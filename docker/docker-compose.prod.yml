@@ -1,0 +1,75 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: zero-to-hundred-postgres-prod
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    networks:
+      - zero-to-hundred-network-prod
+    restart: always
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: zero-to-hundred-backend-prod
+    depends_on:
+      - postgres
+    environment:
+      - NODE_ENV=production
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=${DB_USER}
+      - DATABASE_PASSWORD=${DB_PASSWORD}
+      - DATABASE_NAME=${DB_NAME}
+      - JWT_SECRET=${JWT_SECRET}
+    ports:
+      - "3000:3000"
+    networks:
+      - zero-to-hundred-network-prod
+    restart: always
+    command: npm run start:prod
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: zero-to-hundred-frontend-prod
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - zero-to-hundred-network-prod
+    restart: always
+    command: npm run start
+
+  nginx:
+    image: nginx:latest
+    container_name: zero-to-hundred-nginx
+    ports:
+      - "443:443"
+    volumes:
+      - ../nginx/conf:/etc/nginx/conf.d
+      - ../nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - zero-to-hundred-network-prod
+    restart: always
+
+networks:
+  zero-to-hundred-network-prod:
+    driver: bridge
+
+volumes:
+  postgres_data_prod:
