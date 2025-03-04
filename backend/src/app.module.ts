@@ -7,8 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { MemecoinModule } from './memecoin/memecoin.module';
-import { WalletService } from './wallet/wallet.service';
-import { WalletController } from './wallet/wallet.controller';
+import { WalletModule } from './wallet/wallet.module';
 import { TradingModule } from './trading/trading.module';
 import { StatisticsModule } from './statistics/statistics.module';
 
@@ -21,10 +20,11 @@ import { StatisticsModule } from './statistics/statistics.module';
     AuthModule,
     UserModule,
     MemecoinModule,
+    WalletModule,
     TradingModule,
     StatisticsModule,
   ],
-  controllers: [AppController, WalletController],
-  providers: [AppService, WalletService],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
