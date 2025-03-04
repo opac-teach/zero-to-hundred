@@ -1,0 +1,88 @@
+import { defineStore } from 'pinia';
+import { ref, computed } from 'vue';
+import type { 
+  MemecoinResponseDto, 
+  MemecoinPriceDto, 
+  TradingVolumeDto 
+} from '@/types/api';
+import { memecoins, statistics } from '@/api/client';
+
+export const useMarketStore = defineStore('market', () => {
+  const memecoinsList = ref<MemecoinResponseDto[]>([]);
+  const memecoinPrices = ref<Record<string, MemecoinPriceDto>>({});
+  const tradingVolume = ref<TradingVolumeDto | null>(null);
+  const isLoading = ref(false);
+  const error = ref<string | null>(null);
+
+  const sortedMemecoins = computed(() => {
+    return [...memecoinsList.value].sort((a, b) => b.volume24h - a.volume24h);
+  });
+
+  async function fetchMemecoins(params?: { 
+    page?: number; 
+    limit?: number; 
+    sortBy?: 'createdAt' | 'name' | 'symbol' | 'totalSupply'; 
+    order?: 'ASC' | 'DESC' 
+  }) {
+    try {
+      isLoading.value = true;
+      error.value = null;
+      const response = await memecoins.getAll(params);
+      memecoinsList.value = response.data;
+    } catch (err: any) {
+      error.value = err.response?.data?.message || 'Failed to fetch memecoins';
+      throw err;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  async function fetchMemecoinPrice(memecoinId: string) {
+    try {
+      const response = await memecoins.getPrice(memecoinId);
+      memecoinPrices.value[memecoinId] = response.data;
+    } catch (err: any) {
+      console.error('Failed to fetch memecoin price:', err);
+    }
+  }
+
+  async function fetchTradingVolume(params?: { timeframe?: '24h' | '7d' | '30d'; memecoinId?: string }) {
+    try {
+      const response = await statistics.getTradingVolume(params);
+      tradingVolume.value = response.data;
+    } catch (err: any) {
+      console.error('Failed to fetch trading volume:', err);
+    }
+  }
+
+  function updateMemecoinPrice(memecoinId: string, price: number, supply: number, marketSentiment: 'POSITIVE' | 'NEUTRAL' | 'NEGATIVE') {
+    memecoinPrices.value[memecoinId] = {
+      price,
+      supply,
+      marketSentiment,
+    };
+  }
+
+  function startPriceUpdates() {
+    // Update prices every 30 seconds
+    setInterval(() => {
+      memecoinsList.value.forEach(memecoin => {
+        fetchMemecoinPrice(memecoin.id);
+      });
+    }, 30000);
+  }
+
+  return {
+    memecoinsList,
+    memecoinPrices,
+    tradingVolume,
+    isLoading,
+    error,
+    sortedMemecoins,
+    fetchMemecoins,
+    fetchMemecoinPrice,
+    fetchTradingVolume,
+    updateMemecoinPrice,
+    startPriceUpdates,
+  };
+}); 
