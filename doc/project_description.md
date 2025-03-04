@@ -1,7 +1,6 @@
 # Zero To Hundred
 
 This is a memecoin platform, where users can create and buy/sell memecoins.
-
  
 Users can earn ZTH (the platform's native currency) by creating memecoins, strategically buying trending coins, and selling them at optimal times. A user's ZTH balance serves as their score on the platform's leaderboard.
 
@@ -89,80 +88,6 @@ When a user asks to buy or sell a token, the price can change between the time i
 Error handling must be properly done, like API error, input validation, both in the frontend and in the backend.
 
 All of the data must be accessible with a REST API, but things like token price shoud be updated regularly on the frontend. (no websocket)
-
-# Frontend
-
-The frontend must be developed using VueJS in Typescript.
-
-Styling must be done using tailwind, using shadcn/vue components.
-
-The frontend must use only client-side rendering, so it should not use Nuxt.
-
-State management must be managed with pinia.
-
-The app should look modern, like a funny web3 degen website.
-
-It should incorporate dynamic elements such as animated background, moving elements, color animations, ...
-
-## Pages
-
-Every page should have a top navigation bar with a drop down on the top right to login or access user pages, and show the user's ZTH balance.
-
-### Landing page
-
-The landing page should feature an eye-catching introduction to the platform, explaining the concept of memecoins, how to get started, and highlighting key features with engaging visuals.
-
-
-### Sign-in/Sign-up
-
-Should also be fun, with jokes in the form. 
-
-*The following pages are only accessible by logged-in users*
-
-### Dashboard
-
-Show a list of all the memecoins existing on the platform, a button to buy, with their price and some nice stats like how many times traded, market sentiment...
-
-### Leaderboard
-
-Display all users sorted by their ZTH balance, biggest first. 
-
-### Wallet
-
-Show the list of the memecoin owned by the user, with buttons to sell them. 
-
-# Backend
-
-The backend must be developped with NestJS and in Typescript
-
-The database must be PostgreSQL using TypeORM.
-It will expose a HTTP REST API that the frontend will use to communicate.  
-The server must export OpenAPI definitions and expose a swagger interface. 
-Migration should be used when updating data models, to be able to easily update existing database. 
-The app should log most of important actions, with different levels and configurable output. 
-
-## Authentication
-
-There should be an user/password authorization system. It should be basic but secured, with standard flow like sign-up/login/forget password and can use state of the art libraries.
-
-All sensitive routes must be only accessible by who should have access to. 
-
-User profiles and Memecoin list and prices can be publicly accessible, but routes like getting wallet balance should be authenticated. 
-The controllers must guarantee that the user asking for something is allowed to do it, like selling a memecoin. 
-
-## Safe concurrency
-
-The backend service must be resilient if executed concurrently, like with resource scaling, threading, or micro-services. As a starting point, he server must be built in a monolithic fashion in a single instance, but should be already scalable. 
-
-This means for instance, using database transactions while executing multiple read/write that are sensible to concurrency, like updating balances when buying memecoins. 
-
-## Tests
-
-There must exist proper unit tests for each part of the backend software, like API routes, middleware, entities, and providers.
-
-It should be easy to run the tests locally and by a CI. Github actions should be defined to test the app. 
-
-# Deployment
 
 All parts of the app must run inside docker containers, be easily deployable to a cloud.
 The whole app should be easilly locally runnable via docker compose. 

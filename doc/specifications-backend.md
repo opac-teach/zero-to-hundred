@@ -1,4 +1,34 @@
-# Technical Specifications for Zero to Hundred
+# Technical Specifications for Zero to Hundred Backend
+
+The backend must be developped with NestJS and in Typescript
+
+The database must be PostgreSQL using TypeORM.
+It will expose a HTTP REST API that the frontend will use to communicate.  
+The server must export OpenAPI definitions and expose a swagger interface. 
+Migration should be used when updating data models, to be able to easily update existing database. 
+The app should log most of important actions, with different levels and configurable output. 
+
+## Authentication
+
+There should be an user/password authorization system. It should be basic but secured, with standard flow like sign-up/login/forget password and can use state of the art libraries.
+
+All sensitive routes must be only accessible by who should have access to. 
+
+User profiles and Memecoin list and prices can be publicly accessible, but routes like getting wallet balance should be authenticated. 
+The controllers must guarantee that the user asking for something is allowed to do it, like selling a memecoin. 
+
+## Safe concurrency
+
+The backend service must be resilient if executed concurrently, like with resource scaling, threading, or micro-services. As a starting point, he server must be built in a monolithic fashion in a single instance, but should be already scalable. 
+
+This means for instance, using database transactions while executing multiple read/write that are sensible to concurrency, like updating balances when buying memecoins. 
+
+## Tests
+
+There must exist proper unit tests for each part of the backend software, like API routes, middleware, entities, and providers.
+
+It should be easy to run the tests locally and by a CI. Github actions should be defined to test the app. 
+
 
 ## Data Models
 
