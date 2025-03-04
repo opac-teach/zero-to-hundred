@@ -28,6 +28,19 @@ describe('AuthService', () => {
     email: 'test@example.com',
     password: 'hashedpassword',
     fullName: 'Test User',
+    role: 'user',
+    profilePictureUrl: null,
+    bannerUrl: null,
+    description: null,
+    backgroundColor: '#f5f5f5',
+    textColor: '#333333',
+    isActive: true,
+    zthBalance: 100,
+    bio: null,
+    website: null,
+    twitter: null,
+    discord: null,
+    telegram: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -97,7 +110,7 @@ describe('AuthService', () => {
       
       expect(result).toBeDefined();
       expect(result.id).toBe(mockUser.id);
-      expect(result.password).toBeUndefined();
+      expect('password' in result).toBe(false);
       expect(userRepository.findOne).toHaveBeenCalledWith({ where: { email: 'test@example.com' } });
       expect(bcrypt.compare).toHaveBeenCalledWith('password', mockUser.password);
     });
@@ -133,6 +146,10 @@ describe('AuthService', () => {
       const result = await service.register(registerDto);
       
       expect(result).toBeDefined();
+      expect(result.accessToken).toBe('jwt-token');
+      expect(result.userId).toBe(mockUser.id);
+      expect(result.username).toBe(mockUser.username);
+      expect(result.email).toBe(mockUser.email);
       expect(bcrypt.hash).toHaveBeenCalledWith('password', 10);
       expect(userRepository.create).toHaveBeenCalledWith(expect.objectContaining({
         username: 'newuser',
@@ -155,14 +172,17 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
-    it('should return JWT token', async () => {
-      const result = await service.login({ id: 'user-id-1', username: 'testuser', email: 'test@example.com' });
+    it('should return JWT token and user info', async () => {
+      const { password, ...userWithoutPassword } = mockUser;
+      const result = await service.login(userWithoutPassword);
       
       expect(result).toBeDefined();
-      expect(result.access_token).toBe('jwt-token');
+      expect(result.accessToken).toBe('jwt-token');
+      expect(result.userId).toBe(mockUser.id);
+      expect(result.username).toBe(mockUser.username);
+      expect(result.email).toBe(mockUser.email);
       expect(jwtService.sign).toHaveBeenCalledWith(
-        { email: 'test@example.com', sub: 'user-id-1' },
-        { secret: 'jwt-secret', expiresIn: '1d' }
+        { sub: mockUser.id, email: mockUser.email }
       );
     });
   });
@@ -176,7 +196,7 @@ describe('AuthService', () => {
       const result = await service.resetPassword(resetPasswordDto);
       
       expect(result).toBeDefined();
-      expect(result.message).toBe('Password reset instructions sent to your email');
+      expect(result.message).toBe('Password reset instructions sent');
       expect(userRepository.findOne).toHaveBeenCalledWith({ where: { email: 'test@example.com' } });
     });
 
@@ -201,6 +221,16 @@ describe('AuthService', () => {
       
       expect(result).toBeDefined();
       expect(result.message).toBe('Password changed successfully');
+      expect(bcrypt.hash).toHaveBeenCalledWith('newpassword', 10);
+      expect(userRepository.save).toHaveBeenCalled();
+    });
+
+    it('should throw UnauthorizedException when passwords do not match', async () => {
+      await expect(service.changePassword({
+        token: 'valid-token',
+        password: 'newpassword',
+        confirmPassword: 'different',
+      })).rejects.toThrow(UnauthorizedException);
     });
 
     it('should throw UnauthorizedException when token is invalid', async () => {

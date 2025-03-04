@@ -54,6 +54,7 @@ describe('UserService', () => {
     findOne: jest.fn().mockResolvedValue(mockUser),
     save: jest.fn().mockResolvedValue(mockUser),
     create: jest.fn().mockReturnValue(mockUser),
+    count: jest.fn().mockResolvedValue(2),
     createQueryBuilder: jest.fn(() => ({
       select: jest.fn().mockReturnThis(),
       addSelect: jest.fn().mockReturnThis(),
@@ -165,11 +166,12 @@ describe('UserService', () => {
   });
 
   describe('getLeaderboard', () => {
-    it('should return a leaderboard of users', async () => {
-      const result = await service.getLeaderboard();
+    it('should return a leaderboard of users with total count', async () => {
+      const result = await service.getLeaderboard(1, 20);
       
       expect(result).toBeDefined();
-      expect(result.length).toBe(2);
+      expect(result.users.length).toBe(2);
+      expect(result.total).toBe(2);
       expect(userRepository.find).toHaveBeenCalledWith({
         order: {
           zthBalance: 'DESC',
@@ -177,6 +179,7 @@ describe('UserService', () => {
         skip: 0,
         take: 20,
       });
+      expect(userRepository.count).toHaveBeenCalled();
     });
 
     it('should respect pagination parameters', async () => {
@@ -192,6 +195,7 @@ describe('UserService', () => {
         skip: 10,
         take: 10,
       });
+      expect(userRepository.count).toHaveBeenCalled();
     });
   });
 });

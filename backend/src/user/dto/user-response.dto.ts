@@ -51,6 +51,14 @@ export class UserResponseDto {
   @Expose()
   updatedAt: Date;
 
+  @ApiProperty({ description: 'The user\'s ZTH balance' })
+  @Expose()
+  zthBalance: number;
+
+  @ApiProperty({ description: 'The user\'s rank in the leaderboard' })
+  @Expose()
+  rank?: number;
+
   constructor(partial: Partial<UserResponseDto>) {
     Object.assign(this, partial);
   }

@@ -67,8 +67,11 @@ export class UserService {
     return new UserResponseDto(updatedUser);
   }
 
-  async getLeaderboard(page: number = 1, limit: number = 20): Promise<UserResponseDto[]> {
-    // Get all users ordered by ZTH balance (highest first)
+  async getLeaderboard(page: number = 1, limit: number = 20): Promise<{ users: UserResponseDto[], total: number }> {
+    // Get total count of users
+    const total = await this.userRepository.count();
+
+    // Get paginated users ordered by ZTH balance (highest first)
     const users = await this.userRepository.find({
       order: {
         zthBalance: 'DESC',
@@ -77,6 +80,15 @@ export class UserService {
       take: limit,
     });
     
-    return users.map(user => new UserResponseDto(user));
+    // Calculate rank for each user
+    const usersWithRank = users.map((user, index) => ({
+      ...user,
+      rank: (page - 1) * limit + index + 1,
+    }));
+    
+    return {
+      users: usersWithRank.map(user => new UserResponseDto(user)),
+      total,
+    };
   }
 }

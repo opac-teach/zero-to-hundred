@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Request, NotFoundException, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, Request, NotFoundException, Query, BadRequestException, ParseIntPipe, DefaultValuePipe } from '@nestjs/common';
 import { MemecoinService } from './memecoin.service';
 import { CreateMemecoinDto, MemecoinResponseDto, MemecoinPriceDto } from './dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { Transaction } from '../entities/transaction.entity';
+import { Transform } from 'class-transformer';
 
 @ApiTags('memecoins')
 @Controller('memecoins')
@@ -18,8 +19,8 @@ export class MemecoinController {
   @ApiQuery({ name: 'order', required: false, description: 'Sort order', enum: ['ASC', 'DESC'] })
   @Get()
   async findAll(
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 20,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
     @Query('sortBy') sortBy: string = 'createdAt',
     @Query('order') order: 'ASC' | 'DESC' = 'DESC',
   ): Promise<MemecoinResponseDto[]> {

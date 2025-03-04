@@ -115,7 +115,7 @@ describe('WalletService', () => {
   });
 
   describe('getTransactionsByUserId', () => {
-    it('should return user transactions', async () => {
+    it('should return user transactions with default pagination', async () => {
       const result = await service.getTransactionsByUserId('user-id-1');
       
       expect(result).toBeDefined();
@@ -126,6 +126,24 @@ describe('WalletService', () => {
         order: {
           createdAt: 'DESC',
         },
+        skip: 0,
+        take: 20,
+      });
+    });
+
+    it('should return user transactions with custom pagination', async () => {
+      const result = await service.getTransactionsByUserId('user-id-1', 2, 10);
+      
+      expect(result).toBeDefined();
+      expect(result.length).toBeGreaterThan(0);
+      expect(transactionRepository.find).toHaveBeenCalledWith({
+        where: { userId: 'user-id-1' },
+        relations: ['memecoin'],
+        order: {
+          createdAt: 'DESC',
+        },
+        skip: 10,
+        take: 10,
       });
     });
 

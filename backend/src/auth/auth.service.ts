@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from '../entities/user.entity';
 import { Wallet } from '../entities/wallet.entity';
-import { RegisterDto, LoginDto, ResetPasswordDto, ChangePasswordDto } from './dto';
+import { RegisterDto, LoginDto, ResetPasswordDto, ChangePasswordDto, AuthResponseDto } from './dto';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -20,7 +20,7 @@ export class AuthService {
     private configService: ConfigService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<any> {
+  async validateUser(email: string, password: string): Promise<Omit<User, 'password'>> {
     const user = await this.userRepository.findOne({ where: { email } });
     
     if (user && await bcrypt.compare(password, user.password)) {
@@ -31,7 +31,7 @@ export class AuthService {
     return null;
   }
 
-  async register(registerDto: RegisterDto): Promise<any> {
+  async register(registerDto: RegisterDto): Promise<AuthResponseDto> {
     const { username, email, password, fullName } = registerDto;
     
     // Check if user already exists
@@ -54,47 +54,59 @@ export class AuthService {
       fullName,
     });
     
+    // Save user
     const savedUser = await this.userRepository.save(user);
     
-    // Create wallet for the user with initial balance of 100 ZTH
+    // Create wallet for user
     const wallet = this.walletRepository.create({
-      address: uuidv4(),
-      balance: 100, // Initial balance of 100 ZTH
-      owner: savedUser,
       ownerId: savedUser.id,
+      balance: 1000, // Initial balance
+      address: uuidv4(),
     });
     
     await this.walletRepository.save(wallet);
     
-    // Return user without password
-    const { password: _, ...result } = savedUser;
-    return result;
-  }
-
-  async login(user: any): Promise<{ access_token: string }> {
-    const payload = { email: user.email, sub: user.id };
+    // Generate JWT token
+    const payload = { sub: savedUser.id, email: savedUser.email };
+    const accessToken = this.jwtService.sign(payload);
     
     return {
-      access_token: this.jwtService.sign(payload, {
-        secret: this.configService.get<string>('JWT_SECRET'),
-        expiresIn: '1d',
-      }),
+      accessToken,
+      userId: savedUser.id,
+      username: savedUser.username,
+      email: savedUser.email,
+    };
+  }
+
+  async login(user: Omit<User, 'password'>): Promise<AuthResponseDto> {
+    const payload = { sub: user.id, email: user.email };
+    const accessToken = this.jwtService.sign(payload);
+    
+    return {
+      accessToken,
+      userId: user.id,
+      username: user.username,
+      email: user.email,
     };
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<{ message: string }> {
     const { email } = resetPasswordDto;
-    
     const user = await this.userRepository.findOne({ where: { email } });
     
     if (!user) {
       throw new NotFoundException('User not found');
     }
     
-    // In a real application, you would send an email with a reset token
-    // For this example, we'll just return a success message
+    // Generate reset token
+    const resetToken = this.jwtService.sign(
+      { sub: user.id },
+      { expiresIn: '1h' }
+    );
     
-    return { message: 'Password reset instructions sent to your email' };
+    // TODO: Send reset email with token
+    
+    return { message: 'Password reset instructions sent' };
   }
 
   async changePassword(changePasswordDto: ChangePasswordDto): Promise<{ message: string }> {
@@ -105,11 +117,7 @@ export class AuthService {
     }
     
     try {
-      // Verify token
-      const payload = this.jwtService.verify(token, {
-        secret: this.configService.get<string>('JWT_SECRET'),
-      });
-      
+      const payload = this.jwtService.verify(token);
       const user = await this.userRepository.findOne({ where: { id: payload.sub } });
       
       if (!user) {
@@ -118,9 +126,8 @@ export class AuthService {
       
       // Hash new password
       const hashedPassword = await bcrypt.hash(password, 10);
-      
-      // Update user password
       user.password = hashedPassword;
+      
       await this.userRepository.save(user);
       
       return { message: 'Password changed successfully' };

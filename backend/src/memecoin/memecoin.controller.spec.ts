@@ -75,7 +75,7 @@ describe('MemecoinController', () => {
 
   describe('findAll', () => {
     it('should return an array of memecoins with default pagination', async () => {
-      const result = await controller.findAll();
+      const result = await controller.findAll(1, 20);
       
       expect(result).toEqual([mockMemecoinResponse]);
       expect(memecoinService.findAll).toHaveBeenCalledWith(1, 20, 'createdAt', 'DESC');
@@ -111,9 +111,9 @@ describe('MemecoinController', () => {
     it('should create a new memecoin', async () => {
       const req = { user: { id: 'user-id-1' } };
       const createMemecoinDto: CreateMemecoinDto = {
-        name: 'Test Coin',
-        symbol: 'TEST',
-        description: 'A test memecoin',
+        name: 'New Coin',
+        symbol: 'NEW',
+        description: 'A new memecoin',
         logoUrl: 'https://example.com/logo.png',
       };
       
@@ -125,7 +125,7 @@ describe('MemecoinController', () => {
   });
 
   describe('getPrice', () => {
-    it('should return the price information for a memecoin', async () => {
+    it('should return memecoin price information', async () => {
       const result = await controller.getPrice('memecoin-id-1');
       
       expect(result).toEqual(mockMemecoinPriceDto);
@@ -134,7 +134,7 @@ describe('MemecoinController', () => {
   });
 
   describe('getTransactions', () => {
-    it('should return the transactions for a memecoin', async () => {
+    it('should return memecoin transactions', async () => {
       const result = await controller.getTransactions('memecoin-id-1');
       
       expect(result).toEqual(mockTransactions);

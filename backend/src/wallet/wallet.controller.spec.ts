@@ -67,13 +67,22 @@ describe('WalletController', () => {
   });
 
   describe('getTransactions', () => {
-    it('should return the user transactions', async () => {
+    it('should return the user transactions with default pagination', async () => {
       const req = { user: { id: 'user-id-1' } };
       
-      const result = await controller.getTransactions(req);
+      const result = await controller.getTransactions(req, 1, 20);
       
       expect(result).toEqual([mockTransactionResponse]);
-      expect(walletService.getTransactionsByUserId).toHaveBeenCalledWith('user-id-1');
+      expect(walletService.getTransactionsByUserId).toHaveBeenCalledWith('user-id-1', 1, 20);
+    });
+
+    it('should return the user transactions with custom pagination', async () => {
+      const req = { user: { id: 'user-id-1' } };
+      
+      const result = await controller.getTransactions(req, 2, 10);
+      
+      expect(result).toEqual([mockTransactionResponse]);
+      expect(walletService.getTransactionsByUserId).toHaveBeenCalledWith('user-id-1', 2, 10);
     });
   });
 });

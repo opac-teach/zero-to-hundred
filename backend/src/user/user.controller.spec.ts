@@ -17,12 +17,17 @@ describe('UserController', () => {
     updatedAt: new Date(),
   });
 
+  const mockLeaderboardResponse = {
+    users: [mockUserResponse],
+    total: 1,
+  };
+
   const mockUserService = {
     findAll: jest.fn().mockResolvedValue([mockUserResponse]),
     findOne: jest.fn().mockResolvedValue(mockUserResponse),
     findByUsername: jest.fn().mockResolvedValue(mockUserResponse),
     update: jest.fn().mockResolvedValue(mockUserResponse),
-    getLeaderboard: jest.fn().mockResolvedValue([mockUserResponse]),
+    getLeaderboard: jest.fn().mockResolvedValue(mockLeaderboardResponse),
   };
 
   beforeEach(async () => {
@@ -99,16 +104,16 @@ describe('UserController', () => {
 
   describe('getLeaderboard', () => {
     it('should return the user leaderboard with default pagination', async () => {
-      const result = await controller.getLeaderboard();
+      const result = await controller.getLeaderboard(1, 20);
       
-      expect(result).toEqual([mockUserResponse]);
+      expect(result).toEqual(mockLeaderboardResponse);
       expect(userService.getLeaderboard).toHaveBeenCalledWith(1, 20);
     });
 
     it('should return the user leaderboard with custom pagination', async () => {
       const result = await controller.getLeaderboard(2, 10);
       
-      expect(result).toEqual([mockUserResponse]);
+      expect(result).toEqual(mockLeaderboardResponse);
       expect(userService.getLeaderboard).toHaveBeenCalledWith(2, 10);
     });
   });

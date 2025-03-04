@@ -38,13 +38,19 @@ export class WalletService {
     });
   }
 
-  async getTransactionsByUserId(userId: string): Promise<TransactionResponseDto[]> {
+  async getTransactionsByUserId(
+    userId: string,
+    page: number = 1,
+    limit: number = 20,
+  ): Promise<TransactionResponseDto[]> {
     const transactions = await this.transactionRepository.find({
       where: { userId },
       relations: ['memecoin'],
       order: {
         createdAt: 'DESC',
       },
+      skip: (page - 1) * limit,
+      take: limit,
     });
 
     return transactions.map(transaction => new TransactionResponseDto(transaction));

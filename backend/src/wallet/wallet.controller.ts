@@ -1,7 +1,7 @@
-import { Controller, Get, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, UseGuards, Request, Query, ParseIntPipe, DefaultValuePipe } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { WalletResponseDto, TransactionResponseDto } from './dto';
 
 @ApiTags('wallet')
@@ -23,10 +23,16 @@ export class WalletController {
   @ApiOperation({ summary: 'Get current user\'s transaction history' })
   @ApiResponse({ status: 200, description: 'Return the user\'s transaction history', type: [TransactionResponseDto] })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiQuery({ name: 'page', required: false, description: 'Page number', type: Number })
+  @ApiQuery({ name: 'limit', required: false, description: 'Number of items per page', type: Number })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get('transactions')
-  async getTransactions(@Request() req): Promise<TransactionResponseDto[]> {
-    return this.walletService.getTransactionsByUserId(req.user.id);
+  async getTransactions(
+    @Request() req,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
+  ): Promise<TransactionResponseDto[]> {
+    return this.walletService.getTransactionsByUserId(req.user.id, page, limit);
   }
 }
