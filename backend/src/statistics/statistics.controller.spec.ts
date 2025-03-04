@@ -72,8 +72,13 @@ describe('StatisticsController', () => {
 
       jest.spyOn(service, 'getTradingVolume').mockResolvedValue(result);
 
-      expect(await controller.getTradingVolume('24h', 'memecoin-id')).toEqual(result);
-      expect(service.getTradingVolume).toHaveBeenCalledWith('24h', 'memecoin-id');
+      expect(await controller.getTradingVolume('24h', 'memecoin-id')).toEqual(
+        result,
+      );
+      expect(service.getTradingVolume).toHaveBeenCalledWith(
+        '24h',
+        'memecoin-id',
+      );
     });
   });
-}); 
+});

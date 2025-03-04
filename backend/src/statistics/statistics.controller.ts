@@ -9,9 +9,22 @@ export class StatisticsController {
   constructor(private readonly statisticsService: StatisticsService) {}
 
   @ApiOperation({ summary: 'Get trading volume statistics' })
-  @ApiResponse({ status: 200, description: 'Return trading volume statistics', type: TradingVolumeDto })
-  @ApiQuery({ name: 'timeframe', required: false, enum: ['24h', '7d', '30d'], description: 'Timeframe for statistics' })
-  @ApiQuery({ name: 'memecoinId', required: false, description: 'Filter by memecoin ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return trading volume statistics',
+    type: TradingVolumeDto,
+  })
+  @ApiQuery({
+    name: 'timeframe',
+    required: false,
+    enum: ['24h', '7d', '30d'],
+    description: 'Timeframe for statistics',
+  })
+  @ApiQuery({
+    name: 'memecoinId',
+    required: false,
+    description: 'Filter by memecoin ID',
+  })
   @Get('trading-volume')
   async getTradingVolume(
     @Query('timeframe') timeframe: string = '24h',
@@ -19,4 +32,4 @@ export class StatisticsController {
   ): Promise<TradingVolumeDto> {
     return this.statisticsService.getTradingVolume(timeframe, memecoinId);
   }
-} 
+}

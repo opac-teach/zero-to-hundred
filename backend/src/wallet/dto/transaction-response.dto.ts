@@ -10,15 +10,22 @@ export class TransactionResponseDto {
   @Expose()
   id: string;
 
-  @ApiProperty({ description: 'The type of transaction', enum: TransactionType })
+  @ApiProperty({
+    description: 'The type of transaction',
+    enum: TransactionType,
+  })
   @Expose()
   type: TransactionType;
 
-  @ApiProperty({ description: 'The amount of the memecoin involved in the transaction' })
+  @ApiProperty({
+    description: 'The amount of the memecoin involved in the transaction',
+  })
   @Expose()
   amount: number;
 
-  @ApiProperty({ description: 'The price of the memecoin at the time of the transaction' })
+  @ApiProperty({
+    description: 'The price of the memecoin at the time of the transaction',
+  })
   @Expose()
   price: number;
 
@@ -50,5 +57,12 @@ export class TransactionResponseDto {
 
   constructor(partial: Partial<TransactionResponseDto>) {
     Object.assign(this, partial);
+    if (partial.user && 'wallet' in partial.user) {
+      const userData = partial.user as any;
+      this.user = new UserResponseDto({
+        ...userData,
+        zthBalance: userData.wallet?.zthBalance || 0,
+      });
+    }
   }
-} 
+}

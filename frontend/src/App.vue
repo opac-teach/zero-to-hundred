@@ -17,7 +17,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <main-layout />
+  <div class="min-h-screen w-full">
+    <main-layout />
+  </div>
 </template>
 
 <style>

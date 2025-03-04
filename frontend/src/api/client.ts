@@ -57,8 +57,8 @@ export const users = {
   getByUsername: (username: string) => api.get<UserResponseDto>(`/users/username/${username}`),
   getProfile: () => api.get<UserResponseDto>('/users/me/profile'),
   updateProfile: (data: UpdateUserDto) => api.put<UserResponseDto>('/users/me/profile', data),
-  getLeaderboard: (page?: number, limit?: number) =>
-    api.get<LeaderboardResponse>('/users/leaderboard', { params: { page, limit } }),
+  getLeaderboard: (page?: number, limit?: number, timeframe?: '24h' | '7d' | '30d') =>
+    api.get<LeaderboardResponse>('/users/leaderboard', { params: { page, limit, timeframe } }),
 };
 
 // Memecoin endpoints

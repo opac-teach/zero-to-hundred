@@ -7,6 +7,7 @@ import type {
   MemecoinResponseDto 
 } from '@/types/api';
 import { wallet, trading } from '@/api/client';
+import { useMarketStore } from '@/stores/market';
 
 export const useWalletStore = defineStore('wallet', () => {
   const walletData = ref<WalletResponseDto | null>(null);
@@ -20,7 +21,7 @@ export const useWalletStore = defineStore('wallet', () => {
   const isLoading = ref(false);
   const error = ref<string | null>(null);
 
-  const balance = computed(() => walletData.value?.balance || 0);
+  const zthBalance = computed(() => walletData.value?.zthBalance || 0);
   const holdings = computed(() => walletData.value?.holdings || []);
 
   async function fetchWallet() {
@@ -60,7 +61,7 @@ export const useWalletStore = defineStore('wallet', () => {
 
   function updateBalance(newBalance: number) {
     if (walletData.value) {
-      walletData.value.balance = newBalance;
+      walletData.value.zthBalance = newBalance;
     }
   }
 
@@ -93,19 +94,39 @@ export const useWalletStore = defineStore('wallet', () => {
     try {
       isLoading.value = true;
       error.value = null;
+      
+      // Get the current price from the market store
+      const marketStore = useMarketStore();
+      const currentPrice = marketStore.memecoinPrices[memecoinId]?.price;
+      
+      if (!currentPrice) {
+        throw new Error('Unable to get current price for the memecoin');
+      }
+
+      // Log the request payload
+      console.log('Trade request payload:', {
+        memecoinId,
+        amount,
+        requestPrice: currentPrice,
+        slippageTolerance,
+      });
+
       const response = await trading.buy({
         memecoinId,
         amount,
+        requestPrice: currentPrice,
         slippageTolerance,
       });
       
+      // Log the successful response
+      console.log('Trade response:', response.data);
+      
       // Update wallet state based on trade response
       const tradeResponse = response.data;
-      updateBalance(tradeResponse.newBalance);
       updateHolding(
         memecoinId,
         tradeResponse.newHoldingAmount,
-        tradeResponse.totalValue,
+        0, // valueUsd is no longer used
         {} as MemecoinResponseDto // This should be fetched from the memecoin store
       );
       
@@ -113,6 +134,9 @@ export const useWalletStore = defineStore('wallet', () => {
       await fetchWallet();
       return tradeResponse;
     } catch (err: any) {
+      // Log the full error object
+      console.error('Trade error:', err);
+      console.error('Error response:', err.response?.data);
       error.value = err.response?.data?.message || 'Failed to execute trade';
       throw err;
     } finally {
@@ -126,7 +150,7 @@ export const useWalletStore = defineStore('wallet', () => {
     transactionPagination,
     isLoading,
     error,
-    balance,
+    zthBalance,
     holdings,
     fetchWallet,
     fetchTransactions,

@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsOptional, MaxLength, Matches } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsOptional,
+  MaxLength,
+  Matches,
+} from 'class-validator';
 
 export class CreateMemecoinDto {
   @ApiProperty({
@@ -25,7 +31,8 @@ export class CreateMemecoinDto {
 
   @ApiProperty({
     description: 'The description of the memecoin',
-    example: 'A fun cryptocurrency featuring the Shiba Inu dog from the "Doge" meme.',
+    example:
+      'A fun cryptocurrency featuring the Shiba Inu dog from the "Doge" meme.',
     required: false,
   })
   @IsString()
@@ -41,4 +48,4 @@ export class CreateMemecoinDto {
   @IsString()
   @IsOptional()
   logoUrl?: string;
-} 
+}

@@ -7,7 +7,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg px-6 py-3">
           <div class="text-sm text-gray-500 dark:text-gray-400">Available Balance</div>
           <div class="text-2xl font-bold text-gray-900 dark:text-white">
-            {{ walletStore.balance.toLocaleString() }} ZTH
+            {{ walletStore.zthBalance.toLocaleString() }} ZTH
           </div>
         </div>
         <button
@@ -44,7 +44,7 @@
         <div v-for="holding in sortedHoldings" :key="holding.id" class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
           <div class="flex items-center space-x-4">
             <img
-              :src="holding.memecoin.logoUrl"
+              :src="holding.memecoin.logoUrl || assetsStore.defaultMemecoinLogo"
               :alt="holding.memecoin.name"
               class="w-12 h-12 rounded-full"
             />
@@ -62,7 +62,7 @@
               {{ holding.amount.toLocaleString() }} {{ holding.memecoin.symbol }}
             </div>
             <div class="text-sm text-gray-500 dark:text-gray-400">
-              {{ holding.valueUsd.toLocaleString() }} ZTH
+              {{ (holding.amount * (marketStore.memecoinPrices[holding.memecoin.id]?.price || holding.memecoin.currentPrice)).toLocaleString() }} ZTH
             </div>
           </div>
         </div>
@@ -122,7 +122,7 @@
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center">
                   <img
-                    :src="transaction.memecoin.logoUrl"
+                    :src="transaction.memecoin.logoUrl || assetsStore.defaultMemecoinLogo"
                     :alt="transaction.memecoin.name"
                     class="h-8 w-8 rounded-full"
                   />
@@ -137,7 +137,7 @@
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                {{ transaction.amount.toLocaleString() }} {{ transaction.memecoin.symbol }}
+                {{ transaction.type === 'buy' ? '+' : '-' }}{{ transaction.amount.toLocaleString() }} {{ transaction.memecoin.symbol }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                 {{ transaction.totalValue.toLocaleString() }} ZTH
@@ -153,6 +153,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useWalletStore } from '@/stores/wallet';
+import { useMarketStore } from '@/stores/market';
+import { useAssetsStore } from '@/stores/assets';
 import { useToast } from 'vue-toastification';
 import type { Transaction } from '@/types/api';
 
@@ -169,6 +171,8 @@ interface Holding {
 }
 
 const walletStore = useWalletStore();
+const marketStore = useMarketStore();
+const assetsStore = useAssetsStore();
 const toast = useToast();
 const showDepositModal = ref(false);
 const sortHoldingsBy = ref<'value' | 'amount'>('value');

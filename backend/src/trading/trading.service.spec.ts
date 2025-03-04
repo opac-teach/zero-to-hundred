@@ -9,6 +9,7 @@ import { WalletHolding } from '../entities/wallet-holding.entity';
 import { Transaction, TransactionType } from '../entities/transaction.entity';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { BuyMemecoinDto, SellMemecoinDto } from './dto';
+import { calculatePrice } from './bonding-curve';
 
 // Mock data
 const mockUser = {
@@ -72,41 +73,43 @@ describe('TradingService', () => {
       release: jest.fn(),
       manager: {
         save: jest.fn().mockImplementation((entity) => Promise.resolve(entity)),
-        remove: jest.fn().mockImplementation((entity) => Promise.resolve(entity)),
+        remove: jest
+          .fn()
+          .mockImplementation((entity) => Promise.resolve(entity)),
       },
     };
-    
+
     // Create mock repositories
     memecoinRepository = {
       findOne: jest.fn(),
       create: jest.fn(),
       save: jest.fn(),
     };
-    
+
     userRepository = {
       findOne: jest.fn(),
       create: jest.fn(),
       save: jest.fn(),
     };
-    
+
     walletRepository = {
       findOne: jest.fn(),
       create: jest.fn(),
       save: jest.fn(),
     };
-    
+
     walletHoldingRepository = {
       findOne: jest.fn(),
       create: jest.fn(),
       save: jest.fn(),
       remove: jest.fn(),
     };
-    
+
     transactionRepository = {
       create: jest.fn(),
       save: jest.fn(),
     };
-    
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TradingService,
@@ -152,8 +155,11 @@ describe('TradingService', () => {
       const buyDto = new BuyMemecoinDto();
       buyDto.memecoinId = 'memecoin-id-1';
       buyDto.amount = 0;
+      buyDto.requestPrice = 0.1;
 
-      await expect(service.buyMemecoin('user-id-1', buyDto)).rejects.toThrow(BadRequestException);
+      await expect(service.buyMemecoin('user-id-1', buyDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw NotFoundException if user is not found', async () => {
@@ -162,8 +168,11 @@ describe('TradingService', () => {
       const buyDto = new BuyMemecoinDto();
       buyDto.memecoinId = 'memecoin-id-1';
       buyDto.amount = 10;
+      buyDto.requestPrice = 0.1;
 
-      await expect(service.buyMemecoin('non-existent-user', buyDto)).rejects.toThrow(NotFoundException);
+      await expect(
+        service.buyMemecoin('non-existent-user', buyDto),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw NotFoundException if wallet is not found', async () => {
@@ -173,8 +182,11 @@ describe('TradingService', () => {
       const buyDto = new BuyMemecoinDto();
       buyDto.memecoinId = 'memecoin-id-1';
       buyDto.amount = 10;
+      buyDto.requestPrice = 0.1;
 
-      await expect(service.buyMemecoin('user-id-1', buyDto)).rejects.toThrow(NotFoundException);
+      await expect(service.buyMemecoin('user-id-1', buyDto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw NotFoundException if memecoin is not found', async () => {
@@ -185,8 +197,11 @@ describe('TradingService', () => {
       const buyDto = new BuyMemecoinDto();
       buyDto.memecoinId = 'non-existent-memecoin';
       buyDto.amount = 10;
+      buyDto.requestPrice = 0.1;
 
-      await expect(service.buyMemecoin('user-id-1', buyDto)).rejects.toThrow(NotFoundException);
+      await expect(service.buyMemecoin('user-id-1', buyDto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw BadRequestException if wallet balance is insufficient', async () => {
@@ -198,21 +213,29 @@ describe('TradingService', () => {
       const buyDto = new BuyMemecoinDto();
       buyDto.memecoinId = 'memecoin-id-1';
       buyDto.amount = 10;
+      buyDto.requestPrice = 0.1;
 
-      await expect(service.buyMemecoin('user-id-1', buyDto)).rejects.toThrow(BadRequestException);
+      await expect(service.buyMemecoin('user-id-1', buyDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should successfully buy a memecoin', async () => {
       // Mock all necessary repository methods
       userRepository.findOne.mockResolvedValue(mockUser);
       walletRepository.findOne.mockResolvedValue({ ...mockWallet });
-      memecoinRepository.findOne.mockResolvedValue({ ...mockMemecoin });
-      walletHoldingRepository.findOne.mockResolvedValue({ ...mockWalletHolding });
-      
+      memecoinRepository.findOne.mockResolvedValue({
+        ...mockMemecoin,
+        currentPrice: 0.1,
+      }); // Match request price
+      walletHoldingRepository.findOne.mockResolvedValue({
+        ...mockWalletHolding,
+      });
+
       // Mock transaction creation
       const mockCreatedTransaction = { ...mockTransaction };
       transactionRepository.create.mockReturnValue(mockCreatedTransaction);
-      
+
       // Set up the query runner manager to return the updated entities
       queryRunner.manager.save.mockImplementation((entity) => {
         if (entity.balance !== undefined) {
@@ -221,7 +244,7 @@ describe('TradingService', () => {
         } else if (entity.totalSupply !== undefined) {
           // This is the memecoin
           entity.totalSupply += 100;
-          entity.currentPrice = 0.2;
+          entity.currentPrice = 0.1; // Keep price consistent
         } else if (entity.amount !== undefined && entity.walletId) {
           // This is the wallet holding
           entity.amount += 100;
@@ -232,17 +255,24 @@ describe('TradingService', () => {
       const buyDto = new BuyMemecoinDto();
       buyDto.memecoinId = 'memecoin-id-1';
       buyDto.amount = 10;
+      buyDto.requestPrice = 0.1;
       buyDto.slippageTolerance = 100; // Set high tolerance to avoid slippage error
 
       const result = await service.buyMemecoin('user-id-1', buyDto);
 
       // Check that repositories were called correctly
-      expect(userRepository.findOne).toHaveBeenCalledWith({ where: { id: 'user-id-1' } });
-      expect(walletRepository.findOne).toHaveBeenCalledWith({ where: { ownerId: 'user-id-1' } });
-      expect(memecoinRepository.findOne).toHaveBeenCalledWith({ where: { id: 'memecoin-id-1' } });
+      expect(userRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 'user-id-1' },
+      });
+      expect(walletRepository.findOne).toHaveBeenCalledWith({
+        where: { ownerId: 'user-id-1' },
+      });
+      expect(memecoinRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 'memecoin-id-1' },
+      });
       expect(walletHoldingRepository.findOne).toHaveBeenCalled();
       expect(transactionRepository.create).toHaveBeenCalled();
-      
+
       // Check that the query runner was used correctly
       expect(queryRunner.connect).toHaveBeenCalled();
       expect(queryRunner.startTransaction).toHaveBeenCalled();
@@ -261,9 +291,12 @@ describe('TradingService', () => {
       // Mock all necessary repository methods
       userRepository.findOne.mockResolvedValue(mockUser);
       walletRepository.findOne.mockResolvedValue({ ...mockWallet });
-      memecoinRepository.findOne.mockResolvedValue({ ...mockMemecoin });
+      memecoinRepository.findOne.mockResolvedValue({
+        ...mockMemecoin,
+        currentPrice: 0.1,
+      }); // Match request price
       walletHoldingRepository.findOne.mockResolvedValue(null);
-      
+
       // Mock wallet holding creation
       const newHolding = {
         id: 'new-holding-id',
@@ -272,11 +305,11 @@ describe('TradingService', () => {
         amount: 0,
       };
       walletHoldingRepository.create.mockReturnValue(newHolding);
-      
+
       // Mock transaction creation
       const mockCreatedTransaction = { ...mockTransaction };
       transactionRepository.create.mockReturnValue(mockCreatedTransaction);
-      
+
       // Set up the query runner manager to return the updated entities
       queryRunner.manager.save.mockImplementation((entity) => {
         if (entity.balance !== undefined) {
@@ -285,7 +318,7 @@ describe('TradingService', () => {
         } else if (entity.totalSupply !== undefined) {
           // This is the memecoin
           entity.totalSupply += 100;
-          entity.currentPrice = 0.2;
+          entity.currentPrice = 0.1; // Keep price consistent
         } else if (entity.amount !== undefined && entity.walletId) {
           // This is the wallet holding
           entity.amount = 100;
@@ -296,6 +329,7 @@ describe('TradingService', () => {
       const buyDto = new BuyMemecoinDto();
       buyDto.memecoinId = 'memecoin-id-1';
       buyDto.amount = 10;
+      buyDto.requestPrice = 0.1;
       buyDto.slippageTolerance = 100; // Set high tolerance to avoid slippage error
 
       const result = await service.buyMemecoin('user-id-1', buyDto);
@@ -309,15 +343,15 @@ describe('TradingService', () => {
       // Mock a scenario where price changes dramatically
       userRepository.findOne.mockResolvedValue(mockUser);
       walletRepository.findOne.mockResolvedValue({ ...mockWallet });
-      
-      // Create a memecoin with very low supply to trigger high slippage
-      const highSlippageMemecoin = { 
-        ...mockMemecoin, 
-        totalSupply: 10,  // Low supply will cause high price impact
-        currentPrice: 0.01
+
+      // Create a memecoin with a different price than the request price
+      const memecoinWithDifferentPrice = {
+        ...mockMemecoin,
+        totalSupply: 1000,
+        currentPrice: 0.2, // Price is double the request price
       };
-      memecoinRepository.findOne.mockResolvedValue(highSlippageMemecoin);
-      
+      memecoinRepository.findOne.mockResolvedValue(memecoinWithDifferentPrice);
+
       // Mock transaction creation to avoid null reference
       const mockCreatedTransaction = { ...mockTransaction };
       transactionRepository.create.mockReturnValue(mockCreatedTransaction);
@@ -325,10 +359,57 @@ describe('TradingService', () => {
       const buyDto = new BuyMemecoinDto();
       buyDto.memecoinId = 'memecoin-id-1';
       buyDto.amount = 10;
-      buyDto.slippageTolerance = 0.1; // Very low tolerance
+      buyDto.requestPrice = 0.1; // Request price is 0.1
+      buyDto.slippageTolerance = 1; // 1% tolerance
 
-      await expect(service.buyMemecoin('user-id-1', buyDto)).rejects.toThrow(BadRequestException);
+      await expect(service.buyMemecoin('user-id-1', buyDto)).rejects.toThrow(
+        BadRequestException,
+      );
       expect(queryRunner.rollbackTransaction).toHaveBeenCalled();
+    });
+
+    it('should throw BadRequestException if transaction would result in negative balance', async () => {
+      // Mock a scenario where the transaction would result in negative balance
+      userRepository.findOne.mockResolvedValue(mockUser);
+      walletRepository.findOne.mockResolvedValue({
+        ...mockWallet,
+        zthBalance: 5,
+      }); // Set balance to 5
+      memecoinRepository.findOne.mockResolvedValue({
+        ...mockMemecoin,
+        currentPrice: 0.1,
+      }); // Match request price
+
+      // Mock transaction creation to avoid null reference
+      const mockCreatedTransaction = { ...mockTransaction };
+      transactionRepository.create.mockReturnValue(mockCreatedTransaction);
+
+      // Mock the query runner
+      const mockQueryRunner = {
+        connect: jest.fn(),
+        startTransaction: jest.fn(),
+        commitTransaction: jest.fn(),
+        rollbackTransaction: jest.fn(),
+        release: jest.fn(),
+        manager: {
+          save: jest.fn(),
+          remove: jest.fn(),
+        },
+      };
+      jest
+        .spyOn(service['dataSource'], 'createQueryRunner')
+        .mockReturnValue(mockQueryRunner as any);
+
+      const buyDto = new BuyMemecoinDto();
+      buyDto.memecoinId = 'memecoin-id-1';
+      buyDto.amount = 10; // Amount greater than balance
+      buyDto.requestPrice = 0.1;
+      buyDto.slippageTolerance = 100; // Set high tolerance to avoid slippage error
+
+      await expect(service.buyMemecoin('user-id-1', buyDto)).rejects.toThrow(
+        BadRequestException,
+      );
+      expect(mockQueryRunner.rollbackTransaction).not.toHaveBeenCalled();
     });
   });
 
@@ -337,8 +418,11 @@ describe('TradingService', () => {
       const sellDto = new SellMemecoinDto();
       sellDto.memecoinId = 'memecoin-id-1';
       sellDto.amount = 0;
+      sellDto.requestPrice = 0.1;
 
-      await expect(service.sellMemecoin('user-id-1', sellDto)).rejects.toThrow(BadRequestException);
+      await expect(service.sellMemecoin('user-id-1', sellDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw NotFoundException if user is not found', async () => {
@@ -347,8 +431,11 @@ describe('TradingService', () => {
       const sellDto = new SellMemecoinDto();
       sellDto.memecoinId = 'memecoin-id-1';
       sellDto.amount = 10;
+      sellDto.requestPrice = 0.1;
 
-      await expect(service.sellMemecoin('non-existent-user', sellDto)).rejects.toThrow(NotFoundException);
+      await expect(
+        service.sellMemecoin('non-existent-user', sellDto),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw NotFoundException if wallet is not found', async () => {
@@ -358,8 +445,11 @@ describe('TradingService', () => {
       const sellDto = new SellMemecoinDto();
       sellDto.memecoinId = 'memecoin-id-1';
       sellDto.amount = 10;
+      sellDto.requestPrice = 0.1;
 
-      await expect(service.sellMemecoin('user-id-1', sellDto)).rejects.toThrow(NotFoundException);
+      await expect(service.sellMemecoin('user-id-1', sellDto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw NotFoundException if memecoin is not found', async () => {
@@ -370,8 +460,11 @@ describe('TradingService', () => {
       const sellDto = new SellMemecoinDto();
       sellDto.memecoinId = 'non-existent-memecoin';
       sellDto.amount = 10;
+      sellDto.requestPrice = 0.1;
 
-      await expect(service.sellMemecoin('user-id-1', sellDto)).rejects.toThrow(NotFoundException);
+      await expect(service.sellMemecoin('user-id-1', sellDto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw BadRequestException if wallet holding is not found', async () => {
@@ -383,8 +476,11 @@ describe('TradingService', () => {
       const sellDto = new SellMemecoinDto();
       sellDto.memecoinId = 'memecoin-id-1';
       sellDto.amount = 10;
+      sellDto.requestPrice = 0.1;
 
-      await expect(service.sellMemecoin('user-id-1', sellDto)).rejects.toThrow(BadRequestException);
+      await expect(service.sellMemecoin('user-id-1', sellDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException if holding amount is insufficient', async () => {
@@ -397,24 +493,32 @@ describe('TradingService', () => {
       const sellDto = new SellMemecoinDto();
       sellDto.memecoinId = 'memecoin-id-1';
       sellDto.amount = 10;
+      sellDto.requestPrice = 0.1;
 
-      await expect(service.sellMemecoin('user-id-1', sellDto)).rejects.toThrow(BadRequestException);
+      await expect(service.sellMemecoin('user-id-1', sellDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should successfully sell a memecoin', async () => {
       // Mock all necessary repository methods
       userRepository.findOne.mockResolvedValue(mockUser);
       walletRepository.findOne.mockResolvedValue({ ...mockWallet });
-      memecoinRepository.findOne.mockResolvedValue({ ...mockMemecoin });
-      walletHoldingRepository.findOne.mockResolvedValue({ ...mockWalletHolding });
-      
+      memecoinRepository.findOne.mockResolvedValue({
+        ...mockMemecoin,
+        currentPrice: 0.1,
+      }); // Match request price
+      walletHoldingRepository.findOne.mockResolvedValue({
+        ...mockWalletHolding,
+      });
+
       // Mock transaction creation
-      const mockCreatedTransaction = { 
+      const mockCreatedTransaction = {
         ...mockTransaction,
-        type: TransactionType.SELL
+        type: TransactionType.SELL,
       };
       transactionRepository.create.mockReturnValue(mockCreatedTransaction);
-      
+
       // Set up the query runner manager to return the updated entities
       queryRunner.manager.save.mockImplementation((entity) => {
         if (entity.balance !== undefined) {
@@ -423,7 +527,7 @@ describe('TradingService', () => {
         } else if (entity.totalSupply !== undefined) {
           // This is the memecoin
           entity.totalSupply -= 10;
-          entity.currentPrice = 0.09;
+          entity.currentPrice = 0.1; // Keep price consistent
         } else if (entity.amount !== undefined && entity.walletId) {
           // This is the wallet holding
           entity.amount -= 10;
@@ -434,17 +538,24 @@ describe('TradingService', () => {
       const sellDto = new SellMemecoinDto();
       sellDto.memecoinId = 'memecoin-id-1';
       sellDto.amount = 10;
+      sellDto.requestPrice = 0.1;
       sellDto.slippageTolerance = 100; // Set high tolerance to avoid slippage error
 
       const result = await service.sellMemecoin('user-id-1', sellDto);
 
       // Check that repositories were called correctly
-      expect(userRepository.findOne).toHaveBeenCalledWith({ where: { id: 'user-id-1' } });
-      expect(walletRepository.findOne).toHaveBeenCalledWith({ where: { ownerId: 'user-id-1' } });
-      expect(memecoinRepository.findOne).toHaveBeenCalledWith({ where: { id: 'memecoin-id-1' } });
+      expect(userRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 'user-id-1' },
+      });
+      expect(walletRepository.findOne).toHaveBeenCalledWith({
+        where: { ownerId: 'user-id-1' },
+      });
+      expect(memecoinRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 'memecoin-id-1' },
+      });
       expect(walletHoldingRepository.findOne).toHaveBeenCalled();
       expect(transactionRepository.create).toHaveBeenCalled();
-      
+
       // Check that the query runner was used correctly
       expect(queryRunner.connect).toHaveBeenCalled();
       expect(queryRunner.startTransaction).toHaveBeenCalled();
@@ -464,16 +575,19 @@ describe('TradingService', () => {
       const exactAmountHolding = { ...mockWalletHolding, amount: 10 };
       userRepository.findOne.mockResolvedValue(mockUser);
       walletRepository.findOne.mockResolvedValue({ ...mockWallet });
-      memecoinRepository.findOne.mockResolvedValue({ ...mockMemecoin });
+      memecoinRepository.findOne.mockResolvedValue({
+        ...mockMemecoin,
+        currentPrice: 0.1,
+      }); // Match request price
       walletHoldingRepository.findOne.mockResolvedValue(exactAmountHolding);
-      
+
       // Mock transaction creation
-      const mockCreatedTransaction = { 
+      const mockCreatedTransaction = {
         ...mockTransaction,
-        type: TransactionType.SELL
+        type: TransactionType.SELL,
       };
       transactionRepository.create.mockReturnValue(mockCreatedTransaction);
-      
+
       // Set up the query runner manager
       queryRunner.manager.save.mockImplementation((entity) => {
         if (entity.balance !== undefined) {
@@ -482,16 +596,17 @@ describe('TradingService', () => {
         } else if (entity.totalSupply !== undefined) {
           // This is the memecoin
           entity.totalSupply -= 10;
-          entity.currentPrice = 0.09;
+          entity.currentPrice = 0.1; // Keep price consistent
         }
         return Promise.resolve(entity);
       });
-      
+
       queryRunner.manager.remove.mockResolvedValue(exactAmountHolding);
 
       const sellDto = new SellMemecoinDto();
       sellDto.memecoinId = 'memecoin-id-1';
       sellDto.amount = 10;
+      sellDto.requestPrice = 0.1;
       sellDto.slippageTolerance = 100; // Set high tolerance to avoid slippage error
 
       const result = await service.sellMemecoin('user-id-1', sellDto);
@@ -504,16 +619,18 @@ describe('TradingService', () => {
       // Mock a scenario where price changes dramatically
       userRepository.findOne.mockResolvedValue(mockUser);
       walletRepository.findOne.mockResolvedValue({ ...mockWallet });
-      
-      // Create a memecoin with very low supply to trigger high slippage
-      const highSlippageMemecoin = { 
-        ...mockMemecoin, 
-        totalSupply: 100,  // Low supply will cause high price impact
-        currentPrice: 0.01
+
+      // Create a memecoin with a different price than the request price
+      const memecoinWithDifferentPrice = {
+        ...mockMemecoin,
+        totalSupply: 1000,
+        currentPrice: 0.05, // Price is half the request price
       };
-      memecoinRepository.findOne.mockResolvedValue(highSlippageMemecoin);
-      walletHoldingRepository.findOne.mockResolvedValue({ ...mockWalletHolding });
-      
+      memecoinRepository.findOne.mockResolvedValue(memecoinWithDifferentPrice);
+      walletHoldingRepository.findOne.mockResolvedValue({
+        ...mockWalletHolding,
+      });
+
       // Mock transaction creation to avoid null reference
       const mockCreatedTransaction = { ...mockTransaction };
       transactionRepository.create.mockReturnValue(mockCreatedTransaction);
@@ -521,22 +638,21 @@ describe('TradingService', () => {
       const sellDto = new SellMemecoinDto();
       sellDto.memecoinId = 'memecoin-id-1';
       sellDto.amount = 10;
-      sellDto.slippageTolerance = 0.1; // Very low tolerance
+      sellDto.requestPrice = 0.1; // Request price is 0.1
+      sellDto.slippageTolerance = 1; // 1% tolerance
 
-      await expect(service.sellMemecoin('user-id-1', sellDto)).rejects.toThrow(BadRequestException);
+      await expect(service.sellMemecoin('user-id-1', sellDto)).rejects.toThrow(
+        BadRequestException,
+      );
       expect(queryRunner.rollbackTransaction).toHaveBeenCalled();
     });
   });
 
   describe('calculatePrice', () => {
     it('should calculate price based on bonding curve formula', () => {
-      // Using the private method through any type assertion
-      const calculatePrice = (service as any).calculatePrice.bind(service);
-      
-      expect(calculatePrice(0)).toBe(0);
-      expect(calculatePrice(100)).toBe(1);
-      expect(calculatePrice(200)).toBe(4);
-      expect(calculatePrice(1000)).toBe(100);
+      expect(calculatePrice(0)).toBe(1); // Base price for new memecoins
+      expect(calculatePrice(100)).toBe(1.01);
+      expect(calculatePrice(200)).toBe(1.02);
     });
   });
 });

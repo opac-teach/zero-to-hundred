@@ -63,6 +63,9 @@ export const useAssetsStore = defineStore('assets', () => {
   const adjectives = ['Chad', 'Giga', 'Mega', 'Ultra', 'Super'];
   const status = ['King', 'Lord', 'Master', 'Boss', 'Legend'];
 
+  // Default meme coin logo
+  const defaultMemecoinLogo = '/memecoins/default.svg';
+
   function generateRandomUsername(): string {
     const pattern = usernamePatterns[Math.floor(Math.random() * usernamePatterns.length)];
     const number = Math.floor(Math.random() * 1000);
@@ -106,6 +109,13 @@ export const useAssetsStore = defineStore('assets', () => {
     avatars,
     banners,
     themes,
+    usernamePatterns,
+    animals,
+    objects,
+    actions,
+    adjectives,
+    status,
+    defaultMemecoinLogo,
     generateRandomUsername,
     getRandomAvatar,
     getRandomBanner,

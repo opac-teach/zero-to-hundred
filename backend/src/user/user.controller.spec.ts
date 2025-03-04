@@ -55,7 +55,7 @@ describe('UserController', () => {
   describe('findAll', () => {
     it('should return an array of users', async () => {
       const result = await controller.findAll();
-      
+
       expect(result).toEqual([mockUserResponse]);
       expect(userService.findAll).toHaveBeenCalled();
     });
@@ -64,7 +64,7 @@ describe('UserController', () => {
   describe('findOne', () => {
     it('should return a user by id', async () => {
       const result = await controller.findOne('user-id-1');
-      
+
       expect(result).toEqual(mockUserResponse);
       expect(userService.findOne).toHaveBeenCalledWith('user-id-1');
     });
@@ -73,7 +73,7 @@ describe('UserController', () => {
   describe('findByUsername', () => {
     it('should return a user by username', async () => {
       const result = await controller.findByUsername('testuser');
-      
+
       expect(result).toEqual(mockUserResponse);
       expect(userService.findByUsername).toHaveBeenCalledWith('testuser');
     });
@@ -82,9 +82,9 @@ describe('UserController', () => {
   describe('getProfile', () => {
     it('should return the current user profile', async () => {
       const req = { user: { id: 'user-id-1' } };
-      
+
       const result = await controller.getProfile(req);
-      
+
       expect(result).toEqual(mockUserResponse);
       expect(userService.findOne).toHaveBeenCalledWith('user-id-1');
     });
@@ -94,25 +94,28 @@ describe('UserController', () => {
     it('should update the current user profile', async () => {
       const req = { user: { id: 'user-id-1' } };
       const updateUserDto: UpdateUserDto = { fullName: 'Updated Name' };
-      
+
       const result = await controller.updateProfile(req, updateUserDto);
-      
+
       expect(result).toEqual(mockUserResponse);
-      expect(userService.update).toHaveBeenCalledWith('user-id-1', updateUserDto);
+      expect(userService.update).toHaveBeenCalledWith(
+        'user-id-1',
+        updateUserDto,
+      );
     });
   });
 
   describe('getLeaderboard', () => {
     it('should return the user leaderboard with default pagination', async () => {
       const result = await controller.getLeaderboard(1, 20);
-      
+
       expect(result).toEqual(mockLeaderboardResponse);
       expect(userService.getLeaderboard).toHaveBeenCalledWith(1, 20);
     });
 
     it('should return the user leaderboard with custom pagination', async () => {
       const result = await controller.getLeaderboard(2, 10);
-      
+
       expect(result).toEqual(mockLeaderboardResponse);
       expect(userService.getLeaderboard).toHaveBeenCalledWith(2, 10);
     });

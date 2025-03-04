@@ -124,23 +124,23 @@
             <CardContent class="pt-6">
               <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Win Rate</div>
               <div class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
-                {{ tradingStore.stats.winRate.toFixed(1) }}%
+                {{ winRate.toFixed(1) }}%
               </div>
             </CardContent>
           </Card>
           <Card>
             <CardContent class="pt-6">
               <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Avg. Return</div>
-              <div class="mt-1 text-2xl font-semibold" :class="tradingStore.stats.averageReturn >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
-                {{ tradingStore.stats.averageReturn.toFixed(2) }} ZTH
+              <div class="mt-1 text-2xl font-semibold" :class="averageReturn >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                {{ averageReturn.toFixed(2) }} ZTH
               </div>
             </CardContent>
           </Card>
           <Card>
             <CardContent class="pt-6">
               <div class="text-sm font-medium text-gray-500 dark:text-gray-400">24h Change</div>
-              <div class="mt-1 text-2xl font-semibold" :class="tradingStore.stats.change24h >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
-                {{ tradingStore.stats.change24h.toFixed(2) }} ZTH
+              <div class="mt-1 text-2xl font-semibold" :class="change24h >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                {{ change24h >= 0 ? '+' : '' }}{{ change24h.toFixed(2) }}%
               </div>
             </CardContent>
           </Card>
@@ -168,13 +168,13 @@
               <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Trading Activity</div>
               <div class="mt-1">
                 <div class="text-lg font-semibold text-gray-900 dark:text-white">
-                  {{ tradingStore.stats.tradingFrequency.toFixed(1) }}
+                  {{ tradingFrequency.toFixed(1) }}
                 </div>
                 <div class="text-sm text-gray-500 dark:text-gray-400">
                   trades per day
                 </div>
                 <div class="text-xs text-gray-500 dark:text-gray-400">
-                  Avg. holding time: {{ tradingStore.stats.averageHoldingTime.toFixed(1) }} days
+                  Avg. holding time: {{ averageHoldingTime.toFixed(1) }} days
                 </div>
               </div>
             </CardContent>
@@ -194,7 +194,7 @@
             <CardContent class="pt-6">
               <div class="flex justify-between items-center">
                 <span class="text-gray-600 dark:text-gray-400">ZTH Balance</span>
-                <span class="font-medium text-gray-900 dark:text-white">{{ walletStore.balance.toLocaleString() }} ZTH</span>
+                <span class="font-medium text-gray-900 dark:text-white">{{ walletStore.zthBalance.toLocaleString() }} ZTH</span>
               </div>
             </CardContent>
           </Card>
@@ -210,8 +210,8 @@
             <CardContent class="pt-6">
               <div class="flex justify-between items-center">
                 <span class="text-gray-600 dark:text-gray-400">24h Change</span>
-                <span :class="['font-medium', tradingStore.stats.change24h >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400']">
-                  {{ tradingStore.stats.change24h >= 0 ? '+' : '' }}{{ tradingStore.stats.change24h.toFixed(2) }}%
+                <span :class="['font-medium', change24h >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400']">
+                  {{ change24h >= 0 ? '+' : '' }}{{ change24h.toFixed(2) }}%
                 </span>
               </div>
             </CardContent>
@@ -232,7 +232,7 @@
               <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                   <Avatar>
-                    <AvatarImage :src="memecoin.logoUrl" :alt="memecoin.name" />
+                    <AvatarImage :src="memecoin.logoUrl || assetsStore.defaultMemecoinLogo" :alt="memecoin.name" />
                     <AvatarFallback>{{ memecoin.symbol }}</AvatarFallback>
                   </Avatar>
                   <div>
@@ -241,7 +241,7 @@
                   </div>
                 </div>
                 <div class="text-right">
-                  <div class="font-medium text-gray-900 dark:text-white">{{ memecoin.currentPrice }} ZTH</div>
+                  <div class="font-medium text-gray-900 dark:text-white">{{ Number(marketStore.memecoinPrices[memecoin.id]?.price || memecoin.currentPrice).toFixed(6) }} ZTH</div>
                   <div class="text-sm text-gray-500 dark:text-gray-400">{{ memecoin.volume24h }} ZTH 24h</div>
                 </div>
               </div>
@@ -259,6 +259,7 @@ import { useUserStore } from '@/stores/user';
 import { useWalletStore } from '@/stores/wallet';
 import { useMarketStore } from '@/stores/market';
 import { useTradingStore } from '@/stores/trading';
+import { useAssetsStore } from '@/stores/assets';
 import { CameraIcon } from '@heroicons/vue/24/outline';
 import { useToast } from 'vue-toastification';
 import { Button } from '@/components/ui/button';
@@ -273,6 +274,7 @@ const userStore = useUserStore();
 const walletStore = useWalletStore();
 const marketStore = useMarketStore();
 const tradingStore = useTradingStore();
+const assetsStore = useAssetsStore();
 const toast = useToast();
 
 const isEditing = ref(false);
@@ -281,6 +283,32 @@ const createdMemecoins = ref<MemecoinResponseDto[]>([]);
 
 const user = computed(() => userStore.currentUser);
 const createdMemecoinsList = computed(() => marketStore.memecoinsList.filter(m => m.creatorId === user.value?.id));
+
+// Add computed properties for stats
+const change24h = computed(() => {
+  const value = tradingStore.stats.change24h;
+  return typeof value === 'number' ? value : 0;
+});
+
+const averageReturn = computed(() => {
+  const value = tradingStore.stats.averageReturn;
+  return typeof value === 'number' ? value : 0;
+});
+
+const winRate = computed(() => {
+  const value = tradingStore.stats.winRate;
+  return typeof value === 'number' ? value : 0;
+});
+
+const tradingFrequency = computed(() => {
+  const value = tradingStore.stats.tradingFrequency;
+  return typeof value === 'number' ? value : 0;
+});
+
+const averageHoldingTime = computed(() => {
+  const value = tradingStore.stats.averageHoldingTime;
+  return typeof value === 'number' ? value : 0;
+});
 
 onMounted(async () => {
   try {

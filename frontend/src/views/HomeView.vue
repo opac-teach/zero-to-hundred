@@ -29,7 +29,7 @@ import { Separator } from '@/components/ui/separator';
                 Get Started
               </Button>
             </router-link>
-            <router-link to="/market">
+            <router-link to="/memecoins">
               <Button size="lg">
                 Explore Market
               </Button>

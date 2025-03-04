@@ -1,0 +1,15 @@
+meta {
+  name: Get memecoin transactions
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/memecoins/:id/transactions
+  body: none
+  auth: none
+}
+
+params:path {
+  id: 
+}

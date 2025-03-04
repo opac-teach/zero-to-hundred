@@ -1,1 +1,1 @@
-export * from './trading-volume.dto'; 
+export * from './trading-volume.dto';

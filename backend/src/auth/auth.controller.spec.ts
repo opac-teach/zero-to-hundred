@@ -1,17 +1,24 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto, ResetPasswordDto, ChangePasswordDto } from './dto';
+import { RegisterDto } from './dto/register.dto';
+import { ResetPasswordDto, ChangePasswordDto } from './dto';
 
 describe('AuthController', () => {
   let controller: AuthController;
   let authService: AuthService;
 
   const mockAuthService = {
-    register: jest.fn().mockResolvedValue({ id: 'user-id', accessToken: 'token' }),
+    register: jest
+      .fn()
+      .mockResolvedValue({ id: 'user-id', accessToken: 'token' }),
     login: jest.fn().mockResolvedValue({ accessToken: 'token' }),
-    resetPassword: jest.fn().mockResolvedValue({ message: 'Reset instructions sent' }),
-    changePassword: jest.fn().mockResolvedValue({ message: 'Password changed' }),
+    resetPassword: jest
+      .fn()
+      .mockResolvedValue({ message: 'Reset instructions sent' }),
+    changePassword: jest
+      .fn()
+      .mockResolvedValue({ message: 'Password changed' }),
   };
 
   beforeEach(async () => {
@@ -93,7 +100,9 @@ describe('AuthController', () => {
       const result = await controller.changePassword(changePasswordDto);
 
       expect(result).toEqual({ message: 'Password changed' });
-      expect(authService.changePassword).toHaveBeenCalledWith(changePasswordDto);
+      expect(authService.changePassword).toHaveBeenCalledWith(
+        changePasswordDto,
+      );
     });
   });
 });

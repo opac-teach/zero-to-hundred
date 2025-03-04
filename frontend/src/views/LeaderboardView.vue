@@ -7,6 +7,7 @@
         <select
           v-model="timeframe"
           class="rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-indigo-500 focus:border-indigo-500"
+          :disabled="isLoading"
         >
           <option value="24h">Last 24 Hours</option>
           <option value="7d">Last 7 Days</option>
@@ -15,139 +16,87 @@
       </div>
     </div>
 
-    <!-- Top 3 -->
-    <div class="grid grid-cols-1 gap-8 sm:grid-cols-3 mb-12">
-      <!-- Second Place -->
-      <div v-if="topTraders[1]" class="relative transform hover:scale-105 transition-transform duration-200">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 text-center">
-          <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
-            <div class="bg-gray-300 dark:bg-gray-600 rounded-full w-8 h-8 flex items-center justify-center">
-              <span class="text-gray-700 dark:text-gray-300 font-bold">2</span>
-            </div>
-          </div>
-          <img
-            :src="topTraders[1].profilePictureUrl || ''"
-            :alt="topTraders[1].username"
-            class="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-gray-300 dark:border-gray-600"
-          />
-          <h3 class="text-lg font-medium text-gray-900 dark:text-white">
-            {{ topTraders[1].username }}
-          </h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400">
-            {{ topTraders[1].fullName || 'No name set' }}
-          </p>
-          <div class="mt-4">
-            <span class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
-              {{ topTraders[1].balance.toLocaleString() }} ZTH
-            </span>
-          </div>
-        </div>
-      </div>
+    <!-- Loading State -->
+    <div v-if="isLoading" class="flex justify-center items-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
+    </div>
 
-      <!-- First Place -->
-      <div v-if="topTraders[0]" class="relative transform hover:scale-105 transition-transform duration-200">
-        <div class="bg-yellow-100 dark:bg-yellow-900 rounded-lg shadow-lg p-6 text-center transform scale-105">
-          <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
-            <div class="bg-yellow-500 rounded-full w-8 h-8 flex items-center justify-center">
-              <span class="text-white font-bold">1</span>
-            </div>
-          </div>
-          <img
-            :src="topTraders[0].profilePictureUrl || ''"
-            :alt="topTraders[0].username"
-            class="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-yellow-500"
-          />
-          <h3 class="text-xl font-medium text-gray-900 dark:text-white">
-            {{ topTraders[0].username }}
-          </h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400">
-            {{ topTraders[0].fullName || 'No name set' }}
-          </p>
-          <div class="mt-4">
-            <span class="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
-              {{ topTraders[0].balance.toLocaleString() }} ZTH
-            </span>
-          </div>
+    <!-- Error State -->
+    <div v-else-if="error" class="bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-800 rounded-lg p-4">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+          </svg>
         </div>
-      </div>
-
-      <!-- Third Place -->
-      <div v-if="topTraders[2]" class="relative transform hover:scale-105 transition-transform duration-200">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 text-center">
-          <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
-            <div class="bg-amber-600 rounded-full w-8 h-8 flex items-center justify-center">
-              <span class="text-white font-bold">3</span>
-            </div>
-          </div>
-          <img
-            :src="topTraders[2].profilePictureUrl || ''"
-            :alt="topTraders[2].username"
-            class="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-amber-600"
-          />
-          <h3 class="text-lg font-medium text-gray-900 dark:text-white">
-            {{ topTraders[2].username }}
-          </h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400">
-            {{ topTraders[2].fullName || 'No name set' }}
-          </p>
-          <div class="mt-4">
-            <span class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
-              {{ topTraders[2].balance.toLocaleString() }} ZTH
-            </span>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800 dark:text-red-200">Error loading leaderboard</h3>
+          <div class="mt-2 text-sm text-red-700 dark:text-red-300">
+            {{ error }}
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Rest of the Leaderboard -->
-    <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead class="bg-gray-50 dark:bg-gray-700">
-            <tr>
-              <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Rank
-              </th>
-              <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                User
-              </th>
-              <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Balance
-              </th>
-              <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Profile
-              </th>
-            </tr>
-          </thead>
-          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-            <tr v-for="(trader, index) in traders.slice(3)" :key="trader.id" class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex items-center">
-                  <span class="text-sm font-medium text-gray-900 dark:text-white">{{ index + 4 }}</span>
-                </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex items-center">
-                  <img :src="trader.profilePictureUrl || ''" :alt="trader.username" class="h-10 w-10 rounded-full" />
-                  <div class="ml-4">
-                    <div class="text-sm font-medium text-gray-900 dark:text-white">{{ trader.username }}</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ trader.fullName || 'No name set' }}</div>
+    <!-- Content -->
+    <template v-else>
+      <!-- Leaderboard Table -->
+      <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-700">
+              <tr>
+                <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-20">
+                  Rank
+                </th>
+                <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  User
+                </th>
+                <th scope="col" class="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Balance
+                </th>
+                <th scope="col" class="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24">
+                  Profile
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              <tr v-for="(trader, index) in traders" :key="trader.id" class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium text-gray-900 dark:text-white">{{ index + 1 }}</span>
                   </div>
-                </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900 dark:text-white">{{ trader.balance.toLocaleString() }} ZTH</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <router-link :to="`/profile/${trader.id}`" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
-                  View Profile
-                </router-link>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex items-center">
+                    <img 
+                      :src="trader.profilePictureUrl || '/default-avatar.svg'" 
+                      :alt="trader.username" 
+                      class="h-10 w-10 rounded-full object-cover" 
+                    />
+                    <div class="ml-4">
+                      <div class="text-sm font-medium text-gray-900 dark:text-white">{{ trader.username }}</div>
+                      <div class="text-sm text-gray-500 dark:text-gray-400">{{ trader.fullName || 'No name set' }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right">
+                  <div class="text-sm font-medium text-gray-900 dark:text-white">{{ trader.zthBalance.toLocaleString() }} ZTH</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right">
+                  <router-link 
+                    :to="`/profile/${trader.id}`" 
+                    class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 dark:text-indigo-200 dark:bg-indigo-900 dark:hover:bg-indigo-800"
+                  >
+                    View Profile
+                  </router-link>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -158,38 +107,51 @@ import { users } from '@/api/client';
 import { useToast } from 'vue-toastification';
 import type { UserResponseDto, LeaderboardResponse } from '@/types/api';
 
-interface Trader extends UserResponseDto {
-  balance: number;
+interface Trader {
+  id: string;
+  username: string;
+  fullName: string;
+  profilePictureUrl: string;
+  zthBalance: number;
+  rank: number;
 }
 
 const userStore = useUserStore();
 const toast = useToast();
-const timeframe = ref('24h');
+const timeframe = ref<'24h' | '7d' | '30d'>('24h');
+const isLoading = ref(false);
+const error = ref<string | null>(null);
 
 const traders = ref<Trader[]>([]);
-const topTraders = computed(() => {
-  if (!Array.isArray(traders.value)) return [];
-  return traders.value.slice(0, 3);
-});
 
 // Fetch leaderboard data
 async function fetchLeaderboard() {
   try {
-    const response = await users.getLeaderboard(1, 100); // Get top 100 traders
+    isLoading.value = true;
+    error.value = null;
+    const response = await users.getLeaderboard(1, 100, timeframe.value);
     const leaderboardData = response.data as LeaderboardResponse;
     
     if (leaderboardData && Array.isArray(leaderboardData.users)) {
       traders.value = leaderboardData.users.map(user => ({
-        ...user,
-        balance: user.zthBalance
+        id: user.id,
+        username: user.username,
+        fullName: user.fullName,
+        profilePictureUrl: user.profilePictureUrl,
+        zthBalance: user.zthBalance,
+        rank: user.rank
       })) as Trader[];
     } else {
       traders.value = [];
+      error.value = 'Invalid response format from leaderboard API';
       console.error('Invalid response format from leaderboard API');
     }
   } catch (error: any) {
     traders.value = [];
-    toast.error(error.message || 'Failed to fetch leaderboard data');
+    error.value = error.message || 'Failed to fetch leaderboard data';
+    toast.error(error.value);
+  } finally {
+    isLoading.value = false;
   }
 }
 

@@ -1,7 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MemecoinController } from './memecoin.controller';
 import { MemecoinService } from './memecoin.service';
-import { MemecoinResponseDto, MemecoinPriceDto, CreateMemecoinDto } from './dto';
+import {
+  MemecoinResponseDto,
+  MemecoinPriceDto,
+  CreateMemecoinDto,
+} from './dto';
 
 describe('MemecoinController', () => {
   let controller: MemecoinController;
@@ -76,23 +80,33 @@ describe('MemecoinController', () => {
   describe('findAll', () => {
     it('should return an array of memecoins with default pagination', async () => {
       const result = await controller.findAll(1, 20);
-      
+
       expect(result).toEqual([mockMemecoinResponse]);
-      expect(memecoinService.findAll).toHaveBeenCalledWith(1, 20, 'createdAt', 'DESC');
+      expect(memecoinService.findAll).toHaveBeenCalledWith(
+        1,
+        20,
+        'createdAt',
+        'DESC',
+      );
     });
 
     it('should return an array of memecoins with custom pagination and sorting', async () => {
       const result = await controller.findAll(2, 10, 'name', 'ASC');
-      
+
       expect(result).toEqual([mockMemecoinResponse]);
-      expect(memecoinService.findAll).toHaveBeenCalledWith(2, 10, 'name', 'ASC');
+      expect(memecoinService.findAll).toHaveBeenCalledWith(
+        2,
+        10,
+        'name',
+        'ASC',
+      );
     });
   });
 
   describe('findOne', () => {
     it('should return a memecoin by id', async () => {
       const result = await controller.findOne('memecoin-id-1');
-      
+
       expect(result).toEqual(mockMemecoinResponse);
       expect(memecoinService.findOne).toHaveBeenCalledWith('memecoin-id-1');
     });
@@ -101,7 +115,7 @@ describe('MemecoinController', () => {
   describe('findBySymbol', () => {
     it('should return a memecoin by symbol', async () => {
       const result = await controller.findBySymbol('TEST');
-      
+
       expect(result).toEqual(mockMemecoinResponse);
       expect(memecoinService.findBySymbol).toHaveBeenCalledWith('TEST');
     });
@@ -116,18 +130,21 @@ describe('MemecoinController', () => {
         description: 'A new memecoin',
         logoUrl: 'https://example.com/logo.png',
       };
-      
+
       const result = await controller.create(req, createMemecoinDto);
-      
+
       expect(result).toEqual(mockMemecoinResponse);
-      expect(memecoinService.create).toHaveBeenCalledWith('user-id-1', createMemecoinDto);
+      expect(memecoinService.create).toHaveBeenCalledWith(
+        'user-id-1',
+        createMemecoinDto,
+      );
     });
   });
 
   describe('getPrice', () => {
     it('should return memecoin price information', async () => {
       const result = await controller.getPrice('memecoin-id-1');
-      
+
       expect(result).toEqual(mockMemecoinPriceDto);
       expect(memecoinService.getPrice).toHaveBeenCalledWith('memecoin-id-1');
     });
@@ -136,9 +153,11 @@ describe('MemecoinController', () => {
   describe('getTransactions', () => {
     it('should return memecoin transactions', async () => {
       const result = await controller.getTransactions('memecoin-id-1');
-      
+
       expect(result).toEqual(mockTransactions);
-      expect(memecoinService.getTransactions).toHaveBeenCalledWith('memecoin-id-1');
+      expect(memecoinService.getTransactions).toHaveBeenCalledWith(
+        'memecoin-id-1',
+      );
     });
   });
 });

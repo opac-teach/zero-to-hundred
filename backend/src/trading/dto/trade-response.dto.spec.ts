@@ -1,90 +1,92 @@
-import { plainToInstance } from 'class-transformer';
+import { Test } from '@nestjs/testing';
 import { TradeResponseDto } from './trade-response.dto';
-import { TransactionType } from '../../entities/transaction.entity';
+import {
+  Transaction,
+  TransactionType,
+} from '../../entities/transaction.entity';
+import { Memecoin } from '../../entities/memecoin.entity';
 
 describe('TradeResponseDto', () => {
-  it('should transform a plain object to a TradeResponseDto instance', () => {
-    const now = new Date();
+  const mockTransaction: Transaction = {
+    id: 'transaction-id-1',
+    userId: 'user-id-1',
+    memecoinId: 'memecoin-id-1',
+    amount: 100,
+    price: 0.1,
+    totalValue: 10,
+    type: TransactionType.BUY,
+    createdAt: new Date(),
+    user: null,
+    memecoin: null,
+  };
+
+  const mockMemecoin: Memecoin = {
+    id: 'memecoin-id-1',
+    name: 'Test Coin',
+    symbol: 'TEST',
+    description: 'A test memecoin',
+    logoUrl: 'https://example.com/logo.png',
+    totalSupply: 1000000,
+    currentPrice: 0.1,
+    marketCap: 100000,
+    volume24h: 10000,
+    creatorId: 'user-id-1',
+    isActive: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    creator: null,
+  };
+
+  it('should create a DTO from a plain object', () => {
     const plainObject = {
-      transactionId: 'transaction-id-1',
-      type: TransactionType.BUY,
-      memecoinId: 'memecoin-id-1',
-      memecoinSymbol: 'TEST',
-      amount: 10,
-      price: 0.1,
-      totalValue: 1,
-      newBalance: 99,
-      newHoldingAmount: 60,
-      executedAt: now,
+      transactionId: mockTransaction.id,
+      type: mockTransaction.type,
+      memecoinId: mockMemecoin.id,
+      memecoinSymbol: mockMemecoin.symbol,
+      newHoldingAmount: 90,
     };
 
     const dto = new TradeResponseDto(plainObject);
 
-    // Check that all expected properties are present
-    expect(dto.transactionId).toBe(plainObject.transactionId);
-    expect(dto.type).toBe(plainObject.type);
-    expect(dto.memecoinId).toBe(plainObject.memecoinId);
-    expect(dto.memecoinSymbol).toBe(plainObject.memecoinSymbol);
-    expect(dto.amount).toBe(plainObject.amount);
-    expect(dto.price).toBe(plainObject.price);
-    expect(dto.totalValue).toBe(plainObject.totalValue);
-    expect(dto.newBalance).toBe(plainObject.newBalance);
-    expect(dto.newHoldingAmount).toBe(plainObject.newHoldingAmount);
-    expect(dto.executedAt).toEqual(plainObject.executedAt);
+    expect(dto.transactionId).toBe(mockTransaction.id);
+    expect(dto.type).toBe(mockTransaction.type);
+    expect(dto.memecoinId).toBe(mockMemecoin.id);
+    expect(dto.memecoinSymbol).toBe(mockMemecoin.symbol);
+    expect(dto.newHoldingAmount).toBe(90);
   });
 
-  it('should handle partial data correctly', () => {
+  it('should create a DTO from partial data', () => {
     const partialData = {
-      transactionId: 'transaction-id-1',
-      type: TransactionType.SELL,
-      memecoinId: 'memecoin-id-1',
-      memecoinSymbol: 'TEST',
+      transactionId: mockTransaction.id,
+      type: mockTransaction.type,
+      memecoinId: mockMemecoin.id,
+      memecoinSymbol: mockMemecoin.symbol,
     };
 
     const dto = new TradeResponseDto(partialData);
 
-    // Check that provided properties are present
-    expect(dto.transactionId).toBe(partialData.transactionId);
-    expect(dto.type).toBe(partialData.type);
-    expect(dto.memecoinId).toBe(partialData.memecoinId);
-    expect(dto.memecoinSymbol).toBe(partialData.memecoinSymbol);
-
-    // Check that non-provided properties are undefined
-    expect(dto.amount).toBeUndefined();
-    expect(dto.price).toBeUndefined();
-    expect(dto.totalValue).toBeUndefined();
-    expect(dto.newBalance).toBeUndefined();
+    expect(dto.transactionId).toBe(mockTransaction.id);
+    expect(dto.type).toBe(mockTransaction.type);
+    expect(dto.memecoinId).toBe(mockMemecoin.id);
+    expect(dto.memecoinSymbol).toBe(mockMemecoin.symbol);
     expect(dto.newHoldingAmount).toBeUndefined();
-    expect(dto.executedAt).toBeUndefined();
   });
 
-  it('should handle transformation with class-transformer', () => {
-    const now = new Date();
+  it('should handle undefined values', () => {
     const plainObject = {
-      transactionId: 'transaction-id-1',
-      type: TransactionType.BUY,
-      memecoinId: 'memecoin-id-1',
-      memecoinSymbol: 'TEST',
-      amount: 10,
-      price: 0.1,
-      totalValue: 1,
-      newBalance: 99,
-      newHoldingAmount: 60,
-      executedAt: now,
+      transactionId: undefined,
+      type: undefined,
+      memecoinId: undefined,
+      memecoinSymbol: undefined,
+      newHoldingAmount: undefined,
     };
 
-    const dto = plainToInstance(TradeResponseDto, plainObject);
+    const dto = new TradeResponseDto(plainObject);
 
-    // Check that all expected properties are present
-    expect(dto.transactionId).toBe(plainObject.transactionId);
-    expect(dto.type).toBe(plainObject.type);
-    expect(dto.memecoinId).toBe(plainObject.memecoinId);
-    expect(dto.memecoinSymbol).toBe(plainObject.memecoinSymbol);
-    expect(dto.amount).toBe(plainObject.amount);
-    expect(dto.price).toBe(plainObject.price);
-    expect(dto.totalValue).toBe(plainObject.totalValue);
-    expect(dto.newBalance).toBe(plainObject.newBalance);
-    expect(dto.newHoldingAmount).toBe(plainObject.newHoldingAmount);
-    expect(dto.executedAt).toEqual(plainObject.executedAt);
+    expect(dto.transactionId).toBeUndefined();
+    expect(dto.type).toBeUndefined();
+    expect(dto.memecoinId).toBeUndefined();
+    expect(dto.memecoinSymbol).toBeUndefined();
+    expect(dto.newHoldingAmount).toBeUndefined();
   });
-}); 
+});

@@ -29,9 +29,14 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
-      path: '/market',
-      name: 'market',
+      path: '/memecoins',
+      name: 'memecoins',
       component: () => import('@/views/MarketView.vue'),
+    },
+    {
+      path: '/memecoin/:id',
+      name: 'memecoin-details',
+      component: () => import('@/views/MemecoinDetailsView.vue'),
     },
     {
       path: '/leaderboard',
@@ -55,6 +60,11 @@ const router = createRouter({
       name: 'wallet',
       component: () => import('@/views/WalletView.vue'),
       meta: { requiresAuth: true },
+    },
+    {
+      path: '/profile/:id',
+      name: 'user-profile',
+      component: () => import('@/views/UserProfileView.vue'),
     },
     {
       path: '/:pathMatch(.*)*',

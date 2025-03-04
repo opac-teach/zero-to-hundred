@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose, Type } from 'class-transformer';
-import { UserResponseDto } from '../../user/dto/user-response.dto';
+import { UserResponseDto } from '../../user/dto';
 
 @Exclude()
 export class MemecoinResponseDto {
@@ -24,22 +24,6 @@ export class MemecoinResponseDto {
   @Expose()
   logoUrl: string;
 
-  @ApiProperty({ description: 'The total supply of the memecoin' })
-  @Expose()
-  totalSupply: number;
-
-  @ApiProperty({ description: 'The current price of the memecoin in ZTH' })
-  @Expose()
-  currentPrice: number;
-
-  @ApiProperty({ description: 'The market cap of the memecoin in ZTH' })
-  @Expose()
-  marketCap: number;
-
-  @ApiProperty({ description: 'The 24h trading volume of the memecoin in ZTH' })
-  @Expose()
-  volume24h: number;
-
   @ApiProperty({ description: 'The creator of the memecoin' })
   @Expose()
   @Type(() => UserResponseDto)
@@ -49,9 +33,21 @@ export class MemecoinResponseDto {
   @Expose()
   creatorId: string;
 
-  @ApiProperty({ description: 'Whether the memecoin is active' })
+  @ApiProperty({ description: 'The total supply of the memecoin' })
   @Expose()
-  isActive: boolean;
+  totalSupply: number;
+
+  @ApiProperty({ description: 'The current price of the memecoin' })
+  @Expose()
+  currentPrice: number;
+
+  @ApiProperty({ description: 'The market cap of the memecoin' })
+  @Expose()
+  marketCap: number;
+
+  @ApiProperty({ description: 'The 24h trading volume of the memecoin' })
+  @Expose()
+  volume24h: number;
 
   @ApiProperty({ description: 'The date when the memecoin was created' })
   @Expose()
@@ -64,4 +60,4 @@ export class MemecoinResponseDto {
   constructor(partial: Partial<MemecoinResponseDto>) {
     Object.assign(this, partial);
   }
-} 
+}

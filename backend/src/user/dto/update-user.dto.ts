@@ -64,4 +64,4 @@ export class UpdateUserDto {
   @IsHexColor()
   @IsOptional()
   textColor?: string;
-} 
+}

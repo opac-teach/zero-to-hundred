@@ -27,4 +27,4 @@ export class ChangePasswordDto {
   @IsNotEmpty()
   @MinLength(6)
   confirmPassword: string;
-} 
+}

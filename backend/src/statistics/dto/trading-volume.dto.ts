@@ -30,15 +30,21 @@ export class TradingVolumeDto {
   @Expose()
   sellVolume: number;
 
-  @ApiProperty({ description: 'The timeframe for the statistics', enum: ['24h', '7d', '30d'] })
+  @ApiProperty({
+    description: 'The timeframe for the statistics',
+    enum: ['24h', '7d', '30d'],
+  })
   @Expose()
   timeframe: string;
 
-  @ApiProperty({ type: [MemecoinVolumeDto], description: 'Volume statistics per memecoin' })
+  @ApiProperty({
+    type: [MemecoinVolumeDto],
+    description: 'Volume statistics per memecoin',
+  })
   @Expose()
   memecoins: MemecoinVolumeDto[];
 
   constructor(partial: Partial<TradingVolumeDto>) {
     Object.assign(this, partial);
   }
-} 
+}

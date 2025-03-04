@@ -21,9 +21,12 @@
               v-model="form.name"
               type="text"
               required
+              @input="validateName"
               class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              :class="{ 'border-red-500 dark:border-red-500': errors.name }"
               placeholder="e.g., Doge Coin"
             />
+            <p v-if="errors.name" class="mt-1 text-sm text-red-600 dark:text-red-400">{{ errors.name }}</p>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Symbol</label>
@@ -32,9 +35,12 @@
               type="text"
               required
               maxlength="5"
+              @input="validateSymbol"
               class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              :class="{ 'border-red-500 dark:border-red-500': errors.symbol }"
               placeholder="e.g., DOGE"
             />
+            <p v-if="errors.symbol" class="mt-1 text-sm text-red-600 dark:text-red-400">{{ errors.symbol }}</p>
           </div>
         </div>
 
@@ -43,9 +49,12 @@
           <textarea
             v-model="form.description"
             rows="3"
+            @input="validateDescription"
             class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            :class="{ 'border-red-500 dark:border-red-500': errors.description }"
             placeholder="Describe your memecoin..."
           ></textarea>
+          <p v-if="errors.description" class="mt-1 text-sm text-red-600 dark:text-red-400">{{ errors.description }}</p>
         </div>
 
         <div>
@@ -127,6 +136,12 @@ const form = ref<CreateMemecoinDto>({
   logoUrl: '',
 });
 
+const errors = ref({
+  name: '',
+  symbol: '',
+  description: '',
+});
+
 const isLoading = ref(false);
 const logoPreview = ref<string | null>(null);
 const logoInput = ref<HTMLInputElement | null>(null);
@@ -137,9 +152,41 @@ const isValid = computed(() => {
     form.value.name.length >= 3 &&
     form.value.symbol.length >= 2 &&
     form.value.symbol.length <= 5 &&
-    (form.value.description?.length ?? 0) >= 10
+    /^[A-Z0-9]+$/.test(form.value.symbol) &&
+    (form.value.description?.length ?? 0) >= 10 &&
+    !errors.value.name &&
+    !errors.value.symbol &&
+    !errors.value.description
   );
 });
+
+function validateName() {
+  if (form.value.name.length < 3) {
+    errors.value.name = 'Name must be at least 3 characters long';
+  } else {
+    errors.value.name = '';
+  }
+}
+
+function validateSymbol() {
+  if (form.value.symbol.length < 2) {
+    errors.value.symbol = 'Symbol must be at least 2 characters long';
+  } else if (form.value.symbol.length > 5) {
+    errors.value.symbol = 'Symbol must be at most 5 characters long';
+  } else if (!/^[A-Z0-9]+$/.test(form.value.symbol)) {
+    errors.value.symbol = 'Symbol must contain only uppercase letters and numbers';
+  } else {
+    errors.value.symbol = '';
+  }
+}
+
+function validateDescription() {
+  if ((form.value.description?.length ?? 0) < 10) {
+    errors.value.description = 'Description must be at least 10 characters long';
+  } else {
+    errors.value.description = '';
+  }
+}
 
 function handleLogoUpload() {
   logoInput.value?.click();
@@ -207,8 +254,8 @@ async function handleSubmit() {
   try {
     isLoading.value = true;
     await marketStore.createMemecoin(form.value);
-    toast.success('Memecoin created successfully! 🚀');
-    router.push('/market');
+    toast.success('Memecoin created successfully! 🎉');
+    router.push('/memecoins');
   } catch (error: any) {
     toast.error(error.message || 'Failed to create memecoin');
   } finally {

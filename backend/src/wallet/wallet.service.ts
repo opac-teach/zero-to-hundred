@@ -23,18 +23,34 @@ export class WalletService {
     });
 
     if (!wallet) {
-      throw new NotFoundException(`Wallet for user with ID ${userId} not found`);
+      throw new NotFoundException(
+        `Wallet for user with ID ${userId} not found`,
+      );
     }
 
     // Get wallet holdings
     const holdings = await this.walletHoldingRepository.find({
       where: { walletId: wallet.id },
-      relations: ['memecoin'],
+      relations: ['memecoin', 'memecoin.creator', 'memecoin.creator.wallet'],
+    });
+
+    const holdingsWithUserBalance = holdings.map((holding) => {
+      const creatorWithBalance = {
+        ...holding.memecoin.creator,
+        zthBalance: holding.memecoin.creator.wallet?.zthBalance || 0,
+      };
+      return {
+        ...holding,
+        memecoin: {
+          ...holding.memecoin,
+          creator: creatorWithBalance,
+        },
+      };
     });
 
     return new WalletResponseDto({
       ...wallet,
-      holdings,
+      holdings: holdingsWithUserBalance,
     });
   }
 
@@ -45,7 +61,13 @@ export class WalletService {
   ): Promise<TransactionResponseDto[]> {
     const transactions = await this.transactionRepository.find({
       where: { userId },
-      relations: ['memecoin'],
+      relations: [
+        'memecoin',
+        'memecoin.creator',
+        'memecoin.creator.wallet',
+        'user',
+        'user.wallet',
+      ],
       order: {
         createdAt: 'DESC',
       },
@@ -53,6 +75,23 @@ export class WalletService {
       take: limit,
     });
 
-    return transactions.map(transaction => new TransactionResponseDto(transaction));
+    return transactions.map((transaction) => {
+      const userWithBalance = {
+        ...transaction.user,
+        zthBalance: transaction.user.wallet?.zthBalance || 0,
+      };
+      const creatorWithBalance = {
+        ...transaction.memecoin.creator,
+        zthBalance: transaction.memecoin.creator.wallet?.zthBalance || 0,
+      };
+      return new TransactionResponseDto({
+        ...transaction,
+        user: userWithBalance,
+        memecoin: {
+          ...transaction.memecoin,
+          creator: creatorWithBalance,
+        },
+      });
+    });
   }
 }

@@ -1,12 +1,20 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from './user.entity';
 import { Memecoin } from './memecoin.entity';
 
 export enum TransactionType {
-  BUY = 'buy',
-  SELL = 'sell',
-  CREATE = 'create',
+  BUY = 'BUY',
+  SELL = 'SELL',
+  CREATE = 'CREATE',
 }
 
 @Entity('transactions')
@@ -14,25 +22,6 @@ export class Transaction {
   @ApiProperty({ description: 'The unique identifier of the transaction' })
   @PrimaryGeneratedColumn('uuid')
   id: string;
-
-  @ApiProperty({ description: 'The type of transaction' })
-  @Column({
-    type: 'enum',
-    enum: TransactionType,
-  })
-  type: TransactionType;
-
-  @ApiProperty({ description: 'The amount of the memecoin involved in the transaction' })
-  @Column({ type: 'decimal', precision: 24, scale: 8 })
-  amount: number;
-
-  @ApiProperty({ description: 'The price of the memecoin at the time of the transaction' })
-  @Column({ type: 'decimal', precision: 24, scale: 8 })
-  price: number;
-
-  @ApiProperty({ description: 'The total value of the transaction in ZTH' })
-  @Column({ type: 'decimal', precision: 24, scale: 8 })
-  totalValue: number;
 
   @ApiProperty({ description: 'The user who performed the transaction' })
   @ManyToOne(() => User)
@@ -50,7 +39,39 @@ export class Transaction {
   @Column()
   memecoinId: string;
 
+  @ApiProperty({
+    description: 'The type of transaction',
+    enum: TransactionType,
+  })
+  @Column({
+    type: 'enum',
+    enum: TransactionType,
+  })
+  type: TransactionType;
+
+  @ApiProperty({
+    description: 'The amount of tokens involved in the transaction',
+  })
+  @Column({ type: 'decimal', precision: 24, scale: 8 })
+  amount: string;
+
+  @ApiProperty({
+    description: 'The price per token at the time of the transaction',
+  })
+  @Column({ type: 'decimal', precision: 24, scale: 8 })
+  price: string;
+
+  @ApiProperty({ description: 'The total value of the transaction in ZTH' })
+  @Column({ type: 'decimal', precision: 24, scale: 8 })
+  totalValue: string;
+
   @ApiProperty({ description: 'The date when the transaction was created' })
   @CreateDateColumn()
   createdAt: Date;
+
+  @ApiProperty({
+    description: 'The date when the transaction was last updated',
+  })
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

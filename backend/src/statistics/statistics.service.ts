@@ -19,7 +19,10 @@ export class StatisticsService {
    * @param timeframe The timeframe for the statistics (24h, 7d, 30d)
    * @param memecoinId Optional memecoin ID to filter by
    */
-  async getTradingVolume(timeframe: string = '24h', memecoinId?: string): Promise<TradingVolumeDto> {
+  async getTradingVolume(
+    timeframe: string = '24h',
+    memecoinId?: string,
+  ): Promise<TradingVolumeDto> {
     // Calculate the start date based on the timeframe
     const startDate = new Date();
     switch (timeframe) {
@@ -38,11 +41,15 @@ export class StatisticsService {
     const queryBuilder = this.transactionRepository
       .createQueryBuilder('transaction')
       .where('transaction.createdAt >= :startDate', { startDate })
-      .andWhere('transaction.type IN (:...types)', { types: [TransactionType.BUY, TransactionType.SELL] });
+      .andWhere('transaction.type IN (:...types)', {
+        types: [TransactionType.BUY, TransactionType.SELL],
+      });
 
     // Add memecoin filter if provided
     if (memecoinId) {
-      queryBuilder.andWhere('transaction.memecoinId = :memecoinId', { memecoinId });
+      queryBuilder.andWhere('transaction.memecoinId = :memecoinId', {
+        memecoinId,
+      });
     }
 
     // Get all transactions for the period
@@ -54,11 +61,14 @@ export class StatisticsService {
     let sellVolume = 0;
 
     // Group transactions by memecoin
-    const memecoinVolumes = new Map<string, { id: string; ticker: string; volume: number }>();
+    const memecoinVolumes = new Map<
+      string,
+      { id: string; ticker: string; volume: number }
+    >();
 
     for (const transaction of transactions) {
       totalVolume += transaction.totalValue;
-      
+
       if (transaction.type === TransactionType.BUY) {
         buyVolume += transaction.totalValue;
       } else if (transaction.type === TransactionType.SELL) {
@@ -67,7 +77,9 @@ export class StatisticsService {
 
       // Update memecoin volume
       if (!memecoinVolumes.has(transaction.memecoinId)) {
-        const memecoin = await this.memecoinRepository.findOne({ where: { id: transaction.memecoinId } });
+        const memecoin = await this.memecoinRepository.findOne({
+          where: { id: transaction.memecoinId },
+        });
         memecoinVolumes.set(transaction.memecoinId, {
           id: transaction.memecoinId,
           ticker: memecoin ? memecoin.symbol : 'UNKNOWN',
@@ -81,8 +93,9 @@ export class StatisticsService {
     }
 
     // Convert Map to array for response
-    const memecoins: MemecoinVolumeDto[] = Array.from(memecoinVolumes.values())
-      .sort((a, b) => b.volume - a.volume); // Sort by volume, highest first
+    const memecoins: MemecoinVolumeDto[] = Array.from(
+      memecoinVolumes.values(),
+    ).sort((a, b) => b.volume - a.volume); // Sort by volume, highest first
 
     return new TradingVolumeDto({
       totalVolume,
@@ -124,12 +137,14 @@ export class StatisticsService {
     }
 
     // Determine sentiment
-    if (buyCount > sellCount * 1.2) { // 20% more buys than sells
+    if (buyCount > sellCount * 1.2) {
+      // 20% more buys than sells
       return 'POSITIVE';
-    } else if (sellCount > buyCount * 1.2) { // 20% more sells than buys
+    } else if (sellCount > buyCount * 1.2) {
+      // 20% more sells than buys
       return 'NEGATIVE';
     } else {
       return 'NEUTRAL';
     }
   }
-} 
+}

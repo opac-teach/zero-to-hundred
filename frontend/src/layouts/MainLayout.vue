@@ -1,16 +1,16 @@
 <template>
   <div class="min-h-screen bg-background">
     <!-- Navigation -->
-    <header class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header class="sticky top-0 z-[100] w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div class="container flex h-14 items-center">
-        <div class="mr-4 flex">
+        <div class="mr-4 flex flex-1">
           <!-- Logo -->
           <router-link to="/" class="mr-6 flex items-center space-x-2">
             <span class="font-bold text-xl text-primary">ZTH</span>
           </router-link>
 
           <!-- Navigation Links -->
-          <nav class="flex items-center space-x-6 text-sm font-medium">
+          <nav class="flex items-center space-x-8 text-sm font-medium">
             <router-link
               v-for="item in navigationItems"
               :key="item.name"
@@ -47,31 +47,43 @@
             </div>
 
             <!-- Profile dropdown -->
-            <DropdownMenu v-model:open="isProfileMenuOpen">
-              <DropdownMenuTrigger as-child>
-                <Button variant="ghost" class="relative h-9 w-9 rounded-full">
-                  <Avatar class="h-9 w-9">
-                    <AvatarImage :src="userStore.currentUser?.profilePictureUrl || '/default-avatar.png'" :alt="userStore.currentUser?.username" />
-                    <AvatarFallback>{{ userStore.currentUser?.username?.charAt(0).toUpperCase() }}</AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem as-child>
-                  <router-link to="/profile" @click="isProfileMenuOpen = false">
-                    Profile
-                  </router-link>
-                </DropdownMenuItem>
-                <DropdownMenuItem as-child>
-                  <router-link to="/wallet" @click="isProfileMenuOpen = false">
-                    Wallet
-                  </router-link>
-                </DropdownMenuItem>
-                <DropdownMenuItem @click="handleLogout">
+            <div class="relative">
+              <Button
+                variant="ghost"
+                class="relative h-9 w-9 rounded-full"
+                @click="isProfileMenuOpen = !isProfileMenuOpen"
+              >
+                <Avatar class="h-9 w-9">
+                  <AvatarImage :src="userStore.currentUser?.profilePictureUrl || '/default-avatar.svg'" :alt="userStore.currentUser?.username" />
+                  <AvatarFallback>{{ userStore.currentUser?.username?.charAt(0).toUpperCase() }}</AvatarFallback>
+                </Avatar>
+              </Button>
+              <div
+                v-if="isProfileMenuOpen"
+                class="absolute right-0 mt-2 w-48 bg-background border rounded-md shadow-lg z-10"
+              >
+                <router-link
+                  to="/profile"
+                  class="block px-4 py-2 hover:bg-accent cursor-pointer"
+                  @click="isProfileMenuOpen = false"
+                >
+                  Profile
+                </router-link>
+                <router-link
+                  to="/wallet"
+                  class="block px-4 py-2 hover:bg-accent cursor-pointer"
+                  @click="isProfileMenuOpen = false"
+                >
+                  Wallet
+                </router-link>
+                <button
+                  class="w-full text-left px-4 py-2 hover:bg-accent cursor-pointer"
+                  @click="handleLogout"
+                >
                   Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </button>
+              </div>
+            </div>
           </div>
 
           <!-- Login/Register buttons -->
@@ -92,31 +104,21 @@
     </header>
 
     <!-- Main content -->
-    <main class="container py-6">
-      <router-view v-slot="slotProps">
-        <transition name="fade" mode="out-in">
-          <component :is="slotProps?.Component || defineComponent({ template: '<div>Loading...</div>' })" />
-        </transition>
-      </router-view>
+    <main class="container py-8">
+      <router-view />
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, defineComponent } from 'vue';
+import { ref, defineComponent, onMounted, onUnmounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import { useWalletStore } from '@/stores/wallet';
 import { useUIStore } from '@/stores/ui';
-import { SunIcon, MoonIcon, ChevronDownIcon } from 'lucide-vue-next';
+import { SunIcon, MoonIcon } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 
 const router = useRouter();
 const route = useRoute();
@@ -127,7 +129,7 @@ const isProfileMenuOpen = ref(false);
 
 const navigationItems = [
   { name: 'Home', href: '/' },
-  { name: 'Market', href: '/market' },
+  { name: 'Memecoins', href: '/memecoins' },
   { name: 'Leaderboard', href: '/leaderboard' },
   { name: 'Create Memecoin', href: '/create-memecoin' },
 ];

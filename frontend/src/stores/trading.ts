@@ -37,7 +37,25 @@ export const useTradingStore = defineStore('trading', () => {
   });
 
   function calculateStats() {
-    if (transactions.value.length === 0) return;
+    if (transactions.value.length === 0) {
+      // Reset stats to default values when there are no transactions
+      stats.value = {
+        totalTrades: 0,
+        winRate: 0,
+        averageReturn: 0,
+        totalHoldings: 0,
+        change24h: 0,
+        bestTrade: {
+          memecoinId: '',
+          memecoinName: '',
+          profit: 0,
+          date: '',
+        },
+        averageHoldingTime: 0,
+        tradingFrequency: 0,
+      };
+      return;
+    }
 
     // Calculate total trades
     stats.value.totalTrades = transactions.value.length;
@@ -76,6 +94,8 @@ export const useTradingStore = defineStore('trading', () => {
     if (holdingTimes.length > 0) {
       const averageHoldingTimeMs = holdingTimes.reduce((sum, time) => sum + time, 0) / holdingTimes.length;
       stats.value.averageHoldingTime = averageHoldingTimeMs / (1000 * 60 * 60 * 24); // Convert to days
+    } else {
+      stats.value.averageHoldingTime = 0;
     }
 
     // Calculate trading frequency (trades per day)

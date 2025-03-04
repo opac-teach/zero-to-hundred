@@ -6,7 +6,11 @@ import { User } from '../entities/user.entity';
 import { Wallet } from '../entities/wallet.entity';
 import { Transaction, TransactionType } from '../entities/transaction.entity';
 import { Repository, DataSource } from 'typeorm';
-import { NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import {
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { StatisticsService } from '../statistics/statistics.service';
 import { CreateMemecoinDto } from './dto';
 import { MemecoinResponseDto } from './dto/memecoin-response.dto';
@@ -165,10 +169,16 @@ describe('MemecoinService', () => {
     }).compile();
 
     service = module.get<MemecoinService>(MemecoinService);
-    memecoinRepository = module.get<Repository<Memecoin>>(getRepositoryToken(Memecoin));
+    memecoinRepository = module.get<Repository<Memecoin>>(
+      getRepositoryToken(Memecoin),
+    );
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
-    walletRepository = module.get<Repository<Wallet>>(getRepositoryToken(Wallet));
-    transactionRepository = module.get<Repository<Transaction>>(getRepositoryToken(Transaction));
+    walletRepository = module.get<Repository<Wallet>>(
+      getRepositoryToken(Wallet),
+    );
+    transactionRepository = module.get<Repository<Transaction>>(
+      getRepositoryToken(Transaction),
+    );
     dataSource = module.get<DataSource>(DataSource);
     statisticsService = module.get<StatisticsService>(StatisticsService);
 
@@ -183,7 +193,7 @@ describe('MemecoinService', () => {
   describe('findAll', () => {
     it('should return an array of memecoins with pagination', async () => {
       const result = await service.findAll(1, 10);
-      
+
       expect(result).toBeDefined();
       expect(result.length).toBeGreaterThan(0);
       expect(memecoinRepository.find).toHaveBeenCalled();
@@ -191,30 +201,36 @@ describe('MemecoinService', () => {
 
     it('should apply sorting options', async () => {
       await service.findAll(1, 10, 'createdAt', 'ASC');
-      
-      expect(memecoinRepository.find).toHaveBeenCalledWith(expect.objectContaining({
-        order: {
-          createdAt: 'ASC',
-        },
-      }));
+
+      expect(memecoinRepository.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          order: {
+            createdAt: 'ASC',
+          },
+        }),
+      );
     });
   });
 
   describe('findOne', () => {
     it('should return a memecoin by id', async () => {
       const result = await service.findOne('memecoin-id-1');
-      
+
       expect(result).toBeDefined();
       expect(result.id).toBe('memecoin-id-1');
-      expect(memecoinRepository.findOne).toHaveBeenCalledWith(expect.objectContaining({
-        where: { id: 'memecoin-id-1' },
-      }));
+      expect(memecoinRepository.findOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'memecoin-id-1' },
+        }),
+      );
     });
 
     it('should throw NotFoundException when memecoin is not found', async () => {
       jest.spyOn(memecoinRepository, 'findOne').mockResolvedValueOnce(null);
-      
-      await expect(service.findOne('nonexistent-id')).rejects.toThrow(NotFoundException);
+
+      await expect(service.findOne('nonexistent-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -233,19 +249,19 @@ describe('MemecoinService', () => {
         marketCap: 0,
         volume24h: 0,
       };
-      
+
       // Mock the service.create method to return the mock response
       jest.spyOn(service, 'create').mockResolvedValueOnce(mockResponse as any);
-      
+
       const createMemecoinDto: CreateMemecoinDto = {
         name: 'Test Coin',
         symbol: 'TEST',
         description: 'A test memecoin',
         logoUrl: 'https://example.com/logo.png',
       };
-      
+
       const result = await service.create('user-id-1', createMemecoinDto);
-      
+
       expect(result).toBeDefined();
       expect(result.name).toBe('Test Coin');
       expect(result.symbol).toBe('TEST');
@@ -256,45 +272,57 @@ describe('MemecoinService', () => {
       jest.spyOn(memecoinRepository, 'findOne').mockResolvedValueOnce(null);
       // Mock the userRepository.findOne to return null (user not found)
       jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(null);
-      
+
       const createMemecoinDto: CreateMemecoinDto = {
         name: 'Test Coin',
         symbol: 'TEST',
         description: 'A test memecoin',
         logoUrl: 'https://example.com/logo.png',
       };
-      
-      await expect(service.create('nonexistent-id', createMemecoinDto)).rejects.toThrow(NotFoundException);
+
+      await expect(
+        service.create('nonexistent-id', createMemecoinDto),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw ConflictException when memecoin symbol already exists', async () => {
-      jest.spyOn(memecoinRepository, 'findOne').mockResolvedValueOnce(mockMemecoin as unknown as Memecoin);
-      
+      jest
+        .spyOn(memecoinRepository, 'findOne')
+        .mockResolvedValueOnce(mockMemecoin as unknown as Memecoin);
+
       const createMemecoinDto: CreateMemecoinDto = {
         name: 'New Coin',
         symbol: 'TEST', // Same symbol as existing memecoin
         description: 'A new memecoin',
       };
-      
-      await expect(service.create('user-id-1', createMemecoinDto)).rejects.toThrow(ConflictException);
+
+      await expect(
+        service.create('user-id-1', createMemecoinDto),
+      ).rejects.toThrow(ConflictException);
     });
   });
 
   describe('getPrice', () => {
     it('should return the current price of a memecoin', async () => {
-      jest.spyOn(statisticsService, 'getMarketSentiment').mockResolvedValueOnce('POSITIVE');
-      
+      jest
+        .spyOn(statisticsService, 'getMarketSentiment')
+        .mockResolvedValueOnce('POSITIVE');
+
       const result = await service.getPrice('memecoin-id-1');
-      
+
       expect(result).toBeDefined();
       expect(result.price).toBeDefined();
-      expect(memecoinRepository.findOne).toHaveBeenCalledWith({ where: { id: 'memecoin-id-1' } });
+      expect(memecoinRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 'memecoin-id-1' },
+      });
     });
 
     it('should throw NotFoundException when memecoin is not found', async () => {
       jest.spyOn(memecoinRepository, 'findOne').mockResolvedValueOnce(null);
-      
-      await expect(service.getPrice('nonexistent-id')).rejects.toThrow(NotFoundException);
+
+      await expect(service.getPrice('nonexistent-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

@@ -1,0 +1,15 @@
+meta {
+  name: Get memecoin by symbol
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/memecoins/symbol/:symbol
+  body: none
+  auth: none
+}
+
+params:path {
+  symbol: 
+}

@@ -12,17 +12,32 @@
           />
           <magnifying-glass-icon class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
         </div>
-        <Select v-model="sortBy">
-          <SelectTrigger class="w-[180px]">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="createdAt">Created Date</SelectItem>
-            <SelectItem value="name">Name</SelectItem>
-            <SelectItem value="symbol">Symbol</SelectItem>
-            <SelectItem value="totalSupply">Total Supply</SelectItem>
-          </SelectContent>
-        </Select>
+        <div class="relative sort-dropdown">
+          <Button
+            variant="outline"
+            class="w-[180px] justify-between"
+            @click.stop="isSortOpen = !isSortOpen"
+          >
+            <span>{{ sortBy }}</span>
+            <chevron-down-icon class="h-4 w-4" />
+          </Button>
+          <div
+            v-if="isSortOpen"
+            class="absolute top-full left-0 mt-1 w-full bg-background border rounded-md shadow-lg z-10"
+          >
+            <div
+              v-for="option in sortOptions"
+              :key="option.value"
+              class="px-3 py-2 hover:bg-accent cursor-pointer"
+              @click="() => {
+                sortBy = option.value;
+                isSortOpen = false;
+              }"
+            >
+              {{ option.label }}
+            </div>
+          </div>
+        </div>
         <Button
           variant="ghost"
           size="icon"
@@ -73,7 +88,13 @@
     <!-- Memecoin List -->
     <Card>
       <CardContent class="p-0">
-        <Table>
+        <div v-if="marketStore.isLoading" class="p-4 text-center">
+          Loading memecoins...
+        </div>
+        <div v-else-if="marketStore.error" class="p-4 text-center text-red-500">
+          {{ marketStore.error }}
+        </div>
+        <Table v-else>
           <TableHeader>
             <TableRow>
               <TableHead>Memecoin</TableHead>
@@ -88,7 +109,7 @@
             <TableRow v-for="memecoin in sortedMemecoins" :key="memecoin.id">
               <TableCell>
                 <div class="flex items-center">
-                  <img :src="memecoin.logoUrl" :alt="memecoin.name" class="h-10 w-10 rounded-full" />
+                  <img :src="memecoin.logoUrl || assetsStore.defaultMemecoinLogo" :alt="memecoin.name" class="h-10 w-10 rounded-full" />
                   <div class="ml-4">
                     <div class="text-sm font-medium text-gray-900 dark:text-white">{{ memecoin.name }}</div>
                     <div class="text-sm text-gray-500 dark:text-gray-400">{{ memecoin.symbol }}</div>
@@ -96,7 +117,7 @@
                 </div>
               </TableCell>
               <TableCell>
-                <div class="text-sm text-gray-900 dark:text-white">{{ memecoin.currentPrice.toFixed(6) }} ZTH</div>
+                <div class="text-sm text-gray-900 dark:text-white">{{ Number(marketStore.memecoinPrices[memecoin.id]?.price || memecoin.currentPrice).toFixed(6) }} ZTH</div>
               </TableCell>
               <TableCell>
                 <span :class="[
@@ -113,132 +134,32 @@
                 {{ memecoin.volume24h.toLocaleString() }} ZTH
               </TableCell>
               <TableCell>
-                <div class="flex space-x-2">
-                  <Button variant="ghost" size="sm" @click="openTradeModal(memecoin)">
-                    Trade
-                  </Button>
-                  <Button variant="ghost" size="sm" @click="selectMemecoin(memecoin)">
-                    Details
-                  </Button>
-                </div>
+                <Button variant="outline" size="sm" @click="$router.push(`/memecoin/${memecoin.id}`)">
+                  View Details
+                </Button>
               </TableCell>
             </TableRow>
           </TableBody>
         </Table>
       </CardContent>
     </Card>
-
-    <!-- Charts -->
-    <div v-if="selectedMemecoin" class="mt-8 space-y-8">
-      <!-- Price Chart -->
-      <Card>
-        <CardHeader>
-          <CardTitle class="flex justify-between items-center">
-            {{ selectedMemecoin.name }} Price Chart
-            <div class="flex space-x-2">
-              <Button
-                v-for="timeframe in timeframes"
-                :key="timeframe"
-                variant="ghost"
-                size="sm"
-                @click="selectedTimeframe = timeframe"
-                :class="selectedTimeframe === timeframe ? 'bg-primary text-primary-foreground' : ''"
-              >
-                {{ timeframe }}
-              </Button>
-            </div>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div class="h-96">
-            <price-chart
-              :data="priceData"
-              :timeframe="selectedTimeframe"
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      <!-- Volume Chart -->
-      <Card>
-        <CardHeader>
-          <CardTitle>Trading Volume</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div class="h-48">
-            <volume-chart
-              :data="volumeData"
-              :timeframe="selectedTimeframe"
-            />
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-
-    <!-- Trade Modal -->
-    <Dialog v-model:open="isTradeModalOpen">
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Trade {{ selectedMemecoin?.name }}</DialogTitle>
-        </DialogHeader>
-        <div class="space-y-4">
-          <div class="space-y-2">
-            <label class="text-sm font-medium">Amount (ZTH)</label>
-            <Input
-              v-model="tradeAmount"
-              type="number"
-              min="0"
-              step="0.000001"
-            />
-          </div>
-
-          <div class="space-y-2">
-            <label class="text-sm font-medium">Slippage Tolerance (%)</label>
-            <Input
-              v-model="slippageTolerance"
-              type="number"
-              min="0"
-              max="100"
-              step="0.1"
-            />
-          </div>
-
-          <div class="flex justify-end space-x-3">
-            <Button
-              variant="ghost"
-              @click="isTradeModalOpen = false"
-            >
-              Cancel
-            </Button>
-            <Button
-              @click="handleTrade"
-              :disabled="!tradeAmount || isLoading"
-            >
-              {{ isLoading ? 'Processing...' : 'Confirm Trade' }}
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useMarketStore } from '@/stores/market';
-import { useWalletStore } from '@/stores/wallet';
+import { useAssetsStore } from '@/stores/assets';
 import { useToast } from 'vue-toastification';
-import PriceChart from '@/components/PriceChart.vue';
-import VolumeChart from '@/components/VolumeChart.vue';
 import {
   ArrowUpIcon,
   ArrowDownIcon,
-  XMarkIcon,
   MagnifyingGlassIcon,
+  ChevronDownIcon,
 } from '@heroicons/vue/24/outline';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -247,42 +168,29 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import type { MemecoinResponseDto } from '@/types/api';
 
 const marketStore = useMarketStore();
-const walletStore = useWalletStore();
+const assetsStore = useAssetsStore();
 const toast = useToast();
 
 const sortBy = ref<'createdAt' | 'name' | 'symbol' | 'totalSupply'>('createdAt');
 const sortOrder = ref<'ASC' | 'DESC'>('DESC');
-const selectedMemecoin = ref<MemecoinResponseDto | null>(null);
-const isTradeModalOpen = ref(false);
-const tradeAmount = ref('');
-const slippageTolerance = ref('1');
-const isLoading = ref(false);
-const selectedTimeframe = ref<'24h' | '7d' | '30d'>('24h');
-const timeframes = ['24h', '7d', '30d'] as const;
+const isSortOpen = ref(false);
+
+const sortOptions = [
+  { value: 'createdAt', label: 'Created Date' },
+  { value: 'name', label: 'Name' },
+  { value: 'symbol', label: 'Symbol' },
+  { value: 'totalSupply', label: 'Total Supply' },
+] as const;
 
 const totalMarketCap = computed(() => {
-  return marketStore.memecoinsList.reduce((sum, coin) => sum + coin.marketCap, 0).toLocaleString();
+  return marketStore.memecoinsList.reduce((sum, coin) => sum + Number(coin.marketCap), 0).toLocaleString();
 });
 
 const totalVolume24h = computed(() => {
-  return marketStore.memecoinsList.reduce((sum, coin) => sum + coin.volume24h, 0).toLocaleString();
+  return marketStore.memecoinsList.reduce((sum, coin) => sum + Number(coin.volume24h), 0).toLocaleString();
 });
 
 const activeMemecoins = computed(() => {
@@ -315,34 +223,36 @@ const marketSentimentClass = computed(() => {
 
 const sortedMemecoins = computed(() => {
   return [...marketStore.memecoinsList].sort((a, b) => {
-    const aValue = a[sortBy.value];
-    const bValue = b[sortBy.value];
+    let aValue: any = a[sortBy.value];
+    let bValue: any = b[sortBy.value];
+    
+    // Handle date fields
+    if (sortBy.value === 'createdAt') {
+      aValue = new Date(aValue).getTime();
+      bValue = new Date(bValue).getTime();
+    }
+    
+    // Handle numeric fields
+    if (['currentPrice', 'marketCap', 'volume24h', 'totalSupply'].includes(sortBy.value)) {
+      aValue = Number(aValue);
+      bValue = Number(bValue);
+    }
+    
+    // Handle string fields
+    if (['name', 'symbol'].includes(sortBy.value)) {
+      aValue = String(aValue).toLowerCase();
+      bValue = String(bValue).toLowerCase();
+    }
+    
+    // Compare values
+    if (aValue === bValue) return 0;
+    if (aValue === null || aValue === undefined) return 1;
+    if (bValue === null || bValue === undefined) return -1;
+    
     return sortOrder.value === 'ASC' ? 
       (aValue > bValue ? 1 : -1) : 
       (aValue < bValue ? 1 : -1);
   });
-});
-
-const priceData = computed(() => {
-  if (!selectedMemecoin.value) return [];
-  const price = marketStore.memecoinPrices[selectedMemecoin.value.id];
-  if (!price) return [];
-  return [{
-    timestamp: new Date().toISOString(),
-    open: price.price,
-    high: price.price * 1.1, // Simulated data
-    low: price.price * 0.9, // Simulated data
-    close: price.price,
-    volume: selectedMemecoin.value.volume24h
-  }];
-});
-
-const volumeData = computed(() => {
-  if (!selectedMemecoin.value) return [];
-  return [{
-    timestamp: new Date().toISOString(),
-    volume: selectedMemecoin.value.volume24h
-  }];
 });
 
 function getPriceChange(memecoin: MemecoinResponseDto) {
@@ -352,46 +262,35 @@ function getPriceChange(memecoin: MemecoinResponseDto) {
   return `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
 }
 
-function openTradeModal(memecoin: MemecoinResponseDto) {
-  selectedMemecoin.value = memecoin;
-  isTradeModalOpen.value = true;
-}
-
-function selectMemecoin(memecoin: MemecoinResponseDto) {
-  selectedMemecoin.value = memecoin;
-}
-
-async function handleTrade() {
-  if (!selectedMemecoin.value || !tradeAmount.value) return;
-
-  try {
-    isLoading.value = true;
-    await walletStore.trade(
-      selectedMemecoin.value.id,
-      parseFloat(tradeAmount.value),
-      parseFloat(slippageTolerance.value)
-    );
-    toast.success('Trade executed successfully!');
-    isTradeModalOpen.value = false;
-    tradeAmount.value = '';
-  } catch (error) {
-    toast.error('Failed to execute trade. Please try again.');
-  } finally {
-    isLoading.value = false;
-  }
-}
-
 onMounted(async () => {
   try {
-    await marketStore.fetchMemecoins({
-      sortBy: sortBy.value,
-      order: sortOrder.value
-    });
+    await Promise.all([
+      marketStore.fetchMemecoins({
+        sortBy: sortBy.value,
+        order: sortOrder.value
+      }),
+      marketStore.fetchTradingVolume()
+    ]);
     marketStore.startPriceUpdates();
+
+    // Add click outside handler for sort dropdown
+    document.addEventListener('click', handleClickOutside);
   } catch (error: any) {
     toast.error(error.message || 'Failed to fetch market data');
   }
 });
+
+onUnmounted(() => {
+  marketStore.stopPriceUpdates();
+  document.removeEventListener('click', handleClickOutside);
+});
+
+function handleClickOutside(event: MouseEvent) {
+  const target = event.target as HTMLElement;
+  if (!target.closest('.sort-dropdown')) {
+    isSortOpen.value = false;
+  }
+}
 
 watch([sortBy, sortOrder], async () => {
   try {

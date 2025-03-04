@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Zero to Hundred API",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

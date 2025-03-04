@@ -4,11 +4,14 @@ import { TransactionType } from '../../entities/transaction.entity';
 
 @Exclude()
 export class TradeResponseDto {
-  @ApiProperty({ description: 'The unique identifier of the transaction' })
+  @ApiProperty({ description: 'The ID of the transaction' })
   @Expose()
   transactionId: string;
 
-  @ApiProperty({ description: 'The type of transaction', enum: TransactionType })
+  @ApiProperty({
+    description: 'The type of transaction',
+    enum: TransactionType,
+  })
   @Expose()
   type: TransactionType;
 
@@ -20,31 +23,13 @@ export class TradeResponseDto {
   @Expose()
   memecoinSymbol: string;
 
-  @ApiProperty({ description: 'The amount of the memecoin traded' })
+  @ApiProperty({
+    description: 'The new amount of memecoin tokens held after the transaction',
+  })
   @Expose()
-  amount: number;
-
-  @ApiProperty({ description: 'The price of the memecoin at the time of the trade' })
-  @Expose()
-  price: number;
-
-  @ApiProperty({ description: 'The total value of the trade in ZTH' })
-  @Expose()
-  totalValue: number;
-
-  @ApiProperty({ description: 'The new balance of the user in ZTH' })
-  @Expose()
-  newBalance: number;
-
-  @ApiProperty({ description: 'The new amount of the memecoin held by the user' })
-  @Expose()
-  newHoldingAmount: number;
-
-  @ApiProperty({ description: 'The date when the trade was executed' })
-  @Expose()
-  executedAt: Date;
+  newHoldingAmount: string;
 
   constructor(partial: Partial<TradeResponseDto>) {
     Object.assign(this, partial);
   }
-} 
+}

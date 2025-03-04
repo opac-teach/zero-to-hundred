@@ -8,19 +8,22 @@ export class WalletResponseDto {
   @Expose()
   id: string;
 
-  @ApiProperty({ description: 'The address of the wallet' })
+  @ApiProperty({ description: 'The ZTH balance of the wallet' })
   @Expose()
-  address: string;
-
-  @ApiProperty({ description: 'The balance of the wallet in ZTH' })
-  @Expose()
-  balance: number;
+  zthBalance: number;
 
   @ApiProperty({ description: 'The ID of the owner' })
   @Expose()
   ownerId: string;
 
-  @ApiProperty({ description: 'The holdings of the wallet', type: [WalletHoldingResponseDto] })
+  @ApiProperty({ description: 'Whether the wallet is active' })
+  @Expose()
+  isActive: boolean;
+
+  @ApiProperty({
+    description: 'The holdings of the wallet',
+    type: [WalletHoldingResponseDto],
+  })
   @Expose()
   @Type(() => WalletHoldingResponseDto)
   holdings: WalletHoldingResponseDto[];
@@ -36,4 +39,4 @@ export class WalletResponseDto {
   constructor(partial: Partial<WalletResponseDto>) {
     Object.assign(this, partial);
   }
-} 
+}

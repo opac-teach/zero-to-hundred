@@ -1,6 +1,16 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+  OneToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { Wallet } from './wallet.entity';
 
 @Entity('users')
 export class User {
@@ -52,6 +62,11 @@ export class User {
   @Column({ default: true })
   isActive: boolean;
 
+  @ApiProperty({ description: "The user's wallet" })
+  @OneToOne(() => Wallet, (wallet) => wallet.owner)
+  @JoinColumn()
+  wallet: Wallet;
+
   @ApiProperty({ description: 'The date when the user was created' })
   @CreateDateColumn()
   createdAt: Date;
@@ -59,8 +74,4 @@ export class User {
   @ApiProperty({ description: 'The date when the user was last updated' })
   @UpdateDateColumn()
   updatedAt: Date;
-
-  @ApiProperty({ description: 'The ZTH balance of the user' })
-  @Column({ type: 'decimal', precision: 18, scale: 8, default: 100 })
-  zthBalance: number;
-} 
+}

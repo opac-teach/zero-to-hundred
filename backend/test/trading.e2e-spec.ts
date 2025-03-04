@@ -3,14 +3,22 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { TradingController } from '../src/trading/trading.controller';
 import { TradingService } from '../src/trading/trading.service';
-import { JwtAuthGuard } from '../src/common/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../src/auth/guards/jwt-auth.guard';
 
 // Mock data
 const mockUser = { id: '1', username: 'testuser', email: 'test@example.com' };
+const mockWallet = { id: '1', ownerId: mockUser.id, zthBalance: 1000 };
 const mockMemecoin = { id: '1', name: 'Doge', symbol: 'DOGE', price: 100 };
+const mockWalletHolding = {
+  id: '1',
+  walletId: mockWallet.id,
+  memecoinId: mockMemecoin.id,
+  amount: 10,
+};
 const mockTransaction = {
   id: '1',
   userId: mockUser.id,
+  walletId: mockWallet.id,
   memecoinId: mockMemecoin.id,
   amount: 10,
   price: 100,
@@ -40,15 +48,15 @@ describe('TradingController (e2e)', () => {
       canActivate: (context) => {
         const request = context.switchToHttp().getRequest();
         const authHeader = request.headers.authorization;
-        
+
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
           return false;
         }
-        
+
         // Set user in request
         request.user = mockUser;
         return true;
-      }
+      },
     };
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -60,14 +68,14 @@ describe('TradingController (e2e)', () => {
         },
       ],
     })
-    .overrideGuard(JwtAuthGuard)
-    .useValue(mockJwtAuthGuard)
-    .compile();
+      .overrideGuard(JwtAuthGuard)
+      .useValue(mockJwtAuthGuard)
+      .compile();
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe());
     tradingService = moduleFixture.get<TradingService>(TradingService);
-    
+
     await app.init();
   });
 
@@ -131,6 +139,7 @@ describe('TradingController (e2e)', () => {
           expect(res.body).toHaveProperty('amount', 10);
           expect(res.body).toHaveProperty('type', 'BUY');
           expect(res.body).toHaveProperty('userId', mockUser.id);
+          expect(res.body).toHaveProperty('walletId', mockWallet.id);
           expect(res.body).toHaveProperty('memecoinId', mockMemecoin.id);
         });
     });
@@ -192,8 +201,9 @@ describe('TradingController (e2e)', () => {
           expect(res.body).toHaveProperty('amount', 10);
           expect(res.body).toHaveProperty('type', 'SELL');
           expect(res.body).toHaveProperty('userId', mockUser.id);
+          expect(res.body).toHaveProperty('walletId', mockWallet.id);
           expect(res.body).toHaveProperty('memecoinId', mockMemecoin.id);
         });
     });
   });
-}); 
+});

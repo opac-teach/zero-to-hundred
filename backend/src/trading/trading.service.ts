@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { Memecoin } from '../entities/memecoin.entity';
@@ -7,6 +11,8 @@ import { Wallet } from '../entities/wallet.entity';
 import { WalletHolding } from '../entities/wallet-holding.entity';
 import { Transaction, TransactionType } from '../entities/transaction.entity';
 import { BuyMemecoinDto, SellMemecoinDto, TradeResponseDto } from './dto';
+import { calculatePrice } from './bonding-curve';
+import BigNumber from 'bignumber.js';
 
 @Injectable()
 export class TradingService {
@@ -24,10 +30,13 @@ export class TradingService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async buyMemecoin(userId: string, buyDto: BuyMemecoinDto): Promise<TradeResponseDto> {
-    const { memecoinId, amount, slippageTolerance = 1 } = buyDto;
+  async buyMemecoin(
+    userId: string,
+    buyDto: BuyMemecoinDto,
+  ): Promise<TradeResponseDto> {
+    const { memecoinId, amount, requestPrice, slippageTolerance = 1 } = buyDto;
 
-    if (amount <= 0) {
+    if (new BigNumber(amount).isLessThanOrEqualTo(0)) {
       throw new BadRequestException('Amount must be greater than 0');
     }
 
@@ -37,18 +46,22 @@ export class TradingService {
       throw new NotFoundException('User not found');
     }
 
-    const wallet = await this.walletRepository.findOne({ where: { ownerId: userId } });
+    const wallet = await this.walletRepository.findOne({
+      where: { ownerId: userId },
+    });
     if (!wallet) {
       throw new NotFoundException('Wallet not found');
     }
 
     // Check if user has enough balance
-    if (wallet.balance < amount) {
-      throw new BadRequestException('Insufficient balance');
+    if (new BigNumber(wallet.zthBalance).isLessThan(amount)) {
+      throw new BadRequestException('Insufficient ZTH balance');
     }
 
     // Find memecoin
-    const memecoin = await this.memecoinRepository.findOne({ where: { id: memecoinId } });
+    const memecoin = await this.memecoinRepository.findOne({
+      where: { id: memecoinId },
+    });
     if (!memecoin) {
       throw new NotFoundException('Memecoin not found');
     }
@@ -59,28 +72,41 @@ export class TradingService {
     await queryRunner.startTransaction();
 
     try {
-      // Calculate current price using bonding curve
-      const currentPrice = this.calculatePrice(memecoin.totalSupply);
-      
-      // Calculate how many tokens the user will receive
-      const tokensToReceive = amount / currentPrice;
-      
-      // Calculate new price after purchase
-      const newSupply = memecoin.totalSupply + tokensToReceive;
-      const newPrice = this.calculatePrice(newSupply);
-      
-      // Check for price slippage
-      const priceChange = ((newPrice - currentPrice) / currentPrice) * 100;
-      if (priceChange > slippageTolerance) {
-        throw new BadRequestException(`Price slippage exceeds tolerance: ${priceChange.toFixed(2)}%`);
+      // Check for price slippage between request time and execution time
+      const priceChange = new BigNumber(memecoin.currentPrice)
+        .minus(requestPrice)
+        .div(requestPrice)
+        .abs()
+        .times(100);
+
+      if (priceChange.isGreaterThan(slippageTolerance)) {
+        throw new BadRequestException(
+          `Price slippage exceeds tolerance: ${priceChange.toFixed(2)}%`,
+        );
       }
 
+      // Calculate how many tokens the user will receive
+      const tokensToReceive = new BigNumber(amount).div(memecoin.currentPrice);
+
+      // Calculate new price after purchase
+      const newSupply = new BigNumber(memecoin.totalSupply).plus(
+        tokensToReceive,
+      );
+      const newPrice = calculatePrice(newSupply.toString());
+
       // Update wallet balance
-      wallet.balance -= amount;
+      wallet.zthBalance = new BigNumber(wallet.zthBalance)
+        .minus(amount)
+        .toString();
+      if (new BigNumber(wallet.zthBalance).isLessThan(0)) {
+        throw new BadRequestException(
+          'Transaction would result in negative balance',
+        );
+      }
       await queryRunner.manager.save(wallet);
 
       // Update memecoin supply
-      memecoin.totalSupply += tokensToReceive;
+      memecoin.totalSupply = newSupply.toString();
       memecoin.currentPrice = newPrice;
       await queryRunner.manager.save(memecoin);
 
@@ -90,57 +116,56 @@ export class TradingService {
       });
 
       if (holding) {
-        holding.amount += tokensToReceive;
+        holding.amount = new BigNumber(holding.amount)
+          .plus(tokensToReceive)
+          .toString();
+        holding = await queryRunner.manager.save(holding);
       } else {
         holding = this.walletHoldingRepository.create({
           walletId: wallet.id,
           memecoinId,
-          amount: tokensToReceive,
+          amount: tokensToReceive.toString(),
         });
+        holding = await queryRunner.manager.save(holding);
       }
-      await queryRunner.manager.save(holding);
 
       // Create transaction record
       const transaction = this.transactionRepository.create({
-        userId: userId,
-        type: TransactionType.BUY,
+        userId,
         memecoinId,
-        amount: tokensToReceive,
-        price: currentPrice,
-        totalValue: amount,
+        type: TransactionType.BUY,
+        amount: tokensToReceive.toString(),
+        price: memecoin.currentPrice,
+        totalValue: amount.toString(),
       });
-      await queryRunner.manager.save(transaction);
+      const savedTransaction = await queryRunner.manager.save(transaction);
 
       // Commit transaction
       await queryRunner.commitTransaction();
 
-      // Return trade response
+      // Return response
       return new TradeResponseDto({
-        transactionId: transaction.id,
-        type: TransactionType.BUY,
-        memecoinId,
+        transactionId: savedTransaction.id,
+        type: savedTransaction.type,
+        memecoinId: memecoin.id,
         memecoinSymbol: memecoin.symbol,
-        amount: tokensToReceive,
-        price: currentPrice,
-        totalValue: amount,
-        newBalance: wallet.balance,
         newHoldingAmount: holding.amount,
-        executedAt: transaction.createdAt,
       });
     } catch (error) {
-      // Rollback transaction in case of error
       await queryRunner.rollbackTransaction();
       throw error;
     } finally {
-      // Release query runner
       await queryRunner.release();
     }
   }
 
-  async sellMemecoin(userId: string, sellDto: SellMemecoinDto): Promise<TradeResponseDto> {
-    const { memecoinId, amount, slippageTolerance = 1 } = sellDto;
+  async sellMemecoin(
+    userId: string,
+    sellDto: SellMemecoinDto,
+  ): Promise<TradeResponseDto> {
+    const { memecoinId, amount, requestPrice, slippageTolerance = 1 } = sellDto;
 
-    if (amount <= 0) {
+    if (new BigNumber(amount).isLessThanOrEqualTo(0)) {
       throw new BadRequestException('Amount must be greater than 0');
     }
 
@@ -150,23 +175,27 @@ export class TradingService {
       throw new NotFoundException('User not found');
     }
 
-    const wallet = await this.walletRepository.findOne({ where: { ownerId: userId } });
+    const wallet = await this.walletRepository.findOne({
+      where: { ownerId: userId },
+    });
     if (!wallet) {
       throw new NotFoundException('Wallet not found');
     }
 
     // Find memecoin
-    const memecoin = await this.memecoinRepository.findOne({ where: { id: memecoinId } });
+    const memecoin = await this.memecoinRepository.findOne({
+      where: { id: memecoinId },
+    });
     if (!memecoin) {
       throw new NotFoundException('Memecoin not found');
     }
 
-    // Check if user has enough of the memecoin
+    // Find wallet holding
     const holding = await this.walletHoldingRepository.findOne({
       where: { walletId: wallet.id, memecoinId },
     });
 
-    if (!holding || holding.amount < amount) {
+    if (!holding || new BigNumber(holding.amount).isLessThan(amount)) {
       throw new BadRequestException('Insufficient memecoin balance');
     }
 
@@ -176,81 +205,72 @@ export class TradingService {
     await queryRunner.startTransaction();
 
     try {
-      // Calculate current price using bonding curve
-      const currentPrice = this.calculatePrice(memecoin.totalSupply);
-      
-      // Calculate how much ZTH the user will receive
-      const zthToReceive = amount * currentPrice;
-      
-      // Calculate new price after sale
-      const newSupply = memecoin.totalSupply - amount;
-      const newPrice = this.calculatePrice(newSupply);
-      
-      // Check for price slippage
-      const priceChange = ((currentPrice - newPrice) / currentPrice) * 100;
-      if (priceChange > slippageTolerance) {
-        throw new BadRequestException(`Price slippage exceeds tolerance: ${priceChange.toFixed(2)}%`);
+      // Check for price slippage between request time and execution time
+      const priceChange = new BigNumber(memecoin.currentPrice)
+        .minus(requestPrice)
+        .div(requestPrice)
+        .abs()
+        .times(100);
+
+      if (priceChange.isGreaterThan(slippageTolerance)) {
+        throw new BadRequestException(
+          `Price slippage exceeds tolerance: ${priceChange.toFixed(2)}%`,
+        );
       }
 
+      // Calculate how many ZTH the user will receive
+      const zthToReceive = new BigNumber(amount).times(memecoin.currentPrice);
+
+      // Calculate new price after sale
+      const newSupply = new BigNumber(memecoin.totalSupply).minus(amount);
+      const newPrice = calculatePrice(newSupply.toString());
+
       // Update wallet balance
-      wallet.balance += zthToReceive;
+      wallet.zthBalance = new BigNumber(wallet.zthBalance)
+        .plus(zthToReceive)
+        .toString();
       await queryRunner.manager.save(wallet);
 
       // Update memecoin supply
-      memecoin.totalSupply -= amount;
+      memecoin.totalSupply = newSupply.toString();
       memecoin.currentPrice = newPrice;
       await queryRunner.manager.save(memecoin);
 
       // Update wallet holding
-      holding.amount -= amount;
-      
-      if (holding.amount > 0) {
-        await queryRunner.manager.save(holding);
-      } else {
+      holding.amount = new BigNumber(holding.amount).minus(amount).toString();
+      if (new BigNumber(holding.amount).isEqualTo(0)) {
         await queryRunner.manager.remove(holding);
+      } else {
+        await queryRunner.manager.save(holding);
       }
 
       // Create transaction record
       const transaction = this.transactionRepository.create({
-        userId: userId,
-        type: TransactionType.SELL,
+        userId,
         memecoinId,
-        amount,
-        price: currentPrice,
-        totalValue: zthToReceive,
+        type: TransactionType.SELL,
+        amount: amount.toString(),
+        price: memecoin.currentPrice,
+        totalValue: zthToReceive.toString(),
       });
-      await queryRunner.manager.save(transaction);
+      const savedTransaction = await queryRunner.manager.save(transaction);
 
       // Commit transaction
       await queryRunner.commitTransaction();
 
-      // Return trade response
+      // Return response
       return new TradeResponseDto({
-        transactionId: transaction.id,
-        type: TransactionType.SELL,
-        memecoinId,
+        transactionId: savedTransaction.id,
+        type: savedTransaction.type,
+        memecoinId: memecoin.id,
         memecoinSymbol: memecoin.symbol,
-        amount,
-        price: currentPrice,
-        totalValue: zthToReceive,
-        newBalance: wallet.balance,
-        newHoldingAmount: holding.amount > 0 ? holding.amount : 0,
-        executedAt: transaction.createdAt,
+        newHoldingAmount: holding.amount === '0' ? '0' : holding.amount,
       });
     } catch (error) {
-      // Rollback transaction in case of error
       await queryRunner.rollbackTransaction();
       throw error;
     } finally {
-      // Release query runner
       await queryRunner.release();
     }
-  }
-
-  /**
-   * Calculate price based on bonding curve formula: Price = (Supply)²/10000
-   */
-  private calculatePrice(supply: number): number {
-    return (supply * supply) / 10000;
   }
 }

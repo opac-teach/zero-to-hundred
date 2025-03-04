@@ -6,7 +6,11 @@ import { WalletHolding } from '../entities/wallet-holding.entity';
 import { Transaction, TransactionType } from '../entities/transaction.entity';
 import { Repository } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
-import { WalletResponseDto, WalletHoldingResponseDto, TransactionResponseDto } from './dto';
+import {
+  WalletResponseDto,
+  WalletHoldingResponseDto,
+  TransactionResponseDto,
+} from './dto';
 
 describe('WalletService', () => {
   let service: WalletService;
@@ -23,12 +27,38 @@ describe('WalletService', () => {
     updatedAt: new Date(),
   };
 
+  const mockCreatorWallet = {
+    id: 'wallet-id-2',
+    address: 'creator-wallet-address',
+    balance: 200,
+    ownerId: 'creator-id-1',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  const mockCreator = {
+    id: 'creator-id-1',
+    username: 'creator',
+    wallet: mockCreatorWallet,
+  };
+
+  const mockUser = {
+    id: 'user-id-1',
+    username: 'user',
+    wallet: mockWallet,
+  };
+
   const mockWalletHolding = {
     id: 'holding-id-1',
     walletId: 'wallet-id-1',
     memecoinId: 'memecoin-id-1',
     amount: 10,
-    memecoin: { id: 'memecoin-id-1', symbol: 'TEST', name: 'Test Coin' },
+    memecoin: {
+      id: 'memecoin-id-1',
+      symbol: 'TEST',
+      name: 'Test Coin',
+      creator: mockCreator,
+    },
   };
 
   const mockTransaction = {
@@ -41,7 +71,13 @@ describe('WalletService', () => {
     walletId: 'wallet-id-1',
     userId: 'user-id-1',
     createdAt: new Date(),
-    memecoin: { id: 'memecoin-id-1', symbol: 'TEST', name: 'Test Coin' },
+    memecoin: {
+      id: 'memecoin-id-1',
+      symbol: 'TEST',
+      name: 'Test Coin',
+      creator: mockCreator,
+    },
+    user: mockUser,
   };
 
   const mockWalletRepository = {
@@ -86,9 +122,15 @@ describe('WalletService', () => {
     }).compile();
 
     service = module.get<WalletService>(WalletService);
-    walletRepository = module.get<Repository<Wallet>>(getRepositoryToken(Wallet));
-    walletHoldingRepository = module.get<Repository<WalletHolding>>(getRepositoryToken(WalletHolding));
-    transactionRepository = module.get<Repository<Transaction>>(getRepositoryToken(Transaction));
+    walletRepository = module.get<Repository<Wallet>>(
+      getRepositoryToken(Wallet),
+    );
+    walletHoldingRepository = module.get<Repository<WalletHolding>>(
+      getRepositoryToken(WalletHolding),
+    );
+    transactionRepository = module.get<Repository<Transaction>>(
+      getRepositoryToken(Transaction),
+    );
 
     // Reset mocks before each test
     jest.clearAllMocks();
@@ -101,28 +143,38 @@ describe('WalletService', () => {
   describe('getWalletByUserId', () => {
     it('should return a wallet by user id', async () => {
       const result = await service.getWalletByUserId('user-id-1');
-      
+
       expect(result).toBeDefined();
       expect(result.ownerId).toBe('user-id-1');
-      expect(walletRepository.findOne).toHaveBeenCalledWith({ where: { ownerId: 'user-id-1' } });
+      expect(walletRepository.findOne).toHaveBeenCalledWith({
+        where: { ownerId: 'user-id-1' },
+      });
     });
 
     it('should throw NotFoundException when wallet is not found', async () => {
       jest.spyOn(walletRepository, 'findOne').mockResolvedValueOnce(null);
-      
-      await expect(service.getWalletByUserId('nonexistent-id')).rejects.toThrow(NotFoundException);
+
+      await expect(service.getWalletByUserId('nonexistent-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
   describe('getTransactionsByUserId', () => {
     it('should return user transactions with default pagination', async () => {
       const result = await service.getTransactionsByUserId('user-id-1');
-      
+
       expect(result).toBeDefined();
       expect(result.length).toBeGreaterThan(0);
       expect(transactionRepository.find).toHaveBeenCalledWith({
         where: { userId: 'user-id-1' },
-        relations: ['memecoin'],
+        relations: [
+          'memecoin',
+          'memecoin.creator',
+          'memecoin.creator.wallet',
+          'user',
+          'user.wallet',
+        ],
         order: {
           createdAt: 'DESC',
         },
@@ -133,12 +185,18 @@ describe('WalletService', () => {
 
     it('should return user transactions with custom pagination', async () => {
       const result = await service.getTransactionsByUserId('user-id-1', 2, 10);
-      
+
       expect(result).toBeDefined();
       expect(result.length).toBeGreaterThan(0);
       expect(transactionRepository.find).toHaveBeenCalledWith({
         where: { userId: 'user-id-1' },
-        relations: ['memecoin'],
+        relations: [
+          'memecoin',
+          'memecoin.creator',
+          'memecoin.creator.wallet',
+          'user',
+          'user.wallet',
+        ],
         order: {
           createdAt: 'DESC',
         },
@@ -149,12 +207,11 @@ describe('WalletService', () => {
 
     it('should return empty array when no transactions are found', async () => {
       jest.spyOn(transactionRepository, 'find').mockResolvedValueOnce([]);
-      
+
       const result = await service.getTransactionsByUserId('user-id-1');
-      
+
       expect(result).toBeDefined();
       expect(result.length).toBe(0);
     });
   });
 });
-

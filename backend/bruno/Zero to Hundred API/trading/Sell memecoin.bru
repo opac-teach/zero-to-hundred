@@ -1,0 +1,23 @@
+meta {
+  name: Sell memecoin
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/trading/sell
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "memecoinId": "",
+    "amount": "",
+    "slippageTolerance": ""
+  }
+}

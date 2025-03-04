@@ -7,15 +7,9 @@ import { Memecoin } from '../entities/memecoin.entity';
 import { User } from '../entities/user.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      Transaction,
-      Memecoin,
-      User
-    ])
-  ],
+  imports: [TypeOrmModule.forFeature([Transaction, Memecoin, User])],
   controllers: [StatisticsController],
   providers: [StatisticsService],
-  exports: [StatisticsService]
+  exports: [StatisticsService],
 })
-export class StatisticsModule {} 
+export class StatisticsModule {}

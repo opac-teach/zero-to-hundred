@@ -1,0 +1,24 @@
+meta {
+  name: Create a new memecoin
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/memecoins
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "name": "",
+    "symbol": "",
+    "description": "",
+    "logoUrl": ""
+  }
+}

@@ -1,0 +1,15 @@
+meta {
+  name: Get memecoin price information
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/memecoins/:id/price
+  body: none
+  auth: none
+}
+
+params:path {
+  id: 
+}

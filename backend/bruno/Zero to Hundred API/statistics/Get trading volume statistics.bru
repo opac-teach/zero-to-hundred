@@ -1,0 +1,16 @@
+meta {
+  name: Get trading volume statistics
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/statistics/trading-volume
+  body: none
+  auth: none
+}
+
+params:query {
+  ~timeframe: 
+  ~memecoinId: 
+}

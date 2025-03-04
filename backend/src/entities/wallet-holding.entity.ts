@@ -1,4 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Wallet } from './wallet.entity';
 import { Memecoin } from './memecoin.entity';
@@ -26,12 +34,8 @@ export class WalletHolding {
   memecoinId: string;
 
   @ApiProperty({ description: 'The amount of the memecoin held' })
-  @Column({ type: 'decimal', precision: 24, scale: 8, default: 0 })
-  amount: number;
-
-  @ApiProperty({ description: 'The value of the holding in USD' })
-  @Column({ type: 'decimal', precision: 24, scale: 8, default: 0 })
-  valueUsd: number;
+  @Column({ type: 'decimal', precision: 24, scale: 8, default: '0' })
+  amount: string;
 
   @ApiProperty({ description: 'The date when the holding was created' })
   @CreateDateColumn()
@@ -40,4 +44,4 @@ export class WalletHolding {
   @ApiProperty({ description: 'The date when the holding was last updated' })
   @UpdateDateColumn()
   updatedAt: Date;
-} 
+}

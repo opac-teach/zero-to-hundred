@@ -83,8 +83,12 @@ describe('StatisticsService', () => {
     }).compile();
 
     service = module.get<StatisticsService>(StatisticsService);
-    transactionRepository = module.get<Repository<Transaction>>(getRepositoryToken(Transaction));
-    memecoinRepository = module.get<Repository<Memecoin>>(getRepositoryToken(Memecoin));
+    transactionRepository = module.get<Repository<Transaction>>(
+      getRepositoryToken(Transaction),
+    );
+    memecoinRepository = module.get<Repository<Memecoin>>(
+      getRepositoryToken(Memecoin),
+    );
 
     // Reset mocks before each test
     jest.clearAllMocks();
@@ -97,7 +101,7 @@ describe('StatisticsService', () => {
   describe('getTradingVolume', () => {
     it('should return trading volume for 24h timeframe', async () => {
       const result = await service.getTradingVolume('24h');
-      
+
       expect(result).toBeDefined();
       expect(result.totalVolume).toBeGreaterThan(0);
       expect(result.timeframe).toBe('24h');
@@ -110,7 +114,7 @@ describe('StatisticsService', () => {
 
     it('should return trading volume for 7d timeframe', async () => {
       const result = await service.getTradingVolume('7d');
-      
+
       expect(result).toBeDefined();
       expect(result.timeframe).toBe('7d');
       expect(transactionRepository.createQueryBuilder).toHaveBeenCalled();
@@ -118,7 +122,7 @@ describe('StatisticsService', () => {
 
     it('should return trading volume for 30d timeframe', async () => {
       const result = await service.getTradingVolume('30d');
-      
+
       expect(result).toBeDefined();
       expect(result.timeframe).toBe('30d');
       expect(transactionRepository.createQueryBuilder).toHaveBeenCalled();
@@ -126,19 +130,19 @@ describe('StatisticsService', () => {
 
     it('should return trading volume for a specific memecoin', async () => {
       const result = await service.getTradingVolume('24h', '1');
-      
+
       expect(result).toBeDefined();
       expect(result.totalVolume).toBeGreaterThan(0);
       expect(transactionRepository.createQueryBuilder).toHaveBeenCalled();
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         'transaction.memecoinId = :memecoinId',
-        { memecoinId: '1' }
+        { memecoinId: '1' },
       );
     });
 
     it('should include memecoin details in the response', async () => {
       const result = await service.getTradingVolume('24h');
-      
+
       expect(result.memecoins).toBeDefined();
       expect(result.memecoins.length).toBeGreaterThan(0);
       expect(result.memecoins[0].id).toBe('1');
@@ -158,16 +162,20 @@ describe('StatisticsService', () => {
         { id: '5', type: TransactionType.SELL, memecoinId: '1' },
       ] as unknown as Transaction[];
 
-      jest.spyOn(transactionRepository, 'find').mockResolvedValueOnce(positiveSentimentTransactions);
+      jest
+        .spyOn(transactionRepository, 'find')
+        .mockResolvedValueOnce(positiveSentimentTransactions);
 
       const result = await service.getMarketSentiment('1');
-      
+
       expect(result).toBe('POSITIVE');
-      expect(transactionRepository.find).toHaveBeenCalledWith(expect.objectContaining({
-        where: expect.objectContaining({
-          memecoinId: '1'
-        })
-      }));
+      expect(transactionRepository.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            memecoinId: '1',
+          }),
+        }),
+      );
     });
 
     it('should return NEGATIVE sentiment when sells exceed buys by more than 20%', async () => {
@@ -180,10 +188,12 @@ describe('StatisticsService', () => {
         { id: '5', type: TransactionType.BUY, memecoinId: '1' },
       ] as unknown as Transaction[];
 
-      jest.spyOn(transactionRepository, 'find').mockResolvedValueOnce(negativeSentimentTransactions);
+      jest
+        .spyOn(transactionRepository, 'find')
+        .mockResolvedValueOnce(negativeSentimentTransactions);
 
       const result = await service.getMarketSentiment('1');
-      
+
       expect(result).toBe('NEGATIVE');
     });
 
@@ -196,10 +206,12 @@ describe('StatisticsService', () => {
         { id: '4', type: TransactionType.SELL, memecoinId: '1' },
       ] as unknown as Transaction[];
 
-      jest.spyOn(transactionRepository, 'find').mockResolvedValueOnce(neutralSentimentTransactions);
+      jest
+        .spyOn(transactionRepository, 'find')
+        .mockResolvedValueOnce(neutralSentimentTransactions);
 
       const result = await service.getMarketSentiment('1');
-      
+
       expect(result).toBe('NEUTRAL');
     });
 
@@ -207,8 +219,8 @@ describe('StatisticsService', () => {
       jest.spyOn(transactionRepository, 'find').mockResolvedValueOnce([]);
 
       const result = await service.getMarketSentiment('1');
-      
+
       expect(result).toBe('NEUTRAL');
     });
   });
-}); 
+});

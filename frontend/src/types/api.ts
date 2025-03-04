@@ -99,11 +99,11 @@ export interface UserResponseDto {
   id: string;
   username: string;
   email: string;
-  fullName: string | null;
+  fullName: string;
   role: string;
-  profilePictureUrl: string | null;
-  bannerUrl: string | null;
-  description: string | null;
+  profilePictureUrl: string;
+  bannerUrl: string;
+  description: string;
   backgroundColor: string;
   textColor: string;
   createdAt: string;
@@ -165,9 +165,9 @@ export interface WalletHoldingResponseDto {
 
 export interface WalletResponseDto {
   id: string;
-  address: string;
-  balance: number;
+  zthBalance: number;
   ownerId: string;
+  isActive: boolean;
   holdings: WalletHoldingResponseDto[];
   createdAt: string;
   updatedAt: string;
@@ -189,12 +189,14 @@ export interface TransactionResponseDto {
 export interface BuyMemecoinDto {
   memecoinId: string;
   amount: number;
+  requestPrice: number;
   slippageTolerance?: number;
 }
 
 export interface SellMemecoinDto {
   memecoinId: string;
   amount: number;
+  requestPrice: number;
   slippageTolerance?: number;
 }
 
@@ -203,12 +205,7 @@ export interface TradeResponseDto {
   type: 'buy' | 'sell' | 'create';
   memecoinId: string;
   memecoinSymbol: string;
-  amount: number;
-  price: number;
-  totalValue: number;
-  newBalance: number;
   newHoldingAmount: number;
-  executedAt: string;
 }
 
 export interface MemecoinVolumeDto {

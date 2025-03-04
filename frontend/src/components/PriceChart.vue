@@ -8,7 +8,12 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import Chart from 'chart.js/auto';
 import 'chartjs-chart-financial';
+import 'chartjs-adapter-date-fns';
 import type { ChartData, ChartOptions } from 'chart.js';
+import { CandlestickController, CandlestickElement, OhlcElement } from 'chartjs-chart-financial';
+
+// Register the candlestick controller and elements
+Chart.register(CandlestickController, CandlestickElement, OhlcElement);
 
 interface PriceData {
   timestamp: string;

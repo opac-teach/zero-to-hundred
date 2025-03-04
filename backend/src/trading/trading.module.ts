@@ -15,10 +15,10 @@ import { Transaction } from '../entities/transaction.entity';
       User,
       Wallet,
       WalletHolding,
-      Transaction
-    ])
+      Transaction,
+    ]),
   ],
   providers: [TradingService],
-  controllers: [TradingController]
+  controllers: [TradingController],
 })
 export class TradingModule {}

@@ -24,4 +24,4 @@ export class AuthResponseDto {
     example: 'user@example.com',
   })
   email: string;
-} 
+}

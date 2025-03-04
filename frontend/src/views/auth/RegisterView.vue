@@ -116,7 +116,7 @@ async function handleSubmit() {
     isLoading.value = true;
     await userStore.register(email.value, password.value);
     toast.success('Account created successfully! 🎉');
-    router.push('/market');
+    router.push('/memecoins');
   } catch (error: any) {
     toast.error(error.message || 'Failed to create account');
   } finally {

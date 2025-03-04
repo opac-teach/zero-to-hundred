@@ -25,10 +25,6 @@ export class WalletHoldingResponseDto {
   @Expose()
   amount: number;
 
-  @ApiProperty({ description: 'The value of the holding in ZTH' })
-  @Expose()
-  valueUsd: number;
-
   @ApiProperty({ description: 'The date when the holding was created' })
   @Expose()
   createdAt: Date;
@@ -40,4 +36,4 @@ export class WalletHoldingResponseDto {
   constructor(partial: Partial<WalletHoldingResponseDto>) {
     Object.assign(this, partial);
   }
-} 
+}

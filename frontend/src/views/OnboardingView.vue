@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-4xl mx-auto space-y-8">
     <!-- Welcome Screen -->
-    <div v-if="currentStep === 0" class="text-center space-y-6">
+    <div v-if="currentStep === 0" class="text-center space-y-6" data-test="onboarding-step">
       <h1 class="text-4xl font-bold text-gray-900 dark:text-white">
         Welcome to Zero to Hundred! 🚀
       </h1>
@@ -12,6 +12,7 @@
         <button
           @click="nextStep"
           class="px-8 py-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-lg font-medium"
+          data-test="next-button"
         >
           Let's Get Started!
         </button>
@@ -29,7 +30,7 @@
         </div>
       </div>
 
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6" data-test="onboarding-step">
         <div class="flex items-center justify-center mb-6">
           <component
             :is="steps[currentStep - 1].icon"
@@ -46,12 +47,15 @@
           v-if="currentStep > 1"
           @click="previousStep"
           class="px-6 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600"
+          data-test="back-button"
         >
           Back
         </button>
         <button
           @click="nextStep"
           class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 ml-auto"
+          :disabled="currentStep === 3"
+          data-test="next-button"
         >
           {{ currentStep === 3 ? 'Finish' : 'Next' }}
         </button>
@@ -59,7 +63,7 @@
     </div>
 
     <!-- Action Choice -->
-    <div v-else class="space-y-6">
+    <div v-else class="space-y-6" data-test="onboarding-step">
       <h2 class="text-2xl font-bold text-gray-900 dark:text-white text-center">
         Ready to Start Your Journey?
       </h2>
@@ -67,6 +71,7 @@
         <router-link
           to="/create-memecoin"
           class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow"
+          data-test="create-memecoin-link"
         >
           <div class="text-center">
             <rocket-launch-icon class="w-12 h-12 text-indigo-600 dark:text-indigo-400 mx-auto mb-4" />
@@ -80,8 +85,9 @@
         </router-link>
 
         <router-link
-          to="/market"
+          to="/memecoins"
           class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow"
+          data-test="explore-market-link"
         >
           <div class="text-center">
             <chart-bar-icon class="w-12 h-12 text-indigo-600 dark:text-indigo-400 mx-auto mb-4" />

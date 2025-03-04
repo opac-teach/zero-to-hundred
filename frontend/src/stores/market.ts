@@ -19,6 +19,8 @@ export const useMarketStore = defineStore('market', () => {
     return [...memecoinsList.value].sort((a, b) => b.volume24h - a.volume24h);
   });
 
+  let priceUpdateInterval: number | null = null;
+
   async function fetchMemecoins(params?: { 
     page?: number; 
     limit?: number; 
@@ -32,6 +34,26 @@ export const useMarketStore = defineStore('market', () => {
       memecoinsList.value = response.data;
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Failed to fetch memecoins';
+      throw err;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  async function fetchMemecoinDetails(memecoinId: string) {
+    try {
+      isLoading.value = true;
+      error.value = null;
+      const response = await memecoins.getById(memecoinId);
+      const index = memecoinsList.value.findIndex(coin => coin.id === memecoinId);
+      if (index !== -1) {
+        memecoinsList.value[index] = response.data;
+      } else {
+        memecoinsList.value.push(response.data);
+      }
+      return response.data;
+    } catch (err: any) {
+      error.value = err.response?.data?.message || 'Failed to fetch memecoin details';
       throw err;
     } finally {
       isLoading.value = false;
@@ -81,11 +103,18 @@ export const useMarketStore = defineStore('market', () => {
 
   function startPriceUpdates() {
     // Update prices every 30 seconds
-    setInterval(() => {
+    priceUpdateInterval = window.setInterval(() => {
       memecoinsList.value.forEach(memecoin => {
         fetchMemecoinPrice(memecoin.id);
       });
     }, 30000);
+  }
+
+  function stopPriceUpdates() {
+    if (priceUpdateInterval) {
+      window.clearInterval(priceUpdateInterval);
+      priceUpdateInterval = null;
+    }
   }
 
   return {
@@ -96,10 +125,12 @@ export const useMarketStore = defineStore('market', () => {
     error,
     sortedMemecoins,
     fetchMemecoins,
+    fetchMemecoinDetails,
     createMemecoin,
     fetchMemecoinPrice,
     fetchTradingVolume,
     updateMemecoinPrice,
     startPriceUpdates,
+    stopPriceUpdates,
   };
 }); 

@@ -44,14 +44,14 @@ There should be a github action to build the necessary containers.
 - `username`: String (unique)
 - `email`: String (unique)
 - `password`: String (hashed)
-- `profilePicture`: String (URL)
-- `banner`: String (URL)
-- `description`: String
-- `zthBalance`: Decimal (default: 100)
-- `pageSettings`: JSON
-  - `backgroundColor`: String (hex color)
-  - `textColor`: String (hex color)
-  - `accentColor`: String (hex color)
+- `fullName`: String (optional)
+- `profilePictureUrl`: String (URL, optional)
+- `bannerUrl`: String (URL, optional)
+- `description`: String (optional)
+- `backgroundColor`: String (hex color, default: #f5f5f5)
+- `textColor`: String (hex color, default: #333333)
+- `isActive`: Boolean (default: true)
+- `role`: String (default: 'user')
 - `createdAt`: DateTime
 - `updatedAt`: DateTime
 
@@ -69,7 +69,9 @@ There should be a github action to build the necessary containers.
 
 ### Wallet
 - `id`: UUID (Primary Key)
-- `userId`: UUID (Foreign Key to User)
+- `zthBalance`: Decimal (precision: 18, scale: 8, default: 100)
+- `ownerId`: UUID (Foreign Key to User)
+- `isActive`: Boolean (default: true)
 - `createdAt`: DateTime
 - `updatedAt`: DateTime
 
@@ -77,7 +79,7 @@ There should be a github action to build the necessary containers.
 - `id`: UUID (Primary Key)
 - `walletId`: UUID (Foreign Key to Wallet)
 - `memecoinId`: UUID (Foreign Key to Memecoin)
-- `balance`: Decimal
+- `amount`: Decimal (number of tokens held)
 - `createdAt`: DateTime
 - `updatedAt`: DateTime
 
@@ -146,7 +148,7 @@ There should be a github action to build the necessary containers.
   - Query Parameters:
     - `page`: number (default: 1)
     - `limit`: number (default: 20)
-    - `sortBy`: string (default: "zthBalance")
+    - `sortBy`: string (default: "wallet.zthBalance")
     - `order`: string (default: "DESC")
   - Response: Array of user objects with pagination metadata
 
@@ -229,7 +231,7 @@ There should be a github action to build the necessary containers.
 - `GET /api/wallet`
   - Description: Get current user's wallet
   - Authentication: Required
-  - Response: Wallet object with holdings
+  - Response: Wallet object with holdings and ZTH balance
 
 - `GET /api/wallet/transactions`
   - Description: Get current user's transaction history

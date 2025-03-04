@@ -1,8 +1,13 @@
 import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
 import { TradingService } from './trading.service';
 import { BuyMemecoinDto, SellMemecoinDto, TradeResponseDto } from './dto';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 
 @ApiTags('trading')
 @Controller('trading')
@@ -10,8 +15,15 @@ export class TradingController {
   constructor(private readonly tradingService: TradingService) {}
 
   @ApiOperation({ summary: 'Buy memecoin' })
-  @ApiResponse({ status: 201, description: 'Memecoin successfully purchased', type: TradeResponseDto })
-  @ApiResponse({ status: 400, description: 'Invalid input or insufficient balance' })
+  @ApiResponse({
+    status: 201,
+    description: 'Memecoin successfully purchased',
+    type: TradeResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid input or insufficient balance',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Memecoin or user not found' })
   @ApiBearerAuth()
@@ -25,8 +37,15 @@ export class TradingController {
   }
 
   @ApiOperation({ summary: 'Sell memecoin' })
-  @ApiResponse({ status: 201, description: 'Memecoin successfully sold', type: TradeResponseDto })
-  @ApiResponse({ status: 400, description: 'Invalid input or insufficient memecoin balance' })
+  @ApiResponse({
+    status: 201,
+    description: 'Memecoin successfully sold',
+    type: TradeResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid input or insufficient memecoin balance',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Memecoin or user not found' })
   @ApiBearerAuth()
