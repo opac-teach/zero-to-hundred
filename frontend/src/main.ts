@@ -1,10 +1,10 @@
-import './assets/main.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import { createRouter, createWebHistory } from 'vue-router'
 import Toast, { type PluginOptions, type POSITION } from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
+
+import './styles/main.css'
 
 import App from './App.vue'
 import router from './router'

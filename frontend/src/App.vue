@@ -2,11 +2,17 @@
 import { onMounted } from 'vue'
 import MainLayout from '@/layouts/MainLayout.vue'
 import { useUserStore } from '@/stores/user'
+import { useUIStore } from '@/stores/ui'
 
 const userStore = useUserStore()
+const uiStore = useUIStore()
 
 onMounted(() => {
   userStore.initializeFromStorage()
+  // Apply dark mode class if needed
+  if (uiStore.isDarkMode) {
+    document.documentElement.classList.add('dark')
+  }
 })
 </script>
 
@@ -22,29 +28,16 @@ onMounted(() => {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: hsl(var(--background));
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
+  background: hsl(var(--muted-foreground) / 0.5);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
-/* Dark Mode Scrollbar */
-.dark ::-webkit-scrollbar-track {
-  background: #1f2937;
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: #4b5563;
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
+  background: hsl(var(--muted-foreground) / 0.7);
 }
 </style>

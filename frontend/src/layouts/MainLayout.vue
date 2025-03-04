@@ -1,123 +1,98 @@
 <template>
-  <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+  <div class="min-h-screen bg-background">
     <!-- Navigation -->
-    <nav class="bg-white dark:bg-gray-800 shadow-sm">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex">
-            <!-- Logo -->
-            <div class="flex-shrink-0 flex items-center">
-              <router-link to="/" class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
-                ZTH
-              </router-link>
+    <header class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div class="container flex h-14 items-center">
+        <div class="mr-4 flex">
+          <!-- Logo -->
+          <router-link to="/" class="mr-6 flex items-center space-x-2">
+            <span class="font-bold text-xl text-primary">ZTH</span>
+          </router-link>
+
+          <!-- Navigation Links -->
+          <nav class="flex items-center space-x-6 text-sm font-medium">
+            <router-link
+              v-for="item in navigationItems"
+              :key="item.name"
+              :to="item.href"
+              class="transition-colors hover:text-foreground/80"
+              :class="[
+                route.path === item.href
+                  ? 'text-foreground'
+                  : 'text-foreground/60',
+              ]"
+            >
+              {{ item.name }}
+            </router-link>
+          </nav>
+        </div>
+
+        <!-- Right side -->
+        <div class="flex flex-1 items-center justify-end space-x-4">
+          <!-- Theme toggle -->
+          <Button
+            variant="ghost"
+            size="icon"
+            @click="uiStore.toggleDarkMode"
+          >
+            <sun-icon v-if="uiStore.isDarkMode" class="h-4 w-4" />
+            <moon-icon v-else class="h-4 w-4" />
+          </Button>
+
+          <!-- User menu -->
+          <div v-if="userStore.isAuthenticated" class="flex items-center space-x-4">
+            <!-- ZTH Balance -->
+            <div class="text-sm font-medium">
+              {{ walletStore.balance }} ZTH
             </div>
 
-            <!-- Navigation Links -->
-            <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <router-link
-                v-for="item in navigationItems"
-                :key="item.name"
-                :to="item.href"
-                class="inline-flex items-center px-1 pt-1 border-b-2"
-                :class="[
-                  route.path === item.href
-                    ? 'border-indigo-500 text-gray-900 dark:text-white'
-                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300',
-                ]"
-              >
-                {{ item.name }}
-              </router-link>
-            </div>
+            <!-- Profile dropdown -->
+            <DropdownMenu v-model:open="isProfileMenuOpen">
+              <DropdownMenuTrigger as-child>
+                <Button variant="ghost" class="relative h-9 w-9 rounded-full">
+                  <Avatar class="h-9 w-9">
+                    <AvatarImage :src="userStore.currentUser?.profilePictureUrl || '/default-avatar.png'" :alt="userStore.currentUser?.username" />
+                    <AvatarFallback>{{ userStore.currentUser?.username?.charAt(0).toUpperCase() }}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem as-child>
+                  <router-link to="/profile" @click="isProfileMenuOpen = false">
+                    Profile
+                  </router-link>
+                </DropdownMenuItem>
+                <DropdownMenuItem as-child>
+                  <router-link to="/wallet" @click="isProfileMenuOpen = false">
+                    Wallet
+                  </router-link>
+                </DropdownMenuItem>
+                <DropdownMenuItem @click="handleLogout">
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
-          <!-- Right side -->
-          <div class="flex items-center">
-            <!-- Theme toggle -->
-            <button
-              @click="uiStore.toggleDarkMode"
-              class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-            >
-              <sun-icon v-if="uiStore.isDarkMode" class="h-5 w-5" />
-              <moon-icon v-else class="h-5 w-5" />
-            </button>
-
-            <!-- User menu -->
-            <div v-if="userStore.isAuthenticated" class="ml-3 relative">
-              <div class="flex items-center space-x-4">
-                <!-- ZTH Balance -->
-                <div class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {{ walletStore.balance }} ZTH
-                </div>
-
-                <!-- Profile dropdown -->
-                <div class="relative">
-                  <button
-                    @click="isProfileMenuOpen = !isProfileMenuOpen"
-                    class="flex items-center space-x-2 text-sm rounded-full focus:outline-none"
-                  >
-                    <img
-                      :src="userStore.currentUser?.profilePictureUrl || '/default-avatar.png'"
-                      :alt="userStore.currentUser?.username"
-                      class="h-8 w-8 rounded-full"
-                    />
-                    <span class="text-gray-700 dark:text-gray-300">{{ userStore.currentUser?.username }}</span>
-                    <chevron-down-icon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                  </button>
-
-                  <!-- Dropdown menu -->
-                  <div
-                    v-if="isProfileMenuOpen"
-                    class="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5"
-                  >
-                    <div class="py-1">
-                      <router-link
-                        to="/profile"
-                        class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                        @click="isProfileMenuOpen = false"
-                      >
-                        Profile
-                      </router-link>
-                      <router-link
-                        to="/wallet"
-                        class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                        @click="isProfileMenuOpen = false"
-                      >
-                        Wallet
-                      </router-link>
-                      <button
-                        @click="handleLogout"
-                        class="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      >
-                        Logout
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Login/Register buttons -->
-            <div v-else class="flex items-center space-x-4">
-              <router-link
-                to="/login"
-                class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-              >
+          <!-- Login/Register buttons -->
+          <div v-else class="flex items-center space-x-4">
+            <Button variant="ghost" as-child>
+              <router-link to="/login">
                 Login
               </router-link>
-              <router-link
-                to="/register"
-                class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
-              >
+            </Button>
+            <Button as-child>
+              <router-link to="/register">
                 Register
               </router-link>
-            </div>
+            </Button>
           </div>
         </div>
       </div>
-    </nav>
+    </header>
 
     <!-- Main content -->
-    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <main class="container py-6">
       <router-view v-slot="slotProps">
         <transition name="fade" mode="out-in">
           <component :is="slotProps?.Component || defineComponent({ template: '<div>Loading...</div>' })" />
@@ -134,6 +109,14 @@ import { useUserStore } from '@/stores/user';
 import { useWalletStore } from '@/stores/wallet';
 import { useUIStore } from '@/stores/ui';
 import { SunIcon, MoonIcon, ChevronDownIcon } from 'lucide-vue-next';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const router = useRouter();
 const route = useRoute();

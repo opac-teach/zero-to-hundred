@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { RocketLaunchIcon, ChartBarIcon, TrophyIcon } from '@heroicons/vue/24/outline';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 </script>
 
 <template>
@@ -21,17 +24,15 @@ import { RocketLaunchIcon, ChartBarIcon, TrophyIcon } from '@heroicons/vue/24/ou
             The ultimate memecoin platform where you can create, trade, and earn ZTH tokens. Join the revolution and start your journey to the moon! 🚀
           </p>
           <div class="mt-10 flex justify-center gap-4">
-            <router-link
-              to="/register"
-              class="rounded-md bg-white px-8 py-3 text-base font-medium text-indigo-600 hover:bg-indigo-50 md:py-4 md:px-10 md:text-lg"
-            >
-              Get Started
+            <router-link to="/register">
+              <Button variant="secondary" size="lg">
+                Get Started
+              </Button>
             </router-link>
-            <router-link
-              to="/market"
-              class="rounded-md bg-indigo-500 px-8 py-3 text-base font-medium text-white hover:bg-indigo-600 md:py-4 md:px-10 md:text-lg"
-            >
-              Explore Market
+            <router-link to="/market">
+              <Button size="lg">
+                Explore Market
+              </Button>
             </router-link>
           </div>
         </div>
@@ -49,48 +50,58 @@ import { RocketLaunchIcon, ChartBarIcon, TrophyIcon } from '@heroicons/vue/24/ou
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
-          <div class="bg-gray-50 dark:bg-gray-700 rounded-lg shadow-lg p-8">
-            <h3 class="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Our Mission</h3>
-            <p class="text-gray-600 dark:text-gray-400">
-              We're on a mission to democratize memecoin trading and creation, making it accessible to everyone. Our platform combines cutting-edge technology with user-friendly interfaces to create a seamless trading experience.
-            </p>
-          </div>
-          <div class="bg-gray-50 dark:bg-gray-700 rounded-lg shadow-lg p-8">
-            <h3 class="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Our Vision</h3>
-            <p class="text-gray-600 dark:text-gray-400">
-              We envision a future where anyone can participate in the memecoin revolution, regardless of their technical expertise. Through our innovative bonding curve model and community-driven approach, we're building the future of decentralized finance.
-            </p>
-          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Our Mission</CardTitle>
+              <CardDescription>
+                We're on a mission to democratize memecoin trading and creation, making it accessible to everyone. Our platform combines cutting-edge technology with user-friendly interfaces to create a seamless trading experience.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Our Vision</CardTitle>
+              <CardDescription>
+                We envision a future where anyone can participate in the memecoin revolution, regardless of their technical expertise. Through our innovative bonding curve model and community-driven approach, we're building the future of decentralized finance.
+              </CardDescription>
+            </CardHeader>
+          </Card>
         </div>
 
-        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg shadow-lg p-8 mb-16">
-          <h3 class="text-2xl font-semibold text-gray-900 dark:text-white mb-6 text-center">Key Features</h3>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="text-center">
-              <div class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                <rocket-launch-icon class="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+        <Card class="mb-16">
+          <CardHeader>
+            <CardTitle class="text-center">Key Features</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div class="text-center">
+                <div class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <rocket-launch-icon class="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Easy Creation</h4>
+                <p class="text-gray-600 dark:text-gray-400">Create your own memecoin with just a few clicks</p>
               </div>
-              <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Easy Creation</h4>
-              <p class="text-gray-600 dark:text-gray-400">Create your own memecoin with just a few clicks</p>
-            </div>
-            <div class="text-center">
-              <div class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                <chart-bar-icon class="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+              <div class="text-center">
+                <div class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <chart-bar-icon class="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Fair Trading</h4>
+                <p class="text-gray-600 dark:text-gray-400">Transparent and fair trading mechanics</p>
               </div>
-              <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Fair Trading</h4>
-              <p class="text-gray-600 dark:text-gray-400">Transparent and fair trading mechanics</p>
-            </div>
-            <div class="text-center">
-              <div class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                <trophy-icon class="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+              <div class="text-center">
+                <div class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <trophy-icon class="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Community Driven</h4>
+                <p class="text-gray-600 dark:text-gray-400">Active community and competitive leaderboard</p>
               </div>
-              <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Community Driven</h4>
-              <p class="text-gray-600 dark:text-gray-400">Active community and competitive leaderboard</p>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
+
+    <Separator class="my-8" />
 
     <!-- Features section -->
     <div class="py-24 bg-white dark:bg-gray-800">
@@ -105,47 +116,52 @@ import { RocketLaunchIcon, ChartBarIcon, TrophyIcon } from '@heroicons/vue/24/ou
         </div>
 
         <div class="mt-20 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          <!-- Feature 1 -->
-          <div class="relative p-6 bg-white dark:bg-gray-700 rounded-lg shadow-lg">
-            <div class="text-center">
-              <div class="inline-flex items-center justify-center w-12 h-12 rounded-md bg-indigo-500 text-white">
-                <rocket-launch-icon class="h-6 w-6" />
+          <Card>
+            <CardContent class="pt-6">
+              <div class="text-center">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-md bg-indigo-500 text-white">
+                  <rocket-launch-icon class="h-6 w-6" />
+                </div>
+                <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">Create Your Own Memecoin</h3>
+                <p class="mt-2 text-base text-gray-500 dark:text-gray-400">
+                  Launch your own memecoin with just a few clicks. No coding required!
+                </p>
               </div>
-              <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">Create Your Own Memecoin</h3>
-              <p class="mt-2 text-base text-gray-500 dark:text-gray-400">
-                Launch your own memecoin with just a few clicks. No coding required!
-              </p>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <!-- Feature 2 -->
-          <div class="relative p-6 bg-white dark:bg-gray-700 rounded-lg shadow-lg">
-            <div class="text-center">
-              <div class="inline-flex items-center justify-center w-12 h-12 rounded-md bg-indigo-500 text-white">
-                <chart-bar-icon class="h-6 w-6" />
+          <Card>
+            <CardContent class="pt-6">
+              <div class="text-center">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-md bg-indigo-500 text-white">
+                  <chart-bar-icon class="h-6 w-6" />
+                </div>
+                <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">Trade with Confidence</h3>
+                <p class="mt-2 text-base text-gray-500 dark:text-gray-400">
+                  Our bonding curve model ensures fair prices and liquidity for all trades.
+                </p>
               </div>
-              <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">Trade with Confidence</h3>
-              <p class="mt-2 text-base text-gray-500 dark:text-gray-400">
-                Our bonding curve model ensures fair prices and liquidity for all trades.
-              </p>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <!-- Feature 3 -->
-          <div class="relative p-6 bg-white dark:bg-gray-700 rounded-lg shadow-lg">
-            <div class="text-center">
-              <div class="inline-flex items-center justify-center w-12 h-12 rounded-md bg-indigo-500 text-white">
-                <trophy-icon class="h-6 w-6" />
+          <Card>
+            <CardContent class="pt-6">
+              <div class="text-center">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-md bg-indigo-500 text-white">
+                  <trophy-icon class="h-6 w-6" />
+                </div>
+                <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">Compete on the Leaderboard</h3>
+                <p class="mt-2 text-base text-gray-500 dark:text-gray-400">
+                  Show off your trading skills and climb the ranks to become the top trader.
+                </p>
               </div>
-              <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">Compete on the Leaderboard</h3>
-              <p class="mt-2 text-base text-gray-500 dark:text-gray-400">
-                Show off your trading skills and climb the ranks to become the top trader.
-              </p>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
+
+    <Separator class="my-8" />
 
     <!-- How it works section -->
     <div class="py-24 bg-gray-50 dark:bg-gray-900">

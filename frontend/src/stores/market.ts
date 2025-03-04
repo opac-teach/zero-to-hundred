@@ -3,7 +3,8 @@ import { ref, computed } from 'vue';
 import type { 
   MemecoinResponseDto, 
   MemecoinPriceDto, 
-  TradingVolumeDto 
+  TradingVolumeDto,
+  CreateMemecoinDto 
 } from '@/types/api';
 import { memecoins, statistics } from '@/api/client';
 
@@ -31,6 +32,21 @@ export const useMarketStore = defineStore('market', () => {
       memecoinsList.value = response.data;
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Failed to fetch memecoins';
+      throw err;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  async function createMemecoin(data: CreateMemecoinDto) {
+    try {
+      isLoading.value = true;
+      error.value = null;
+      const response = await memecoins.create(data);
+      memecoinsList.value.push(response.data);
+      return response.data;
+    } catch (err: any) {
+      error.value = err.response?.data?.message || 'Failed to create memecoin';
       throw err;
     } finally {
       isLoading.value = false;
@@ -80,6 +96,7 @@ export const useMarketStore = defineStore('market', () => {
     error,
     sortedMemecoins,
     fetchMemecoins,
+    createMemecoin,
     fetchMemecoinPrice,
     fetchTradingVolume,
     updateMemecoinPrice,

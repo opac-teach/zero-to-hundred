@@ -137,7 +137,7 @@ const isValid = computed(() => {
     form.value.name.length >= 3 &&
     form.value.symbol.length >= 2 &&
     form.value.symbol.length <= 5 &&
-    form.value.description.length >= 10
+    (form.value.description?.length ?? 0) >= 10
   );
 });
 

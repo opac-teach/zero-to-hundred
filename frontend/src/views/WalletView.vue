@@ -114,7 +114,7 @@
               <td class="px-6 py-4 whitespace-nowrap">
                 <span
                   class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                  :class="transaction.type === 'BUY' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'"
+                  :class="transaction.type === 'buy' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'"
                 >
                   {{ transaction.type }}
                 </span>
@@ -176,8 +176,8 @@ const selectedFilter = ref('all');
 
 const transactionFilters = [
   { label: 'All', value: 'all' },
-  { label: 'Buy', value: 'BUY' },
-  { label: 'Sell', value: 'SELL' },
+  { label: 'Buy', value: 'buy' },
+  { label: 'Sell', value: 'sell' },
 ];
 
 const sortedHoldings = computed(() => {
