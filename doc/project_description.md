@@ -20,21 +20,36 @@ Users can signup to the platform, see all the existing memecoins, all users prof
 
 Users can edit a public profile page, containing a username, a profile picture, a banner, a description and some other funny things like customizing the look of their page (background color, text color ...). 
 
-Their profile could be randomly generated at signup.
+Their profile should be randomly generated at signup with:
+- A random username following a fun pattern (e.g., "CryptoKitten42", "MoonLambo99")
+- A randomly selected profile picture from a predefined set of meme-themed avatars
+- Random banner from a set of crypto-themed banners
+- Default color scheme from a predefined set of themes
 
-The page should show stats about the user, like their balances, number of trades, metrics about their trading performances.
+The page should show stats about the user, like their balances, number of trades, metrics about their trading performances including:
+- Total profit/loss in ZTH
+- Best performing trade
+- Number of different memecoins traded
+- Average holding time
+- Trading frequency (trades per day)
 
-At onboarding, explain shortly but clearly what the users can do, then propose them to create a memecoin or see the existing meme coins.
+At onboarding, explain shortly but clearly what the users can do, then propose them to create a memecoin or see the existing meme coins. The onboarding flow should:
+1. Welcome screen with platform explanation
+2. Quick tutorial on how trading works
+3. Explanation of the initial 100 ZTH balance
+4. Guide to creating first memecoin or making first trade
 
 ## Memecoins
 
 Memecoins are coins created by users. 
 
 Each memecoins has:
-- Name
-- Ticker
-- Description
-- Logo
+- Name (3-20 characters, alphanumeric)
+- Ticker (2-5 characters, uppercase letters only)
+- Description (max 500 characters)
+- Logo (square image, max 1MB, supported formats: PNG, JPG, GIF)
+- Creation timestamp
+- Creator
 
 ZTH is not a memecoin, it is stored as a value for a user. 
 When a user signup, it gets 100 ZTH.
@@ -83,11 +98,24 @@ This bonding curve model creates a simple yet engaging economic system where ear
 9. Handling price changes
 When a user asks to buy or sell a token, the price can change between the time it saw the price and the moment the transaction is executed. A slippage tolerance must be provided to either accept or reject the trade at execution time. 
 
+The default slippage tolerance should be 1%, but users can adjust this between 0.1% and 5% for each trade.
+
+10. Trade Execution
+For each trade:
+- Show estimated output amount based on current price
+- Display price impact percentage
+- Show minimum amount to be received (with slippage)
+- Require confirmation for trades with high price impact (>5%)
+- Show transaction preview before confirmation
+
 # General technical specifications
 
 Error handling must be properly done, like API error, input validation, both in the frontend and in the backend.
 
-All of the data must be accessible with a REST API, but things like token price shoud be updated regularly on the frontend. (no websocket)
+All of the data must be accessible with a REST API, but things like token price should be updated regularly on the frontend. (no websocket)
+- Price updates every 5 seconds
+- Trading volume updates every minute
+- Market sentiment updates every 5 minutes
 
 All parts of the app must run inside docker containers, be easily deployable to a cloud.
 The whole app should be easilly locally runnable via docker compose. 
