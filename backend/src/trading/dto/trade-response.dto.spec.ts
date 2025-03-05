@@ -5,37 +5,52 @@ import {
   TransactionType,
 } from '../../entities/transaction.entity';
 import { Memecoin } from '../../entities/memecoin.entity';
+import { User } from '../../entities/user.entity';
 
 describe('TradeResponseDto', () => {
-  const mockTransaction: Transaction = {
+  const mockTransaction = {
     id: 'transaction-id-1',
+    type: TransactionType.BUY,
+    amount: '100',
+    price: '0.1',
+    totalValue: '10',
     userId: 'user-id-1',
     memecoinId: 'memecoin-id-1',
-    amount: 100,
-    price: 0.1,
-    totalValue: 10,
-    type: TransactionType.BUY,
     createdAt: new Date(),
-    user: null,
-    memecoin: null,
-  };
+    updatedAt: new Date(),
+  } as Transaction;
 
-  const mockMemecoin: Memecoin = {
+  const mockMemecoin = {
     id: 'memecoin-id-1',
     name: 'Test Coin',
     symbol: 'TEST',
-    description: 'A test memecoin',
+    description: 'Test memecoin',
     logoUrl: 'https://example.com/logo.png',
-    totalSupply: 1000000,
-    currentPrice: 0.1,
-    marketCap: 100000,
-    volume24h: 10000,
-    creatorId: 'user-id-1',
+    creatorId: 'creator-id-1',
+    totalSupply: '1000000',
+    currentPrice: '0.1',
+    marketCap: '100000',
+    volume24h: '10000',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  } as Memecoin;
+
+  const mockUser = {
+    id: 'user-id-1',
+    username: 'testuser',
+    email: 'test@example.com',
+    password: 'password123',
+    fullName: 'Test User',
+    role: 'user',
+    profilePictureUrl: 'https://example.com/pic.jpg',
+    bannerUrl: 'https://example.com/banner.jpg',
+    description: 'Test user description',
+    backgroundColor: '#000000',
+    textColor: '#ffffff',
     isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),
-    creator: null,
-  };
+  } as User;
 
   it('should create a DTO from a plain object', () => {
     const plainObject = {

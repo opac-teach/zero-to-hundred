@@ -43,7 +43,7 @@
           <div v-if="userStore.isAuthenticated" class="flex items-center space-x-4">
             <!-- ZTH Balance -->
             <div class="text-sm font-medium">
-              {{ walletStore.balance }} ZTH
+              {{ walletStore.zthBalance }} ZTH
             </div>
 
             <!-- Profile dropdown -->

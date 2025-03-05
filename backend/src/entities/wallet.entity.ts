@@ -6,9 +6,11 @@ import {
   UpdateDateColumn,
   OneToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from './user.entity';
+import { WalletHolding } from './wallet-holding.entity';
 
 @Entity('wallets')
 export class Wallet {
@@ -24,13 +26,13 @@ export class Wallet {
   @Column()
   ownerId: string;
 
-  @ApiProperty({ description: 'The wallet address' })
-  @Column({ unique: true })
-  address: string;
-
   @ApiProperty({ description: 'The ZTH balance in the wallet' })
   @Column({ type: 'decimal', precision: 24, scale: 8, default: '0' })
   zthBalance: string;
+
+  @ApiProperty({ description: 'The holdings in this wallet' })
+  @OneToMany(() => WalletHolding, (holding) => holding.wallet)
+  holdings: WalletHolding[];
 
   @ApiProperty({ description: 'The date when the wallet was created' })
   @CreateDateColumn()

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude, Expose, Transform } from 'class-transformer';
 
 @Exclude()
 export class UserResponseDto {
@@ -43,6 +43,19 @@ export class UserResponseDto {
   @Expose()
   textColor: string;
 
+  @ApiProperty({ description: 'Whether the user is active' })
+  @Expose()
+  isActive: boolean;
+
+  @ApiProperty({ description: 'The ZTH balance of the user' })
+  @Expose()
+  @Transform(({ value }) => parseFloat(value))
+  zthBalance: number;
+
+  @ApiProperty({ description: 'The rank of the user in the leaderboard' })
+  @Expose()
+  rank: number;
+
   @ApiProperty({ description: 'The date when the user was created' })
   @Expose()
   createdAt: Date;
@@ -50,14 +63,6 @@ export class UserResponseDto {
   @ApiProperty({ description: 'The date when the user was last updated' })
   @Expose()
   updatedAt: Date;
-
-  @ApiProperty({ description: "The user's ZTH balance" })
-  @Expose()
-  zthBalance: number;
-
-  @ApiProperty({ description: "The user's rank in the leaderboard" })
-  @Expose()
-  rank?: number;
 
   constructor(partial: Partial<UserResponseDto>) {
     Object.assign(this, partial);

@@ -18,11 +18,13 @@ describe('WalletController', () => {
   const mockWallet = {
     id: 'wallet-id-1',
     ownerId: 'user-id-1',
-    zthBalance: 1000,
+    zthBalance: '1000',
     isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),
-  } as Wallet;
+    owner: null,
+    address: '0x123456789',
+  } as unknown as Wallet;
 
   const mockUser = {
     id: 'user-id-1',
@@ -54,73 +56,71 @@ describe('WalletController', () => {
     id: 'memecoin-id-1',
     name: 'Test Coin',
     symbol: 'TEST',
-    description: 'A test memecoin',
+    description: 'Test memecoin',
     logoUrl: 'https://example.com/logo.png',
-    totalSupply: 1000000,
-    currentPrice: 0.1,
-    marketCap: 100000,
-    volume24h: 10000,
-    creatorId: mockUser.id,
-    isActive: true,
+    creatorId: 'creator-id-1',
+    totalSupply: '1000000',
+    currentPrice: '0.1',
+    marketCap: '100000',
+    volume24h: '10000',
+    creator: mockUser,
     createdAt: new Date(),
     updatedAt: new Date(),
-    creator: mockUser,
-  };
+  } as Memecoin;
 
   const mockMemecoinResponse: MemecoinResponseDto = new MemecoinResponseDto({
     ...mockMemecoin,
+    totalSupply: parseFloat(mockMemecoin.totalSupply),
+    currentPrice: parseFloat(mockMemecoin.currentPrice),
+    marketCap: parseFloat(mockMemecoin.marketCap),
+    volume24h: parseFloat(mockMemecoin.volume24h),
     creator: mockUserResponse,
   });
 
   const mockWalletHolding: WalletHolding = {
     id: 'holding-id-1',
-    walletId: mockWallet.id,
-    memecoinId: mockMemecoin.id,
-    amount: 100,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    walletId: 'wallet-id-1',
+    memecoinId: 'memecoin-id-1',
+    amount: '100',
     wallet: mockWallet,
     memecoin: mockMemecoin,
-  };
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  } as unknown as WalletHolding;
 
   const mockTransaction: Transaction = {
     id: 'transaction-id-1',
-    userId: mockUser.id,
-    memecoinId: mockMemecoin.id,
-    amount: 100,
-    price: 0.1,
-    totalValue: 10,
     type: TransactionType.BUY,
-    createdAt: new Date(),
+    amount: '100',
+    price: '0.1',
+    totalValue: '10',
+    userId: 'user-id-1',
+    memecoinId: 'memecoin-id-1',
     user: mockUser,
     memecoin: mockMemecoin,
-  };
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  } as unknown as Transaction;
 
   const mockWalletResponse: WalletResponseDto = new WalletResponseDto({
     ...mockWallet,
     holdings: [
       {
         ...mockWalletHolding,
-        memecoin: {
-          ...mockMemecoin,
-          creator: mockUserResponse,
-        },
+        memecoin: mockMemecoinResponse,
       },
     ],
   });
 
-  const mockTransactionResponse: TransactionResponseDto =
-    new TransactionResponseDto({
-      ...mockTransaction,
-      user: mockUserResponse,
-      memecoin: mockMemecoinResponse,
-    });
+  const mockTransactionResponse: TransactionResponseDto = new TransactionResponseDto({
+    ...mockTransaction,
+    user: mockUserResponse,
+    memecoin: mockMemecoinResponse,
+  });
 
   const mockWalletService = {
     getWalletByUserId: jest.fn().mockResolvedValue(mockWalletResponse),
-    getTransactionsByUserId: jest
-      .fn()
-      .mockResolvedValue([mockTransactionResponse]),
+    getTransactionsByUserId: jest.fn().mockResolvedValue([mockTransactionResponse]),
   };
 
   beforeEach(async () => {

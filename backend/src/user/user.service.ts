@@ -9,6 +9,7 @@ import { User } from '../entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { Wallet } from '../entities/wallet.entity';
+import { BigNumber } from 'bignumber.js';
 
 @Injectable()
 export class UserService {
@@ -83,23 +84,21 @@ export class UserService {
     page: number = 1,
     limit: number = 20,
   ): Promise<{ users: UserResponseDto[]; total: number }> {
-    // Get total count of users
-    const total = await this.userRepository.count();
-
-    // Get paginated users with their wallet balances
-    const users = await this.userRepository
-      .createQueryBuilder('user')
+    const queryBuilder = this.userRepository.createQueryBuilder('user')
       .leftJoinAndSelect('user.wallet', 'wallet')
       .orderBy('wallet.zthBalance', 'DESC')
       .skip((page - 1) * limit)
-      .take(limit)
-      .getMany();
+      .take(limit);
 
-    // Calculate rank for each user
+    const [users, total] = await Promise.all([
+      queryBuilder.getMany(),
+      this.userRepository.count(),
+    ]);
+
     const usersWithRank = users.map((user, index) => ({
       ...user,
       rank: (page - 1) * limit + index + 1,
-      zthBalance: user.wallet?.zthBalance || 0,
+      zthBalance: new BigNumber(user.wallet?.zthBalance || '0').toNumber(),
     }));
 
     return {

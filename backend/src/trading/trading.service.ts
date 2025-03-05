@@ -149,7 +149,7 @@ export class TradingService {
         type: savedTransaction.type,
         memecoinId: memecoin.id,
         memecoinSymbol: memecoin.symbol,
-        newHoldingAmount: holding.amount,
+        newHoldingAmount: new BigNumber(holding.amount).toNumber(),
       });
     } catch (error) {
       await queryRunner.rollbackTransaction();
@@ -264,7 +264,7 @@ export class TradingService {
         type: savedTransaction.type,
         memecoinId: memecoin.id,
         memecoinSymbol: memecoin.symbol,
-        newHoldingAmount: holding.amount === '0' ? '0' : holding.amount,
+        newHoldingAmount: new BigNumber(holding.amount).toNumber(),
       });
     } catch (error) {
       await queryRunner.rollbackTransaction();

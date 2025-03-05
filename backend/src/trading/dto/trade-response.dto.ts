@@ -1,10 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude, Expose, Transform, Type } from 'class-transformer';
 import { TransactionType } from '../../entities/transaction.entity';
+import { MemecoinResponseDto } from '../../memecoin/dto';
 
 @Exclude()
 export class TradeResponseDto {
-  @ApiProperty({ description: 'The ID of the transaction' })
+  @ApiProperty({ description: 'The unique identifier of the transaction' })
   @Expose()
   transactionId: string;
 
@@ -23,11 +24,15 @@ export class TradeResponseDto {
   @Expose()
   memecoinSymbol: string;
 
-  @ApiProperty({
-    description: 'The new amount of memecoin tokens held after the transaction',
-  })
+  @ApiProperty({ description: 'The new holding amount after the trade' })
   @Expose()
-  newHoldingAmount: string;
+  @Transform(({ value }) => parseFloat(value))
+  newHoldingAmount: number;
+
+  @ApiProperty({ description: 'The memecoin involved in the trade' })
+  @Expose()
+  @Type(() => MemecoinResponseDto)
+  memecoin: MemecoinResponseDto;
 
   constructor(partial: Partial<TradeResponseDto>) {
     Object.assign(this, partial);

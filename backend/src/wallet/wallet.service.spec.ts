@@ -6,22 +6,15 @@ import { WalletHolding } from '../entities/wallet-holding.entity';
 import { Transaction, TransactionType } from '../entities/transaction.entity';
 import { Repository } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
-import {
-  WalletResponseDto,
-  WalletHoldingResponseDto,
-  TransactionResponseDto,
-} from './dto';
 
 describe('WalletService', () => {
   let service: WalletService;
   let walletRepository: Repository<Wallet>;
-  let walletHoldingRepository: Repository<WalletHolding>;
   let transactionRepository: Repository<Transaction>;
 
   const mockWallet = {
     id: 'wallet-id-1',
-    address: 'wallet-address',
-    balance: 100,
+    zthBalance: '100',
     ownerId: 'user-id-1',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -29,8 +22,7 @@ describe('WalletService', () => {
 
   const mockCreatorWallet = {
     id: 'wallet-id-2',
-    address: 'creator-wallet-address',
-    balance: 200,
+    zthBalance: '200',
     ownerId: 'creator-id-1',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -52,7 +44,7 @@ describe('WalletService', () => {
     id: 'holding-id-1',
     walletId: 'wallet-id-1',
     memecoinId: 'memecoin-id-1',
-    amount: 10,
+    amount: '10',
     memecoin: {
       id: 'memecoin-id-1',
       symbol: 'TEST',
@@ -64,9 +56,9 @@ describe('WalletService', () => {
   const mockTransaction = {
     id: 'transaction-id-1',
     type: TransactionType.BUY,
-    amount: 10,
-    price: 1,
-    totalValue: 10,
+    amount: '10',
+    price: '1',
+    totalValue: '10',
     memecoinId: 'memecoin-id-1',
     walletId: 'wallet-id-1',
     userId: 'user-id-1',
@@ -124,9 +116,6 @@ describe('WalletService', () => {
     service = module.get<WalletService>(WalletService);
     walletRepository = module.get<Repository<Wallet>>(
       getRepositoryToken(Wallet),
-    );
-    walletHoldingRepository = module.get<Repository<WalletHolding>>(
-      getRepositoryToken(WalletHolding),
     );
     transactionRepository = module.get<Repository<Transaction>>(
       getRepositoryToken(Transaction),

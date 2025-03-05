@@ -6,7 +6,6 @@ import {
   Body,
   UseGuards,
   Request,
-  NotFoundException,
   Query,
   ParseIntPipe,
   DefaultValuePipe,

@@ -16,6 +16,7 @@ import {
   ChangePasswordDto,
   AuthResponseDto,
 } from './dto';
+import { UserResponseDto } from '../user/dto/user-response.dto';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -43,53 +44,39 @@ export class AuthService {
     return null;
   }
 
-  async register(registerDto: RegisterDto): Promise<AuthResponseDto> {
-    const { username, email, password, fullName } = registerDto;
-
-    // Check if user already exists
+  async register(createUserDto: RegisterDto): Promise<UserResponseDto> {
     const existingUser = await this.userRepository.findOne({
-      where: [{ email }, { username }],
+      where: [
+        { email: createUserDto.email },
+        { username: createUserDto.username },
+      ],
     });
 
     if (existingUser) {
-      throw new ConflictException(
-        'User with this email or username already exists',
-      );
+      throw new ConflictException('User already exists');
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create new user
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     const user = this.userRepository.create({
-      username,
-      email,
+      ...createUserDto,
       password: hashedPassword,
-      fullName,
     });
 
-    // Save user
     const savedUser = await this.userRepository.save(user);
 
-    // Create wallet for user
+    // Create a wallet for the user
     const wallet = this.walletRepository.create({
       ownerId: savedUser.id,
-      zthBalance: 100, // Initial ZTH balance
-      isActive: true,
+      zthBalance: '0',
+      address: `0x${Math.random().toString(16).substr(2, 40)}`,
     });
 
     await this.walletRepository.save(wallet);
 
-    // Generate JWT token
-    const payload = { sub: savedUser.id, email: savedUser.email };
-    const accessToken = this.jwtService.sign(payload);
-
-    return {
-      accessToken,
-      userId: savedUser.id,
-      username: savedUser.username,
-      email: savedUser.email,
-    };
+    return new UserResponseDto({
+      ...savedUser,
+      zthBalance: 0,
+    });
   }
 
   async login(user: Omit<User, 'password'>): Promise<AuthResponseDto> {

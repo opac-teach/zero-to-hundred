@@ -31,10 +31,12 @@ describe('AuthService', () => {
   const mockWallet = {
     id: 'wallet-id-1',
     ownerId: 'user-id-1',
-    zthBalance: 1000,
+    zthBalance: '1000',
     isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),
+    owner: null,
+    address: '0x123456789',
   } as Wallet;
 
   const mockUser = {

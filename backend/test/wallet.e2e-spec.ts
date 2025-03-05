@@ -10,7 +10,7 @@ const mockUser = { id: '1', username: 'testuser', email: 'test@example.com' };
 const mockWallet = {
   id: '1',
   ownerId: mockUser.id,
-  zthBalance: 1000,
+  zthBalance: '1000',
   isActive: true,
   createdAt: new Date(),
   updatedAt: new Date(),
@@ -19,14 +19,13 @@ const mockWalletHolding = {
   id: '1',
   walletId: mockWallet.id,
   memecoinId: '1',
-  amount: 10,
+  amount: '10',
   createdAt: new Date(),
   updatedAt: new Date(),
 };
 
 describe('WalletController (e2e)', () => {
   let app: INestApplication;
-  let walletService: WalletService;
 
   beforeEach(async () => {
     // Create mock wallet service

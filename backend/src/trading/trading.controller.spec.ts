@@ -17,11 +17,13 @@ describe('TradingController', () => {
   const mockWallet = {
     id: 'wallet-id-1',
     ownerId: 'user-id-1',
-    zthBalance: 1000,
+    zthBalance: '1000',
     isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),
-  } as Wallet;
+    owner: null,
+    address: '0x123456789',
+  } as unknown as Wallet;
 
   const mockUser = {
     id: 'user-id-1',
@@ -43,60 +45,67 @@ describe('TradingController', () => {
 
   mockWallet.owner = mockUser;
 
-  const mockWalletHolding = {
-    id: 'holding-id-1',
-    walletId: mockWallet.id,
-    memecoinId: 'memecoin-id-1',
-    amount: 100,
-  };
-
-  const mockTransaction: Transaction = {
-    id: 'transaction-id-1',
-    userId: mockUser.id,
-    memecoinId: 'memecoin-id-1',
-    amount: 100,
-    price: 0.1,
-    totalValue: 10,
-    type: TransactionType.BUY,
-    createdAt: new Date(),
-    user: mockUser,
-    memecoin: null, // Will be set in mockMemecoin
-  };
-
-  const mockMemecoin: Memecoin = {
+  const mockMemecoin = {
     id: 'memecoin-id-1',
-    name: 'Test Coin',
-    symbol: 'TEST',
-    description: 'A test memecoin',
-    logoUrl: 'https://example.com/logo.png',
-    totalSupply: 1000000,
-    currentPrice: 0.1,
-    marketCap: 100000,
-    volume24h: 10000,
-    creatorId: mockUser.id,
-    isActive: true,
+    name: 'Dogecoin',
+    symbol: 'DOGE',
+    description: 'A fun cryptocurrency',
+    logoUrl: 'https://example.com/doge.png',
+    creatorId: 'creator-id-1',
+    totalSupply: '1000000',
+    currentPrice: '0.5',
+    marketCap: '1000000',
+    volume24h: '500000',
     createdAt: new Date(),
     updatedAt: new Date(),
-    creator: mockUser,
-  };
+    creator: null,
+    transactions: [],
+    holdings: [],
+  } as Memecoin;
 
-  // Set the memecoin relation in the transaction
-  mockTransaction.memecoin = mockMemecoin;
+  const mockTransaction = {
+    id: 'transaction-id-1',
+    type: TransactionType.BUY,
+    amount: '100',
+    price: '0.1',
+    totalValue: '10',
+    userId: 'user-id-1',
+    memecoinId: 'memecoin-id-1',
+    user: mockUser,
+    memecoin: mockMemecoin,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  } as Transaction;
 
-  const mockTradeResponse: TradeResponseDto = {
-    transactionId: mockTransaction.id,
-    type: mockTransaction.type,
-    memecoinId: mockMemecoin.id,
-    memecoinSymbol: mockMemecoin.symbol,
-    newHoldingAmount: 90,
-  };
+  const mockTradeResponse = new TradeResponseDto({
+    transactionId: 'transaction-id-1',
+    type: TransactionType.BUY,
+    memecoinId: 'memecoin-id-1',
+    memecoinSymbol: 'DOGE',
+    newHoldingAmount: 100,
+    memecoin: {
+      id: 'memecoin-id-1',
+      name: 'Dogecoin',
+      symbol: 'DOGE',
+      description: 'A fun cryptocurrency',
+      logoUrl: 'https://example.com/doge.png',
+      creatorId: 'creator-id-1',
+      totalSupply: 1000000,
+      currentPrice: 0.5,
+      marketCap: 1000000,
+      volume24h: 500000,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      creator: null,
+    },
+  });
 
   const mockTradingService = {
     buyMemecoin: jest.fn().mockResolvedValue(mockTradeResponse),
-    sellMemecoin: jest.fn().mockResolvedValue({
+    sellMemecoin: jest.fn().mockResolvedValue(new TradeResponseDto({
       ...mockTradeResponse,
       type: TransactionType.SELL,
-    }),
+    })),
   };
 
   beforeEach(async () => {
@@ -122,7 +131,8 @@ describe('TradingController', () => {
     it('should call tradingService.buyMemecoin with correct parameters', async () => {
       const buyDto = new BuyMemecoinDto();
       buyDto.memecoinId = 'memecoin-id-1';
-      buyDto.amount = 10;
+      buyDto.amount = '100';
+      buyDto.requestPrice = '0.5';
 
       const req = { user: mockUser, wallet: mockWallet };
 
@@ -134,10 +144,11 @@ describe('TradingController', () => {
       );
     });
 
-    it('should return the trade response from the service', async () => {
+    it('should buy memecoin successfully', async () => {
       const buyDto = new BuyMemecoinDto();
       buyDto.memecoinId = 'memecoin-id-1';
-      buyDto.amount = 10;
+      buyDto.amount = '100';
+      buyDto.requestPrice = '0.5';
 
       const req = { user: mockUser, wallet: mockWallet };
 
@@ -151,7 +162,8 @@ describe('TradingController', () => {
     it('should call tradingService.sellMemecoin with correct parameters', async () => {
       const sellDto = new SellMemecoinDto();
       sellDto.memecoinId = 'memecoin-id-1';
-      sellDto.amount = 10;
+      sellDto.amount = '50';
+      sellDto.requestPrice = '0.5';
 
       const req = { user: mockUser, wallet: mockWallet };
 
@@ -163,19 +175,20 @@ describe('TradingController', () => {
       );
     });
 
-    it('should return the trade response from the service', async () => {
+    it('should sell memecoin successfully', async () => {
       const sellDto = new SellMemecoinDto();
       sellDto.memecoinId = 'memecoin-id-1';
-      sellDto.amount = 10;
+      sellDto.amount = '50';
+      sellDto.requestPrice = '0.5';
 
       const req = { user: mockUser, wallet: mockWallet };
 
       const result = await controller.sellMemecoin(req, sellDto);
 
-      expect(result).toEqual({
+      expect(result).toEqual(new TradeResponseDto({
         ...mockTradeResponse,
         type: TransactionType.SELL,
-      });
+      }));
     });
   });
 });

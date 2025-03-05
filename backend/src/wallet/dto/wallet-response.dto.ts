@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude, Expose, Type } from 'class-transformer';
+import { Exclude, Expose, Transform, Type } from 'class-transformer';
 import { WalletHoldingResponseDto } from './wallet-holding-response.dto';
 
 @Exclude()
@@ -10,6 +10,7 @@ export class WalletResponseDto {
 
   @ApiProperty({ description: 'The ZTH balance of the wallet' })
   @Expose()
+  @Transform(({ value }) => parseFloat(value))
   zthBalance: number;
 
   @ApiProperty({ description: 'The ID of the owner' })

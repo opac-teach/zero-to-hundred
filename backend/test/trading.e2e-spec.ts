@@ -4,31 +4,46 @@ import * as request from 'supertest';
 import { TradingController } from '../src/trading/trading.controller';
 import { TradingService } from '../src/trading/trading.service';
 import { JwtAuthGuard } from '../src/auth/guards/jwt-auth.guard';
+import { TransactionType } from '../src/entities/transaction.entity';
 
 // Mock data
 const mockUser = { id: '1', username: 'testuser', email: 'test@example.com' };
-const mockWallet = { id: '1', ownerId: mockUser.id, zthBalance: 1000 };
-const mockMemecoin = { id: '1', name: 'Doge', symbol: 'DOGE', price: 100 };
-const mockWalletHolding = {
+const mockWallet = {
   id: '1',
-  walletId: mockWallet.id,
-  memecoinId: mockMemecoin.id,
-  amount: 10,
+  ownerId: mockUser.id,
+  zthBalance: '1000',
+  isActive: true,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+const mockMemecoin = {
+  id: '1',
+  name: 'Test Coin',
+  symbol: 'TEST',
+  description: 'Test memecoin',
+  logoUrl: 'https://example.com/logo.png',
+  creatorId: 'creator-id-1',
+  totalSupply: '1000000',
+  currentPrice: '0.1',
+  marketCap: '100000',
+  volume24h: '10000',
+  createdAt: new Date(),
+  updatedAt: new Date(),
 };
 const mockTransaction = {
   id: '1',
+  type: TransactionType.BUY,
+  amount: '100',
+  price: '0.1',
+  totalValue: '10',
   userId: mockUser.id,
-  walletId: mockWallet.id,
   memecoinId: mockMemecoin.id,
-  amount: 10,
-  price: 100,
-  type: 'BUY',
-  timestamp: new Date(),
+  createdAt: new Date(),
+  updatedAt: new Date(),
 };
 
 describe('TradingController (e2e)', () => {
   let app: INestApplication;
-  let tradingService: TradingService;
 
   beforeEach(async () => {
     // Create mock trading service
