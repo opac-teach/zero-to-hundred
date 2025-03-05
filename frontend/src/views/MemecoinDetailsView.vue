@@ -184,6 +184,7 @@ import { useMarketStore } from '@/stores/market';
 import { useWalletStore } from '@/stores/wallet';
 import { useAssetsStore } from '@/stores/assets';
 import { useToast } from 'vue-toastification';
+import { usePageTitle } from '@/composables/usePageTitle';
 import PriceChart from '@/components/PriceChart.vue';
 import VolumeChart from '@/components/VolumeChart.vue';
 import { Button } from '@/components/ui/button';
@@ -312,6 +313,18 @@ async function handleTrade(action: 'buy' | 'sell') {
     isLoading.value = false;
   }
 }
+
+// Dynamic page title based on memecoin name
+const { updateTitle } = usePageTitle(() => 
+  memecoin.value?.name ? `${memecoin.value.name} (${memecoin.value.symbol})` : 'Memecoin Details'
+);
+
+// Update title when memecoin data changes
+watch(() => memecoin.value, () => {
+  if (memecoin.value) {
+    updateTitle();
+  }
+}, { immediate: true });
 
 onMounted(async () => {
   try {

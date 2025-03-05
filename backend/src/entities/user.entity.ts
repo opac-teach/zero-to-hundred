@@ -34,10 +34,6 @@ export class User {
   @Column()
   password: string;
 
-  @ApiProperty({ description: 'The role of the user' })
-  @Column({ default: 'user' })
-  role: string;
-
   @ApiProperty({ description: 'The profile picture URL of the user' })
   @Column({ nullable: true })
   profilePictureUrl: string;

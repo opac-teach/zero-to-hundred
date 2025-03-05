@@ -19,10 +19,6 @@ export class UserResponseDto {
   @Expose()
   fullName: string;
 
-  @ApiProperty({ description: 'The role of the user' })
-  @Expose()
-  role: string;
-
   @ApiProperty({ description: 'The profile picture URL of the user' })
   @Expose()
   profilePictureUrl: string;
@@ -46,15 +42,6 @@ export class UserResponseDto {
   @ApiProperty({ description: 'Whether the user is active' })
   @Expose()
   isActive: boolean;
-
-  @ApiProperty({ description: 'The ZTH balance of the user' })
-  @Expose()
-  @Transform(({ value }) => parseFloat(value))
-  zthBalance: number;
-
-  @ApiProperty({ description: 'The rank of the user in the leaderboard' })
-  @Expose()
-  rank: number;
 
   @ApiProperty({ description: 'The date when the user was created' })
   @Expose()

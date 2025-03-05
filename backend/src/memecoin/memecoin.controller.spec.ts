@@ -108,7 +108,7 @@ describe('MemecoinController', () => {
       const result = await controller.findOne('memecoin-id-1');
 
       expect(result).toEqual(mockMemecoinResponse);
-      expect(memecoinService.findOne).toHaveBeenCalledWith('memecoin-id-1');
+      expect(memecoinService.findById).toHaveBeenCalledWith('memecoin-id-1');
     });
   });
 

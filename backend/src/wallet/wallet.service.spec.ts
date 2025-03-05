@@ -137,6 +137,7 @@ describe('WalletService', () => {
       expect(result.ownerId).toBe('user-id-1');
       expect(walletRepository.findOne).toHaveBeenCalledWith({
         where: { ownerId: 'user-id-1' },
+        relations: ['holdings', 'holdings.memecoin', 'holdings.memecoin.creator', 'holdings.memecoin.creator.wallet'],
       });
     });
 
@@ -158,11 +159,10 @@ describe('WalletService', () => {
       expect(transactionRepository.find).toHaveBeenCalledWith({
         where: { userId: 'user-id-1' },
         relations: [
+          'user',
           'memecoin',
           'memecoin.creator',
           'memecoin.creator.wallet',
-          'user',
-          'user.wallet',
         ],
         order: {
           createdAt: 'DESC',
@@ -180,11 +180,10 @@ describe('WalletService', () => {
       expect(transactionRepository.find).toHaveBeenCalledWith({
         where: { userId: 'user-id-1' },
         relations: [
+          'user',
           'memecoin',
           'memecoin.creator',
           'memecoin.creator.wallet',
-          'user',
-          'user.wallet',
         ],
         order: {
           createdAt: 'DESC',

@@ -8,22 +8,22 @@ export class GlobalMemecoinVolumeDto {
   ticker: string;
 
   @ApiProperty({ description: 'The trading volume of the memecoin in ZTH' })
-  volume: number;
+  volume: string;
 }
 
 export class GlobalStatisticsDto {
   @ApiProperty({ description: 'The total trading volume in ZTH' })
-  totalVolume: number;
+  totalVolume: string;
 
   @ApiProperty({ description: 'The total buy volume in ZTH' })
-  buyVolume: number;
+  buyVolume: string;
 
   @ApiProperty({ description: 'The total sell volume in ZTH' })
-  sellVolume: number;
+  sellVolume: string;
 
   @ApiProperty({
     description: 'The trading volumes for each memecoin',
     type: [GlobalMemecoinVolumeDto],
   })
   memecoinVolumes: GlobalMemecoinVolumeDto[];
-} 
+}

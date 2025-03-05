@@ -78,10 +78,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { users, wallet } from '@/api/client';
 import { useToast } from 'vue-toastification';
+import { usePageTitle } from '@/composables/usePageTitle';
 import type { UserResponseDto, TransactionResponseDto } from '@/types/api';
 
 const route = useRoute();
@@ -90,6 +91,18 @@ const isLoading = ref(false);
 const error = ref<string | null>(null);
 const user = ref<UserResponseDto | null>(null);
 const transactions = ref<TransactionResponseDto[]>([]);
+
+// Dynamic page title based on username
+const { updateTitle } = usePageTitle(() => 
+  user.value?.username ? `${user.value.username}'s Profile` : 'User Profile'
+);
+
+// Update title when user data changes
+watch(() => user.value, () => {
+  if (user.value) {
+    updateTitle();
+  }
+}, { immediate: true });
 
 function formatDate(dateString?: string) {
   if (!dateString) return 'N/A';

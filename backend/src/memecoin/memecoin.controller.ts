@@ -85,7 +85,7 @@ export class MemecoinController {
   @ApiParam({ name: 'id', description: 'The ID of the memecoin' })
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<MemecoinResponseDto> {
-    return this.memecoinService.findOne(id);
+    return this.memecoinService.findById(id);
   }
 
   @ApiOperation({ summary: 'Get memecoin by symbol' })
@@ -126,19 +126,6 @@ export class MemecoinController {
     @Body() createMemecoinDto: CreateMemecoinDto,
   ): Promise<MemecoinResponseDto> {
     return this.memecoinService.create(req.user.id, createMemecoinDto);
-  }
-
-  @ApiOperation({ summary: 'Get memecoin price information' })
-  @ApiResponse({
-    status: 200,
-    description: 'Return the memecoin price information',
-    type: MemecoinPriceDto,
-  })
-  @ApiResponse({ status: 404, description: 'Memecoin not found' })
-  @ApiParam({ name: 'id', description: 'The ID of the memecoin' })
-  @Get(':id/price')
-  async getPrice(@Param('id') id: string): Promise<MemecoinPriceDto> {
-    return this.memecoinService.getPrice(id);
   }
 
   @ApiOperation({ summary: 'Get memecoin transactions' })

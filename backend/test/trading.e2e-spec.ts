@@ -89,7 +89,7 @@ describe('TradingController (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe());
-    tradingService = moduleFixture.get<TradingService>(TradingService);
+    const tradingService = moduleFixture.get<TradingService>(TradingService);
 
     await app.init();
   });

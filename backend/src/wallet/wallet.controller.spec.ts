@@ -23,8 +23,8 @@ describe('WalletController', () => {
     createdAt: new Date(),
     updatedAt: new Date(),
     owner: null,
-    address: '0x123456789',
-  } as unknown as Wallet;
+    holdings: [],
+  } as Wallet;
 
   const mockUser = {
     id: 'user-id-1',
@@ -81,7 +81,7 @@ describe('WalletController', () => {
     id: 'holding-id-1',
     walletId: 'wallet-id-1',
     memecoinId: 'memecoin-id-1',
-    amount: '100',
+    amount: 100,
     wallet: mockWallet,
     memecoin: mockMemecoin,
     createdAt: new Date(),
@@ -91,9 +91,9 @@ describe('WalletController', () => {
   const mockTransaction: Transaction = {
     id: 'transaction-id-1',
     type: TransactionType.BUY,
-    amount: '100',
-    price: '0.1',
-    totalValue: '10',
+    amount: 100,
+    price: 0.1,
+    totalValue: 10,
     userId: 'user-id-1',
     memecoinId: 'memecoin-id-1',
     user: mockUser,
@@ -104,9 +104,11 @@ describe('WalletController', () => {
 
   const mockWalletResponse: WalletResponseDto = new WalletResponseDto({
     ...mockWallet,
+    zthBalance: 1000,
     holdings: [
       {
         ...mockWalletHolding,
+        amount: 100,
         memecoin: mockMemecoinResponse,
       },
     ],
@@ -114,6 +116,9 @@ describe('WalletController', () => {
 
   const mockTransactionResponse: TransactionResponseDto = new TransactionResponseDto({
     ...mockTransaction,
+    amount: 100,
+    price: 0.1,
+    totalValue: 10,
     user: mockUserResponse,
     memecoin: mockMemecoinResponse,
   });

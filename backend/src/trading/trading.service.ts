@@ -58,7 +58,6 @@ export class TradingService {
       throw new BadRequestException('Insufficient ZTH balance');
     }
 
-    // Find memecoin
     const memecoin = await this.memecoinRepository.findOne({
       where: { id: memecoinId },
     });
@@ -66,7 +65,6 @@ export class TradingService {
       throw new NotFoundException('Memecoin not found');
     }
 
-    // Start transaction
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -78,39 +76,31 @@ export class TradingService {
         .div(requestPrice)
         .abs()
         .times(100);
-
       if (priceChange.isGreaterThan(slippageTolerance)) {
         throw new BadRequestException(
           `Price slippage exceeds tolerance: ${priceChange.toFixed(2)}%`,
         );
       }
 
-      // Calculate how many tokens the user will receive
-      const tokensToReceive = new BigNumber(amount).div(memecoin.currentPrice);
+      const newZthBalance = new BigNumber(wallet.zthBalance).minus(amount);
+      if (newZthBalance.isLessThan(0)) {
+        throw new BadRequestException(
+          'Transaction would result in negative balance',
+        );
+      }
+      wallet.zthBalance = newZthBalance.toString();
+      await queryRunner.manager.save(wallet);
 
-      // Calculate new price after purchase
+      const tokensToReceive = new BigNumber(amount).div(memecoin.currentPrice);
       const newSupply = new BigNumber(memecoin.totalSupply).plus(
         tokensToReceive,
       );
       const newPrice = calculatePrice(newSupply.toString());
 
-      // Update wallet balance
-      wallet.zthBalance = new BigNumber(wallet.zthBalance)
-        .minus(amount)
-        .toString();
-      if (new BigNumber(wallet.zthBalance).isLessThan(0)) {
-        throw new BadRequestException(
-          'Transaction would result in negative balance',
-        );
-      }
-      await queryRunner.manager.save(wallet);
-
-      // Update memecoin supply
       memecoin.totalSupply = newSupply.toString();
       memecoin.currentPrice = newPrice;
       await queryRunner.manager.save(memecoin);
 
-      // Update or create wallet holding
       let holding = await this.walletHoldingRepository.findOne({
         where: { walletId: wallet.id, memecoinId },
       });
@@ -129,14 +119,13 @@ export class TradingService {
         holding = await queryRunner.manager.save(holding);
       }
 
-      // Create transaction record
       const transaction = this.transactionRepository.create({
         userId,
         memecoinId,
         type: TransactionType.BUY,
-        amount: tokensToReceive.toString(),
+        memeCoinAmount: tokensToReceive.toString(),
+        zthAmount: amount.toString(),
         price: memecoin.currentPrice,
-        totalValue: amount.toString(),
       });
       const savedTransaction = await queryRunner.manager.save(transaction);
 
@@ -145,11 +134,9 @@ export class TradingService {
 
       // Return response
       return new TradeResponseDto({
-        transactionId: savedTransaction.id,
-        type: savedTransaction.type,
-        memecoinId: memecoin.id,
-        memecoinSymbol: memecoin.symbol,
-        newHoldingAmount: new BigNumber(holding.amount).toNumber(),
+        transaction: savedTransaction,
+        memecoin: memecoin,
+        walletHolding: holding,
       });
     } catch (error) {
       await queryRunner.rollbackTransaction();
@@ -218,25 +205,18 @@ export class TradingService {
         );
       }
 
-      // Calculate how many ZTH the user will receive
       const zthToReceive = new BigNumber(amount).times(memecoin.currentPrice);
-
-      // Calculate new price after sale
-      const newSupply = new BigNumber(memecoin.totalSupply).minus(amount);
-      const newPrice = calculatePrice(newSupply.toString());
-
-      // Update wallet balance
       wallet.zthBalance = new BigNumber(wallet.zthBalance)
         .plus(zthToReceive)
         .toString();
       await queryRunner.manager.save(wallet);
 
-      // Update memecoin supply
+      const newSupply = new BigNumber(memecoin.totalSupply).minus(amount);
+      const newPrice = calculatePrice(newSupply.toString());
       memecoin.totalSupply = newSupply.toString();
       memecoin.currentPrice = newPrice;
       await queryRunner.manager.save(memecoin);
 
-      // Update wallet holding
       holding.amount = new BigNumber(holding.amount).minus(amount).toString();
       if (new BigNumber(holding.amount).isEqualTo(0)) {
         await queryRunner.manager.remove(holding);
@@ -244,27 +224,22 @@ export class TradingService {
         await queryRunner.manager.save(holding);
       }
 
-      // Create transaction record
       const transaction = this.transactionRepository.create({
         userId,
         memecoinId,
         type: TransactionType.SELL,
-        amount: amount.toString(),
+        memeCoinAmount: amount.toString(),
+        zthAmount: zthToReceive.toString(),
         price: memecoin.currentPrice,
-        totalValue: zthToReceive.toString(),
       });
       const savedTransaction = await queryRunner.manager.save(transaction);
 
-      // Commit transaction
       await queryRunner.commitTransaction();
 
-      // Return response
       return new TradeResponseDto({
-        transactionId: savedTransaction.id,
-        type: savedTransaction.type,
-        memecoinId: memecoin.id,
-        memecoinSymbol: memecoin.symbol,
-        newHoldingAmount: new BigNumber(holding.amount).toNumber(),
+        transaction: savedTransaction,
+        memecoin: memecoin,
+        walletHolding: holding,
       });
     } catch (error) {
       await queryRunner.rollbackTransaction();

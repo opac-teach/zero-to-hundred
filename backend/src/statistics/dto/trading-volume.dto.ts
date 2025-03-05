@@ -13,22 +13,22 @@ export class MemecoinVolumeDto {
 
   @ApiProperty({ description: 'The trading volume for this memecoin in ZTH' })
   @Expose()
-  volume: number;
+  volume: string;
 }
 
 @Exclude()
 export class TradingVolumeDto {
   @ApiProperty({ description: 'The total trading volume in ZTH' })
   @Expose()
-  totalVolume: number;
+  totalVolume: string;
 
   @ApiProperty({ description: 'The buy volume in ZTH' })
   @Expose()
-  buyVolume: number;
+  buyVolume: string;
 
   @ApiProperty({ description: 'The sell volume in ZTH' })
   @Expose()
-  sellVolume: number;
+  sellVolume: string;
 
   @ApiProperty({
     description: 'The timeframe for the statistics',

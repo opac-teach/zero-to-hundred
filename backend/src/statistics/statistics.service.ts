@@ -3,7 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, In } from 'typeorm';
 import { Transaction, TransactionType } from '../entities/transaction.entity';
 import { Memecoin } from '../entities/memecoin.entity';
-import { TradingVolumeDto, MemecoinVolumeDto, GlobalStatisticsDto } from './dto';
+import {
+  TradingVolumeDto,
+  MemecoinVolumeDto,
+  GlobalStatisticsDto,
+} from './dto';
 import { BigNumber } from 'bignumber.js';
 
 @Injectable()
@@ -57,24 +61,24 @@ export class StatisticsService {
     const transactions = await queryBuilder.getMany();
 
     // Calculate total volume
-    let totalVolume = 0;
-    let buyVolume = 0;
-    let sellVolume = 0;
+    let totalVolume = new BigNumber(0);
+    let buyVolume = new BigNumber(0);
+    let sellVolume = new BigNumber(0);
 
     // Group transactions by memecoin
     const memecoinVolumes = new Map<
       string,
-      { id: string; ticker: string; volume: number }
+      { id: string; ticker: string; volume: BigNumber }
     >();
 
     for (const transaction of transactions) {
-      const totalValue = new BigNumber(transaction.totalValue).toNumber();
-      totalVolume += totalValue;
+      const totalValue = new BigNumber(transaction.zthAmount);
+      totalVolume = totalVolume.plus(totalValue);
 
       if (transaction.type === TransactionType.BUY) {
-        buyVolume += totalValue;
+        buyVolume = buyVolume.plus(totalValue);
       } else if (transaction.type === TransactionType.SELL) {
-        sellVolume += totalValue;
+        sellVolume = sellVolume.plus(totalValue);
       }
 
       // Update memecoin volume
@@ -89,20 +93,24 @@ export class StatisticsService {
         });
       } else {
         const memecoinVolume = memecoinVolumes.get(transaction.memecoinId);
-        memecoinVolume.volume += totalValue;
+        memecoinVolume.volume = memecoinVolume.volume.plus(totalValue);
         memecoinVolumes.set(transaction.memecoinId, memecoinVolume);
       }
     }
 
     // Convert Map to array for response
-    const memecoins: MemecoinVolumeDto[] = Array.from(
-      memecoinVolumes.values(),
-    ).sort((a, b) => b.volume - a.volume); // Sort by volume, highest first
+    const memecoins: MemecoinVolumeDto[] = Array.from(memecoinVolumes.values())
+      .map((item) => ({
+        id: item.id,
+        ticker: item.ticker,
+        volume: item.volume.toString(),
+      }))
+      .sort((a, b) => new BigNumber(b.volume).minus(a.volume).toNumber()); // Sort by volume, highest first
 
     return new TradingVolumeDto({
-      totalVolume,
-      buyVolume,
-      sellVolume,
+      totalVolume: totalVolume.toString(),
+      buyVolume: buyVolume.toString(),
+      sellVolume: sellVolume.toString(),
       timeframe,
       memecoins,
     });
@@ -138,11 +146,15 @@ export class StatisticsService {
       }
     }
 
-    // Determine sentiment
-    if (buyCount > sellCount * 1.2) {
+    // Determine sentiment using BigNumber for more precise comparison
+    const buyCountBN = new BigNumber(buyCount);
+    const sellCountBN = new BigNumber(sellCount);
+    const threshold = new BigNumber(1.2); // 20% threshold
+
+    if (buyCountBN.isGreaterThan(sellCountBN.times(threshold))) {
       // 20% more buys than sells
       return 'POSITIVE';
-    } else if (sellCount > buyCount * 1.2) {
+    } else if (sellCountBN.isGreaterThan(buyCountBN.times(threshold))) {
       // 20% more sells than buys
       return 'NEGATIVE';
     } else {
@@ -155,37 +167,42 @@ export class StatisticsService {
       relations: ['memecoin'],
     });
 
-    let totalVolume = '0';
-    let buyVolume = '0';
-    let sellVolume = '0';
-    const memecoinVolumes = new Map<string, { id: string; ticker: string; volume: string }>();
+    let totalVolume = new BigNumber(0);
+    let buyVolume = new BigNumber(0);
+    let sellVolume = new BigNumber(0);
+    const memecoinVolumes = new Map<
+      string,
+      { id: string; ticker: string; volume: BigNumber }
+    >();
 
     for (const transaction of transactions) {
-      const totalValue = new BigNumber(transaction.totalValue).toNumber();
-      totalVolume = new BigNumber(totalVolume).plus(totalValue).toString();
+      const totalValue = new BigNumber(transaction.zthAmount);
+      totalVolume = totalVolume.plus(totalValue);
+
       if (transaction.type === TransactionType.BUY) {
-        buyVolume = new BigNumber(buyVolume).plus(totalValue).toString();
-      } else {
-        sellVolume = new BigNumber(sellVolume).plus(totalValue).toString();
+        buyVolume = buyVolume.plus(totalValue);
+      } else if (transaction.type === TransactionType.SELL) {
+        sellVolume = sellVolume.plus(totalValue);
       }
 
       const memecoinVolume = memecoinVolumes.get(transaction.memecoinId) || {
         id: transaction.memecoinId,
         ticker: transaction.memecoin.symbol,
-        volume: '0',
+        volume: new BigNumber(0),
       };
 
-      memecoinVolume.volume = new BigNumber(memecoinVolume.volume).plus(totalValue).toString();
+      memecoinVolume.volume = memecoinVolume.volume.plus(totalValue);
       memecoinVolumes.set(transaction.memecoinId, memecoinVolume);
     }
 
     return {
-      totalVolume: parseFloat(totalVolume),
-      buyVolume: parseFloat(buyVolume),
-      sellVolume: parseFloat(sellVolume),
-      memecoinVolumes: Array.from(memecoinVolumes.values()).map(volume => ({
-        ...volume,
-        volume: parseFloat(volume.volume)
+      totalVolume: totalVolume.toString(),
+      buyVolume: buyVolume.toString(),
+      sellVolume: sellVolume.toString(),
+      memecoinVolumes: Array.from(memecoinVolumes.values()).map((volume) => ({
+        id: volume.id,
+        ticker: volume.ticker,
+        volume: volume.volume.toString(),
       })),
     };
   }

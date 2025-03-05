@@ -12,6 +12,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { User } from './user.entity';
 import { Transaction } from './transaction.entity';
 import { WalletHolding } from './wallet-holding.entity';
+import BigNumber from 'bignumber.js';
+import { Transform } from 'stream';
 
 @Entity('memecoins')
 export class Memecoin {
@@ -44,14 +46,16 @@ export class Memecoin {
   creatorId: string;
 
   @ApiProperty({ description: 'The total supply of the memecoin' })
-  @Column({ type: 'decimal', precision: 24, scale: 8, default: '0' })
+  @Column({ type: 'decimal', precision: 24, scale: 8, default: '1' })
   totalSupply: string;
 
   @ApiProperty({ description: 'The current price of the memecoin in ZTH' })
   @Column({ type: 'decimal', precision: 24, scale: 8, default: '1' })
   currentPrice: string;
 
-  @ApiProperty({ description: 'The market cap of the memecoin in ZTH' })
+  @ApiProperty({
+    description: 'The market cap of the memecoin in ZTH (reserve)',
+  })
   @Column({ type: 'decimal', precision: 24, scale: 8, default: '0' })
   marketCap: string;
 

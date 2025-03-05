@@ -24,7 +24,7 @@ export class WalletHoldingResponseDto {
   @ApiProperty({ description: 'The amount of the memecoin held' })
   @Expose()
   @Transform(({ value }) => parseFloat(value))
-  amount: number;
+  amount: string;
 
   @ApiProperty({ description: 'The date when the holding was created' })
   @Expose()

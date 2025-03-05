@@ -9,6 +9,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import appConfig from 'src/config/app.config';
 
 @Module({
   imports: [
@@ -21,6 +22,9 @@ import { JwtStrategy } from './strategies/jwt.strategy';
         secret: configService.get<string>('JWT_SECRET'),
         signOptions: { expiresIn: '1d' },
       }),
+    }),
+    ConfigModule.forRoot({
+      load: [appConfig],
     }),
   ],
   controllers: [AuthController],

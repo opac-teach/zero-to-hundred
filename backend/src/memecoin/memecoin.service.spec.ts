@@ -214,7 +214,7 @@ describe('MemecoinService', () => {
 
   describe('findOne', () => {
     it('should return a memecoin by id', async () => {
-      const result = await service.findOne('memecoin-id-1');
+      const result = await service.findById('memecoin-id-1');
 
       expect(result).toBeDefined();
       expect(result.id).toBe('memecoin-id-1');
@@ -228,7 +228,7 @@ describe('MemecoinService', () => {
     it('should throw NotFoundException when memecoin is not found', async () => {
       jest.spyOn(memecoinRepository, 'findOne').mockResolvedValueOnce(null);
 
-      await expect(service.findOne('nonexistent-id')).rejects.toThrow(
+      await expect(service.findById('nonexistent-id')).rejects.toThrow(
         NotFoundException,
       );
     });

@@ -50,20 +50,20 @@ export class Transaction {
   type: TransactionType;
 
   @ApiProperty({
-    description: 'The amount of tokens involved in the transaction',
+    description: 'The amount of memecoins  involved in the transaction',
   })
   @Column({ type: 'decimal', precision: 24, scale: 8 })
-  amount: string;
+  memeCoinAmount: string;
+
+  @ApiProperty({ description: 'The total value of the transaction in ZTH' })
+  @Column({ type: 'decimal', precision: 24, scale: 8 })
+  zthAmount: string;
 
   @ApiProperty({
     description: 'The price per token at the time of the transaction',
   })
   @Column({ type: 'decimal', precision: 24, scale: 8 })
   price: string;
-
-  @ApiProperty({ description: 'The total value of the transaction in ZTH' })
-  @Column({ type: 'decimal', precision: 24, scale: 8 })
-  totalValue: string;
 
   @ApiProperty({ description: 'The date when the transaction was created' })
   @CreateDateColumn()

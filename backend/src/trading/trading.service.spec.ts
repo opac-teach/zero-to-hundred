@@ -61,6 +61,8 @@ const mockMemecoin = {
   currentPrice: '0.1',
   marketCap: '100000',
   volume24h: '10000',
+  transactions: [],
+  holdings: [],
   creator: mockUser,
   createdAt: new Date(),
   updatedAt: new Date(),
@@ -80,9 +82,9 @@ const mockWalletHolding = {
 const mockTransaction = {
   id: 'transaction-id-1',
   type: TransactionType.BUY,
-  amount: '100',
+  memeCoinAmount: '100',
+  zthAmount: '10',
   price: '0.1',
-  totalValue: '10',
   userId: 'user-id-1',
   memecoinId: 'memecoin-id-1',
   user: mockUser,
@@ -278,14 +280,14 @@ describe('TradingService', () => {
       queryRunner.manager.save.mockImplementation((entity) => {
         if (entity.balance !== undefined) {
           // This is the wallet
-          entity.balance -= '10';
+          entity.balance -= 10;
         } else if (entity.totalSupply !== undefined) {
           // This is the memecoin
-          entity.totalSupply += '100';
+          entity.totalSupply += 100;
           entity.currentPrice = '0.1'; // Keep price consistent
         } else if (entity.amount !== undefined && entity.walletId) {
           // This is the wallet holding
-          entity.amount += '100';
+          entity.amount += 100;
         }
         return Promise.resolve(entity);
       });
@@ -294,7 +296,7 @@ describe('TradingService', () => {
       buyDto.memecoinId = 'memecoin-id-1';
       buyDto.amount = '10';
       buyDto.requestPrice = '0.1';
-      buyDto.slippageTolerance = '100'; // Set high tolerance to avoid slippage error
+      buyDto.slippageTolerance = 100; // Set high tolerance to avoid slippage error
 
       const result = await service.buyMemecoin('user-id-1', buyDto);
 
@@ -352,14 +354,14 @@ describe('TradingService', () => {
       queryRunner.manager.save.mockImplementation((entity) => {
         if (entity.balance !== undefined) {
           // This is the wallet
-          entity.balance -= '10';
+          entity.balance -= 10;
         } else if (entity.totalSupply !== undefined) {
           // This is the memecoin
-          entity.totalSupply += '100';
+          entity.totalSupply += 100;
           entity.currentPrice = '0.1'; // Keep price consistent
         } else if (entity.amount !== undefined && entity.walletId) {
           // This is the wallet holding
-          entity.amount = '100';
+          entity.amount = 100;
         }
         return Promise.resolve(entity);
       });
@@ -368,7 +370,7 @@ describe('TradingService', () => {
       buyDto.memecoinId = 'memecoin-id-1';
       buyDto.amount = '10';
       buyDto.requestPrice = '0.1';
-      buyDto.slippageTolerance = '100'; // Set high tolerance to avoid slippage error
+      buyDto.slippageTolerance = 100; // Set high tolerance to avoid slippage error
 
       const result = await service.buyMemecoin('user-id-1', buyDto);
 
@@ -398,7 +400,7 @@ describe('TradingService', () => {
       buyDto.memecoinId = 'memecoin-id-1';
       buyDto.amount = '10';
       buyDto.requestPrice = '0.1'; // Request price is 0.1
-      buyDto.slippageTolerance = '1'; // 1% tolerance
+      buyDto.slippageTolerance = 1; // 1% tolerance
 
       await expect(service.buyMemecoin('user-id-1', buyDto)).rejects.toThrow(
         BadRequestException,
@@ -442,7 +444,7 @@ describe('TradingService', () => {
       buyDto.memecoinId = 'memecoin-id-1';
       buyDto.amount = '10'; // Amount greater than balance
       buyDto.requestPrice = '0.1';
-      buyDto.slippageTolerance = '100'; // Set high tolerance to avoid slippage error
+      buyDto.slippageTolerance = 100; // Set high tolerance to avoid slippage error
 
       await expect(service.buyMemecoin('user-id-1', buyDto)).rejects.toThrow(
         BadRequestException,
@@ -561,14 +563,14 @@ describe('TradingService', () => {
       queryRunner.manager.save.mockImplementation((entity) => {
         if (entity.balance !== undefined) {
           // This is the wallet
-          entity.balance += '1'; // Increase balance when selling
+          entity.balance += 1; // Increase balance when selling
         } else if (entity.totalSupply !== undefined) {
           // This is the memecoin
-          entity.totalSupply -= '10';
+          entity.totalSupply -= 10;
           entity.currentPrice = '0.1'; // Keep price consistent
         } else if (entity.amount !== undefined && entity.walletId) {
           // This is the wallet holding
-          entity.amount -= '10';
+          entity.amount -= 10;
         }
         return Promise.resolve(entity);
       });
@@ -577,7 +579,7 @@ describe('TradingService', () => {
       sellDto.memecoinId = 'memecoin-id-1';
       sellDto.amount = '10';
       sellDto.requestPrice = '0.1';
-      sellDto.slippageTolerance = '100'; // Set high tolerance to avoid slippage error
+      sellDto.slippageTolerance = 100; // Set high tolerance to avoid slippage error
 
       const result = await service.sellMemecoin('user-id-1', sellDto);
 
@@ -630,10 +632,10 @@ describe('TradingService', () => {
       queryRunner.manager.save.mockImplementation((entity) => {
         if (entity.balance !== undefined) {
           // This is the wallet
-          entity.balance += '1'; // Increase balance when selling
+          entity.balance += 1; // Increase balance when selling
         } else if (entity.totalSupply !== undefined) {
           // This is the memecoin
-          entity.totalSupply -= '10';
+          entity.totalSupply -= 10;
           entity.currentPrice = '0.1'; // Keep price consistent
         }
         return Promise.resolve(entity);
@@ -645,12 +647,12 @@ describe('TradingService', () => {
       sellDto.memecoinId = 'memecoin-id-1';
       sellDto.amount = '10';
       sellDto.requestPrice = '0.1';
-      sellDto.slippageTolerance = '100'; // Set high tolerance to avoid slippage error
+      sellDto.slippageTolerance = 100; // Set high tolerance to avoid slippage error
 
       const result = await service.sellMemecoin('user-id-1', sellDto);
 
       expect(queryRunner.manager.remove).toHaveBeenCalled();
-      expect(result).toHaveProperty('newHoldingAmount', '0');
+      expect(result).toHaveProperty('newHoldingAmount', 0);
     });
 
     it('should throw BadRequestException if price slippage exceeds tolerance', async () => {
@@ -677,7 +679,7 @@ describe('TradingService', () => {
       sellDto.memecoinId = 'memecoin-id-1';
       sellDto.amount = '10';
       sellDto.requestPrice = '0.1'; // Request price is 0.1
-      sellDto.slippageTolerance = '1'; // 1% tolerance
+      sellDto.slippageTolerance = 1; // 1% tolerance
 
       await expect(service.sellMemecoin('user-id-1', sellDto)).rejects.toThrow(
         BadRequestException,
@@ -688,9 +690,9 @@ describe('TradingService', () => {
 
   describe('calculatePrice', () => {
     it('should calculate price based on bonding curve formula', () => {
-      expect(calculatePrice(0)).toBe(1); // Base price for new memecoins
-      expect(calculatePrice(100)).toBe(1.01);
-      expect(calculatePrice(200)).toBe(1.02);
+      expect(calculatePrice(0)).toBe('1'); // Base price for new memecoins
+      expect(calculatePrice(100)).toBe('1.01');
+      expect(calculatePrice(200)).toBe('1.02');
     });
   });
 });

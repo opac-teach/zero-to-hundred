@@ -9,5 +9,6 @@ export const databaseConfig: TypeOrmModuleOptions = {
   database: process.env.DATABASE_NAME || 'zero_to_hundred',
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
   synchronize: process.env.NODE_ENV !== 'production',
-  logging: process.env.NODE_ENV !== 'production',
+  // logging: process.env.NODE_ENV !== 'production',
+  logging: false,
 };

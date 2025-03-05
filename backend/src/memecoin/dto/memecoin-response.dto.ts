@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose, Type } from 'class-transformer';
-import { UserResponseDto } from '../../user/dto';
+import { UserResponseDto } from '../../user/dto/user-response.dto';
 
 @Exclude()
 export class MemecoinResponseDto {
@@ -35,19 +35,19 @@ export class MemecoinResponseDto {
 
   @ApiProperty({ description: 'The total supply of the memecoin' })
   @Expose()
-  totalSupply: number;
+  totalSupply: string;
 
   @ApiProperty({ description: 'The current price of the memecoin' })
   @Expose()
-  currentPrice: number;
+  currentPrice: string;
 
   @ApiProperty({ description: 'The market cap of the memecoin' })
   @Expose()
-  marketCap: number;
+  marketCap: string;
 
   @ApiProperty({ description: 'The 24h trading volume of the memecoin' })
   @Expose()
-  volume24h: number;
+  volume24h: string;
 
   @ApiProperty({ description: 'The date when the memecoin was created' })
   @Expose()

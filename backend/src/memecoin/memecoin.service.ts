@@ -10,12 +10,9 @@ import { Memecoin } from '../entities/memecoin.entity';
 import { User } from '../entities/user.entity';
 import { Wallet } from '../entities/wallet.entity';
 import { Transaction, TransactionType } from '../entities/transaction.entity';
-import {
-  CreateMemecoinDto,
-  MemecoinResponseDto,
-  MemecoinPriceDto,
-} from './dto';
-import { StatisticsService } from '../statistics/statistics.service';
+import { CreateMemecoinDto, MemecoinResponseDto } from './dto';
+import BigNumber from 'bignumber.js';
+import { calculatePrice } from 'src/trading/bonding-curve';
 
 @Injectable()
 export class MemecoinService {
@@ -29,7 +26,6 @@ export class MemecoinService {
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
     private readonly dataSource: DataSource,
-    private readonly statisticsService: StatisticsService,
   ) {}
 
   async findAll(
@@ -51,24 +47,10 @@ export class MemecoinService {
       take: limit,
     });
 
-    return memecoins.map((memecoin) => {
-      const creatorWithBalance = {
-        ...memecoin.creator,
-        zthBalance: Number(memecoin.creator.wallet?.zthBalance || 0),
-      };
-      const currentPrice = this.calculatePrice(Number(memecoin.totalSupply));
-      return new MemecoinResponseDto({
-        ...memecoin,
-        totalSupply: Number(memecoin.totalSupply),
-        currentPrice: Number(memecoin.currentPrice),
-        marketCap: Number(memecoin.marketCap),
-        volume24h: Number(memecoin.volume24h),
-        creator: creatorWithBalance,
-      });
-    });
+    return memecoins.map((memecoin) => new MemecoinResponseDto(memecoin));
   }
 
-  async findOne(id: string): Promise<MemecoinResponseDto> {
+  async findById(id: string): Promise<MemecoinResponseDto> {
     const memecoin = await this.memecoinRepository.findOne({
       where: { id },
       relations: ['creator', 'creator.wallet'],
@@ -78,19 +60,7 @@ export class MemecoinService {
       throw new NotFoundException(`Memecoin with ID ${id} not found`);
     }
 
-    const creatorWithBalance = {
-      ...memecoin.creator,
-      zthBalance: Number(memecoin.creator.wallet?.zthBalance || 0),
-    };
-    const currentPrice = this.calculatePrice(Number(memecoin.totalSupply));
-    return new MemecoinResponseDto({
-      ...memecoin,
-      totalSupply: Number(memecoin.totalSupply),
-      currentPrice: Number(memecoin.currentPrice),
-      marketCap: Number(memecoin.marketCap),
-      volume24h: Number(memecoin.volume24h),
-      creator: creatorWithBalance,
-    });
+    return new MemecoinResponseDto(memecoin);
   }
 
   async findBySymbol(symbol: string): Promise<MemecoinResponseDto> {
@@ -103,19 +73,7 @@ export class MemecoinService {
       throw new NotFoundException(`Memecoin with symbol ${symbol} not found`);
     }
 
-    const creatorWithBalance = {
-      ...memecoin.creator,
-      zthBalance: Number(memecoin.creator.wallet?.zthBalance || 0),
-    };
-    const currentPrice = this.calculatePrice(Number(memecoin.totalSupply));
-    return new MemecoinResponseDto({
-      ...memecoin,
-      totalSupply: Number(memecoin.totalSupply),
-      currentPrice: Number(memecoin.currentPrice),
-      marketCap: Number(memecoin.marketCap),
-      volume24h: Number(memecoin.volume24h),
-      creator: creatorWithBalance,
-    });
+    return new MemecoinResponseDto(memecoin);
   }
 
   async create(
@@ -155,7 +113,7 @@ export class MemecoinService {
     }
 
     // Check if the user has enough ZTH to create a memecoin (1 ZTH)
-    if (Number(wallet.zthBalance) < 1) {
+    if (BigNumber(wallet.zthBalance).lt(1)) {
       throw new BadRequestException(
         'Insufficient ZTH balance to create a memecoin',
       );
@@ -168,7 +126,7 @@ export class MemecoinService {
 
     try {
       // Deduct 1 ZTH from the user's wallet
-      wallet.zthBalance = String(Number(wallet.zthBalance) - 1);
+      wallet.zthBalance = String(BigNumber(wallet.zthBalance).minus(1));
       await queryRunner.manager.save(wallet);
 
       // Create the memecoin
@@ -180,7 +138,7 @@ export class MemecoinService {
       memecoin.creator = user;
       memecoin.creatorId = userId;
       memecoin.totalSupply = '0';
-      memecoin.currentPrice = '0';
+      memecoin.currentPrice = calculatePrice(0);
       memecoin.marketCap = '0';
       memecoin.volume24h = '0';
 
@@ -189,9 +147,9 @@ export class MemecoinService {
       // Create a transaction record
       const transaction = new Transaction();
       transaction.type = TransactionType.CREATE;
-      transaction.amount = '0';
+      transaction.memeCoinAmount = '0';
+      transaction.zthAmount = '1'; // Cost to create a memecoin
       transaction.price = '0';
-      transaction.totalValue = '1'; // Cost to create a memecoin
       transaction.user = user;
       transaction.userId = userId;
       transaction.memecoin = savedMemecoin;
@@ -201,46 +159,13 @@ export class MemecoinService {
 
       await queryRunner.commitTransaction();
 
-      const creatorWithBalance = {
-        ...savedMemecoin.creator,
-        zthBalance: Number(savedMemecoin.creator.wallet?.zthBalance || 0),
-      };
-      const currentPrice = this.calculatePrice(
-        Number(savedMemecoin.totalSupply),
-      );
-      return new MemecoinResponseDto({
-        ...savedMemecoin,
-        totalSupply: Number(savedMemecoin.totalSupply),
-        currentPrice: Number(savedMemecoin.currentPrice),
-        marketCap: Number(savedMemecoin.marketCap),
-        volume24h: Number(savedMemecoin.volume24h),
-        creator: creatorWithBalance,
-      });
+      return new MemecoinResponseDto(savedMemecoin);
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
     } finally {
       await queryRunner.release();
     }
-  }
-
-  async getPrice(id: string): Promise<MemecoinPriceDto> {
-    const memecoin = await this.memecoinRepository.findOne({ where: { id } });
-    if (!memecoin) {
-      throw new NotFoundException(`Memecoin with ID ${id} not found`);
-    }
-
-    // Calculate current price using bonding curve
-    const price = this.calculatePrice(Number(memecoin.totalSupply));
-
-    // Get market sentiment
-    const marketSentiment = await this.statisticsService.getMarketSentiment(id);
-
-    return {
-      price: String(price),
-      supply: memecoin.totalSupply,
-      marketSentiment,
-    };
   }
 
   async getTransactions(id: string): Promise<Transaction[]> {
@@ -257,11 +182,5 @@ export class MemecoinService {
         createdAt: 'DESC',
       },
     });
-  }
-
-  // Helper method to calculate price based on bonding curve
-  calculatePrice(supply: number): number {
-    // Price = (Supply)²/10000
-    return (supply * supply) / 10000;
   }
 }

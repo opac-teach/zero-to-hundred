@@ -10,7 +10,7 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
     "lint": "eslint . --fix",
-    "test": "npm-run type-check && npm run test:unit",
+    "test": "npm run type-check && npm run test:unit",
     "test:unit": "vitest --run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",

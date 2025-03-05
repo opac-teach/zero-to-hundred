@@ -3,10 +3,11 @@ import {
   UnauthorizedException,
   ConflictException,
   NotFoundException,
+  Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from '../entities/user.entity';
 import { Wallet } from '../entities/wallet.entity';
@@ -16,7 +17,6 @@ import {
   ChangePasswordDto,
   AuthResponseDto,
 } from './dto';
-import { UserResponseDto } from '../user/dto/user-response.dto';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -28,7 +28,9 @@ export class AuthService {
     private walletRepository: Repository<Wallet>,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private dataSource: DataSource,
   ) {}
+  private readonly logger = new Logger(AuthService.name);
 
   async validateUser(
     email: string,
@@ -44,7 +46,7 @@ export class AuthService {
     return null;
   }
 
-  async register(createUserDto: RegisterDto): Promise<UserResponseDto> {
+  async register(createUserDto: RegisterDto): Promise<AuthResponseDto> {
     const existingUser = await this.userRepository.findOne({
       where: [
         { email: createUserDto.email },
@@ -57,26 +59,53 @@ export class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-    const user = this.userRepository.create({
-      ...createUserDto,
-      password: hashedPassword,
-    });
 
-    const savedUser = await this.userRepository.save(user);
+    // Use a transaction to ensure both user and wallet are created atomically
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    // Create a wallet for the user
-    const wallet = this.walletRepository.create({
-      ownerId: savedUser.id,
-      zthBalance: '0',
-      address: `0x${Math.random().toString(16).substr(2, 40)}`,
-    });
+    try {
+      // Create and save user within transaction
+      const user = this.userRepository.create({
+        ...createUserDto,
+        password: hashedPassword,
+      });
 
-    await this.walletRepository.save(wallet);
+      const savedUser = await queryRunner.manager.save(user);
 
-    return new UserResponseDto({
-      ...savedUser,
-      zthBalance: 0,
-    });
+      this.logger.log(
+        `Creating new wallet with initial balance: ${this.configService.get('initialZTHBalance')} ZTH`,
+      );
+      // Create and save wallet within the same transaction
+      const wallet = this.walletRepository.create({
+        ownerId: savedUser.id,
+        zthBalance: this.configService.get('initialZTHBalance'),
+      });
+
+      await queryRunner.manager.save(wallet);
+
+      // Commit the transaction
+      await queryRunner.commitTransaction();
+
+      // Generate JWT token
+      const payload = { sub: savedUser.id, email: savedUser.email };
+      const accessToken = this.jwtService.sign(payload);
+
+      return {
+        accessToken,
+        userId: savedUser.id,
+        username: savedUser.username,
+        email: savedUser.email,
+      };
+    } catch (error) {
+      // Rollback the transaction in case of error
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      // Release the query runner
+      await queryRunner.release();
+    }
   }
 
   async login(user: Omit<User, 'password'>): Promise<AuthResponseDto> {

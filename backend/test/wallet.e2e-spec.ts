@@ -66,7 +66,7 @@ describe('WalletController (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe());
-    walletService = moduleFixture.get<WalletService>(WalletService);
+    const walletService = moduleFixture.get<WalletService>(WalletService);
 
     await app.init();
   });

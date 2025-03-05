@@ -22,6 +22,7 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { UserResponseDto } from './dto/user-response.dto';
+import { LeaderboardDto } from './dto/leaderboard.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -69,7 +70,7 @@ export class UserController {
   async getLeaderboard(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
-  ): Promise<{ users: UserResponseDto[]; total: number }> {
+  ): Promise<LeaderboardDto> {
     return this.userService.getLeaderboard(page, limit);
   }
 
@@ -82,7 +83,7 @@ export class UserController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Get('me/profile')
+  @Get('me')
   async getProfile(@Request() req): Promise<UserResponseDto> {
     return this.userService.findOne(req.user.id);
   }
@@ -102,19 +103,6 @@ export class UserController {
     return this.userService.findByUsername(username);
   }
 
-  @ApiOperation({ summary: 'Get user by ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'Return the user',
-    type: UserResponseDto,
-  })
-  @ApiResponse({ status: 404, description: 'User not found' })
-  @ApiParam({ name: 'id', description: 'The ID of the user' })
-  @Get(':id')
-  async findOne(@Param('id') id: string): Promise<UserResponseDto> {
-    return this.userService.findOne(id);
-  }
-
   @ApiOperation({ summary: 'Update current user profile' })
   @ApiResponse({
     status: 200,
@@ -125,7 +113,7 @@ export class UserController {
   @ApiResponse({ status: 404, description: 'User not found' })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Put('me/profile')
+  @Put('me')
   async updateProfile(
     @Request() req,
     @Body() updateUserDto: UpdateUserDto,

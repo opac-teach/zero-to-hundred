@@ -22,7 +22,6 @@ describe('TradingController', () => {
     createdAt: new Date(),
     updatedAt: new Date(),
     owner: null,
-    address: '0x123456789',
   } as unknown as Wallet;
 
   const mockUser = {

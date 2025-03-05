@@ -1,9 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose, Type } from 'class-transformer';
-import { UserResponseDto } from '../../user/dto';
 import { MemecoinResponseDto } from '../../memecoin/dto';
 import { TransactionType } from '../../entities/transaction.entity';
-
+import { UserResponseDto } from '../../user/dto/user-response.dto';
 @Exclude()
 export class TransactionResponseDto {
   @ApiProperty({ description: 'The unique identifier of the transaction' })
@@ -21,17 +20,17 @@ export class TransactionResponseDto {
     description: 'The amount of the memecoin involved in the transaction',
   })
   @Expose()
-  amount: number;
+  memeCoinAmount: string;
+
+  @ApiProperty({ description: 'The total value of the transaction in ZTH' })
+  @Expose()
+  zthAmount: string;
 
   @ApiProperty({
     description: 'The price of the memecoin at the time of the transaction',
   })
   @Expose()
-  price: number;
-
-  @ApiProperty({ description: 'The total value of the transaction in ZTH' })
-  @Expose()
-  totalValue: number;
+  price: string;
 
   @ApiProperty({ description: 'The user who performed the transaction' })
   @Expose()
@@ -57,12 +56,5 @@ export class TransactionResponseDto {
 
   constructor(partial: Partial<TransactionResponseDto>) {
     Object.assign(this, partial);
-    if (partial.user && 'wallet' in partial.user) {
-      const userData = partial.user as any;
-      this.user = new UserResponseDto({
-        ...userData,
-        zthBalance: userData.wallet?.zthBalance || 0,
-      });
-    }
   }
 }

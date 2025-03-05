@@ -14,6 +14,7 @@ import {
 import * as bcrypt from 'bcrypt';
 import { ChangePasswordDto } from './dto';
 import { UserService } from '../user/user.service';
+import { RegisterDto } from './dto';
 
 jest.mock('bcrypt', () => ({
   compare: jest.fn(),
@@ -36,7 +37,7 @@ describe('AuthService', () => {
     createdAt: new Date(),
     updatedAt: new Date(),
     owner: null,
-    address: '0x123456789',
+    holdings: [],
   } as Wallet;
 
   const mockUser = {
@@ -68,10 +69,9 @@ describe('AuthService', () => {
   const mockWalletRepository = {
     create: jest
       .fn()
-      .mockReturnValue({ id: 'wallet-id-1', address: 'address', balance: 100 }),
+      .mockReturnValue({ id: 'wallet-id-1', balance: 100 }),
     save: jest.fn().mockResolvedValue({
       id: 'wallet-id-1',
-      address: 'address',
       balance: 100,
     }),
   };
@@ -208,6 +208,27 @@ describe('AuthService', () => {
         }),
       ).rejects.toThrow(ConflictException);
     });
+
+    it('should register a new user', async () => {
+      const registerDto: RegisterDto = {
+        username: 'testuser',
+        email: 'test@example.com',
+        password: 'password',
+        fullName: 'Test User',
+      };
+
+      // Mock findOne to return null for this test case
+      jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(null);
+
+      const result = await service.register(registerDto);
+
+      expect(result).toBeDefined();
+      expect(result.accessToken).toBe('jwt-token');
+      expect(result.userId).toBe(mockUser.id);
+      expect(result.username).toBe(mockUser.username);
+      expect(result.email).toBe(mockUser.email);
+      expect(Object.prototype.hasOwnProperty.call(result, 'password')).toBe(false);
+    });
   });
 
   describe('login', () => {
@@ -224,6 +245,7 @@ describe('AuthService', () => {
         sub: mockUser.id,
         email: mockUser.email,
       });
+      expect(Object.prototype.hasOwnProperty.call(result, 'password')).toBe(false);
     });
   });
 

@@ -10,6 +10,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { Wallet } from '../entities/wallet.entity';
 import { BigNumber } from 'bignumber.js';
+import { LeaderboardDto, LeaderboardItem } from './dto/leaderboard.dto';
 
 @Injectable()
 export class UserService {
@@ -83,8 +84,9 @@ export class UserService {
   async getLeaderboard(
     page: number = 1,
     limit: number = 20,
-  ): Promise<{ users: UserResponseDto[]; total: number }> {
-    const queryBuilder = this.userRepository.createQueryBuilder('user')
+  ): Promise<LeaderboardDto> {
+    const queryBuilder = this.userRepository
+      .createQueryBuilder('user')
       .leftJoinAndSelect('user.wallet', 'wallet')
       .orderBy('wallet.zthBalance', 'DESC')
       .skip((page - 1) * limit)
@@ -102,7 +104,9 @@ export class UserService {
     }));
 
     return {
-      users: usersWithRank.map((user) => new UserResponseDto(user)),
+      leaderboard: usersWithRank.map(
+        (user) => new LeaderboardItem(user, user.rank, user.zthBalance),
+      ),
       total,
     };
   }

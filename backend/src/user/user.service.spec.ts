@@ -18,6 +18,8 @@ describe('UserService', () => {
     isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),
+    owner: null,
+    holdings: [],
   } as Wallet;
 
   const mockUser = {
@@ -226,7 +228,7 @@ describe('UserService', () => {
 
       const result = await service.getLeaderboard();
 
-      expect(result.users.length).toBe(2);
+      expect(result.leaderboard.length).toBe(2);
       expect(result.total).toBe(2);
       expect(userRepository.createQueryBuilder).toHaveBeenCalledWith('user');
       expect(mockQueryBuilder.leftJoinAndSelect).toHaveBeenCalledWith(
