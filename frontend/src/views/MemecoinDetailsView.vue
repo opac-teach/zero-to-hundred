@@ -40,9 +40,9 @@
       </Card>
       <Card>
         <CardContent class="pt-6">
-          <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Market Cap</h3>
+          <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Supply</h3>
           <p class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">
-            {{ memecoin?.marketCap.toLocaleString() }} ZTH
+            {{ memecoin?.totalSupply }} ZTH
           </p>
         </CardContent>
       </Card>
@@ -50,7 +50,7 @@
         <CardContent class="pt-6">
           <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">24h Volume</h3>
           <p class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">
-            {{ memecoin?.volume24h.toLocaleString() }} ZTH
+            {{ memecoin?.volume24h }} ZTH
           </p>
         </CardContent>
       </Card>
@@ -58,7 +58,7 @@
         <CardContent class="pt-6">
           <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Supply</h3>
           <p class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">
-            {{ memecoin?.totalSupply.toLocaleString() }}
+            {{ memecoin?.totalSupply }}
           </p>
         </CardContent>
       </Card>
@@ -73,25 +73,31 @@
         <CardContent>
           <div class="space-y-4">
             <div class="space-y-2">
-              <label class="text-sm font-medium">Amount (ZTH)</label>
+              <label class="text-sm font-medium">Amount of memecoin to {{ tradeType }}</label>
               <Input
                 v-model="tradeAmount"
                 type="number"
                 min="0"
                 step="0.000001"
                 :class="{ 'border-red-500': tradeAmountError }"
-                @input="validateTradeAmount"
               />
+              <div class="flex">
+                <div>Balance: {{ walletHolding?.amount || "0" }}</div>
+                <Button
+                  v-if="tradeType == 'sell'"
+                  variant="outline"
+                  @click="tradeAmount = walletHolding?.amount || '0'"
+                >
+                  All
+                </Button>
+              </div>
               <p v-if="tradeAmountError" class="text-sm text-red-500">{{ tradeAmountError }}</p>
             </div>
 
             <div class="space-y-2">
               <div class="flex justify-between items-center">
-                <label class="text-sm font-medium">Current Price</label>
-                <span class="text-sm text-gray-500">{{ currentPrice }} ZTH</span>
-              </div>
-              <div v-if="priceWarning" class="text-sm text-yellow-600 dark:text-yellow-400">
-                {{ priceWarning }}
+                <label class="text-sm font-medium">Cost</label>
+                <span class="text-sm text-gray-500">{{ tradeEstimation?.cost }} ZTH</span>
               </div>
             </div>
 
@@ -110,22 +116,21 @@
               />
             </div>
 
+            <div>
+              <label class="text-sm font-medium">Trade Type</label>
+              <select v-model="tradeType" class="w-full">
+                <option value="buy">Buy</option>
+                <option value="sell">Sell</option>
+              </select>
+            </div>
             <div class="flex space-x-3">
               <Button
                 variant="outline"
                 class="flex-1"
-                @click="handleTrade('buy')"
-                :disabled="!isTradeFormValid || isLoading"
+                @click="handleTrade()"
+                :disabled="!isTradeFormValid || isLoading || tradeAmount == '0'"
               >
-                {{ isLoading ? "Processing..." : "Buy" }}
-              </Button>
-              <Button
-                variant="outline"
-                class="flex-1"
-                @click="handleTrade('sell')"
-                :disabled="!isTradeFormValid || isLoading"
-              >
-                {{ isLoading ? "Processing..." : "Sell" }}
+                {{ isLoading ? "Processing..." : "Trade" }}
               </Button>
             </div>
           </div>
@@ -193,7 +198,8 @@ import VolumeChart from "@/components/VolumeChart.vue";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { MemecoinResponseDto } from "@/types/api";
+import type { TradeEstimationResponseDto } from "@/types/api";
+import { trading } from "@/api/client";
 
 const route = useRoute();
 const router = useRouter();
@@ -202,16 +208,23 @@ const walletStore = useWalletStore();
 const assetsStore = useAssetsStore();
 const toast = useToast();
 
-const memecoin = ref<MemecoinResponseDto | null>(null);
-const tradeAmount = ref("");
+const memecoin = computed(() =>
+  marketStore.memecoinsList.find((coin) => coin.symbol === route.params.symbol)
+);
+const walletData = computed(() => walletStore.walletData);
+const walletHolding = computed(() =>
+  walletStore.holdings.find((holding) => holding.memecoinId === memecoin.value?.id)
+);
+const tradeAmount = ref("0");
 const slippageTolerance = ref("5");
 const isLoading = ref(false);
 const selectedTimeframe = ref<"24h" | "7d" | "30d">("24h");
 const timeframes = ["24h", "7d", "30d"] as const;
+const tradeEstimation = ref<TradeEstimationResponseDto | null>(null);
+const tradeType = ref<"buy" | "sell">("buy");
 
 // Validation state
 const tradeAmountError = ref("");
-const priceWarning = ref("");
 
 // Computed properties for validation
 const isTradeAmountValid = computed(() => {
@@ -228,33 +241,47 @@ const isTradeFormValid = computed(() => {
   return isTradeAmountValid.value && isSlippageValid.value;
 });
 
-const currentPrice = computed(() => {
-  if (!memecoin.value) return "0";
-  return Number(memecoin.value.currentPrice).toFixed(6);
-});
+watch(
+  [tradeAmount, tradeType, walletHolding],
+  ([newTradeAmount, newTradeType, newWalletHolding]) => {
+    if (!newTradeAmount) return;
+    tradeEstimation.value = null;
+    tradeAmountError.value = "";
 
-// Add price warning check
-watch([memecoin], ([newMemecoin]) => {
-  if (!newMemecoin) return;
+    const amount = parseFloat(newTradeAmount);
+    if (isNaN(amount)) {
+      tradeAmountError.value = "Please enter a valid number";
+      return false;
+    }
+    if (
+      newTradeType == "sell" &&
+      (!newWalletHolding || Number(newTradeAmount) > Number(newWalletHolding?.amount))
+    ) {
+      tradeAmountError.value = "Insufficient balance";
+      return false;
+    }
 
-  // Price warning is no longer needed since we're using the current price directly
-  priceWarning.value = "";
-});
+    if (!memecoin.value) return;
+    trading
+      .estimate({
+        memecoinId: memecoin.value.id,
+        amount: newTradeAmount,
+        requestCost: memecoin.value.currentPrice,
+        tradeType: newTradeType,
+      })
+      .then((response) => {
+        tradeEstimation.value = response.data;
 
-// Validation functions
-function validateTradeAmount() {
-  const amount = parseFloat(tradeAmount.value);
-  if (isNaN(amount)) {
-    tradeAmountError.value = "Please enter a valid number";
-    return false;
+        if (
+          newTradeType == "buy" &&
+          Number(tradeEstimation.value?.cost) > Number(walletData.value?.zthBalance)
+        ) {
+          tradeAmountError.value = "Insufficient balance";
+          return false;
+        }
+      });
   }
-  if (amount <= 0) {
-    tradeAmountError.value = "Amount must be greater than 0";
-    return false;
-  }
-  tradeAmountError.value = "";
-  return true;
-}
+);
 
 const priceData = computed(() => {
   if (!memecoin.value) return [];
@@ -294,28 +321,25 @@ function getPriceChange() {
   return `${randomChange >= 0 ? "+" : ""}${randomChange.toFixed(2)}%`;
 }
 
-async function handleTrade(action: "buy" | "sell") {
+async function handleTrade() {
   if (!memecoin.value || !tradeAmount.value) return;
 
   try {
     isLoading.value = true;
 
-    if (action === "buy") {
-      await walletStore.buyMemecoin(
-        memecoin.value.id,
-        tradeAmount.value,
-        parseFloat(slippageTolerance.value)
-      );
-    } else {
-      await walletStore.sellMemecoin(
-        memecoin.value.id,
-        tradeAmount.value,
-        parseFloat(slippageTolerance.value)
-      );
+    if (!tradeEstimation.value) {
+      throw new Error("Trade estimation not found");
     }
+    await walletStore.tradeMemecoin(
+      memecoin.value.id,
+      tradeAmount.value,
+      tradeEstimation.value.cost,
+      parseFloat(slippageTolerance.value),
+      tradeType.value
+    );
 
-    toast.success(`Trade ${action} executed successfully!`);
-    tradeAmount.value = "";
+    tradeAmount.value = "0";
+    toast.success(`Trade ${tradeType.value} executed successfully!`);
   } catch (error) {
     toast.error("Failed to execute trade. Please try again.");
   } finally {
@@ -343,8 +367,6 @@ onMounted(async () => {
   try {
     const memecoinSymbol = route.params.symbol as string;
     await marketStore.fetchMemecoinDetails(memecoinSymbol);
-    memecoin.value =
-      marketStore.memecoinsList.find((coin) => coin.symbol === memecoinSymbol) || null;
     if (!memecoin.value) {
       router.push("/memecoins");
     }

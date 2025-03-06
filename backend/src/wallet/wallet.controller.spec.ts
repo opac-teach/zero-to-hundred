@@ -46,11 +46,7 @@ describe('WalletController', () => {
 
   mockWallet.owner = mockUser;
 
-  const mockUserResponse: UserResponseDto = new UserResponseDto({
-    ...mockUser,
-    zthBalance: 1000,
-    rank: 1,
-  });
+  const mockUserResponse: UserResponseDto = new UserResponseDto(mockUser);
 
   const mockMemecoin: Memecoin = {
     id: 'memecoin-id-1',
@@ -61,21 +57,15 @@ describe('WalletController', () => {
     creatorId: 'creator-id-1',
     totalSupply: '1000000',
     currentPrice: '0.1',
-    marketCap: '100000',
     volume24h: '10000',
     creator: mockUser,
     createdAt: new Date(),
     updatedAt: new Date(),
   } as Memecoin;
 
-  const mockMemecoinResponse: MemecoinResponseDto = new MemecoinResponseDto({
-    ...mockMemecoin,
-    totalSupply: parseFloat(mockMemecoin.totalSupply),
-    currentPrice: parseFloat(mockMemecoin.currentPrice),
-    marketCap: parseFloat(mockMemecoin.marketCap),
-    volume24h: parseFloat(mockMemecoin.volume24h),
-    creator: mockUserResponse,
-  });
+  const mockMemecoinResponse: MemecoinResponseDto = new MemecoinResponseDto(
+    mockMemecoin,
+  );
 
   const mockWalletHolding: WalletHolding = {
     id: 'holding-id-1',
@@ -104,28 +94,31 @@ describe('WalletController', () => {
 
   const mockWalletResponse: WalletResponseDto = new WalletResponseDto({
     ...mockWallet,
-    zthBalance: 1000,
+    zthBalance: '1000',
     holdings: [
       {
         ...mockWalletHolding,
-        amount: 100,
+        amount: '100',
         memecoin: mockMemecoinResponse,
       },
     ],
   });
 
-  const mockTransactionResponse: TransactionResponseDto = new TransactionResponseDto({
-    ...mockTransaction,
-    amount: 100,
-    price: 0.1,
-    totalValue: 10,
-    user: mockUserResponse,
-    memecoin: mockMemecoinResponse,
-  });
+  const mockTransactionResponse: TransactionResponseDto =
+    new TransactionResponseDto({
+      ...mockTransaction,
+      memeCoinAmount: '100',
+      price: '0.1',
+      zthAmount: '10',
+      user: mockUserResponse,
+      memecoin: mockMemecoinResponse,
+    });
 
   const mockWalletService = {
     getWalletByUserId: jest.fn().mockResolvedValue(mockWalletResponse),
-    getTransactionsByUserId: jest.fn().mockResolvedValue([mockTransactionResponse]),
+    getTransactionsByUserId: jest
+      .fn()
+      .mockResolvedValue([mockTransactionResponse]),
   };
 
   beforeEach(async () => {

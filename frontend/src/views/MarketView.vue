@@ -53,7 +53,7 @@
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
       <Card>
         <CardContent class="pt-6">
-          <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Market Cap</h3>
+          <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Supply</h3>
           <p class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">
             {{ totalMarketCap }} ZTH
           </p>
@@ -98,7 +98,7 @@
               <TableHead>Memecoin</TableHead>
               <TableHead>Price</TableHead>
               <TableHead>24h Change</TableHead>
-              <TableHead>Market Cap</TableHead>
+              <TableHead>Total Supply</TableHead>
               <TableHead>24h Volume</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
@@ -140,10 +140,10 @@
                 </span>
               </TableCell>
               <TableCell class="text-sm text-gray-900 dark:text-white">
-                {{ memecoin.marketCap.toLocaleString() }} ZTH
+                {{ memecoin.totalSupply }} ZTH
               </TableCell>
               <TableCell class="text-sm text-gray-900 dark:text-white">
-                {{ memecoin.volume24h.toLocaleString() }} ZTH
+                {{ memecoin.volume24h }} ZTH
               </TableCell>
               <TableCell>
                 <Button
@@ -202,15 +202,11 @@ const sortOptions = [
 ] as const;
 
 const totalMarketCap = computed(() => {
-  return marketStore.memecoinsList
-    .reduce((sum, coin) => sum + Number(coin.marketCap), 0)
-    .toLocaleString();
+  return marketStore.memecoinsList.reduce((sum, coin) => sum + Number(coin.marketCap), 0);
 });
 
 const totalVolume24h = computed(() => {
-  return marketStore.memecoinsList
-    .reduce((sum, coin) => sum + Number(coin.volume24h), 0)
-    .toLocaleString();
+  return marketStore.memecoinsList.reduce((sum, coin) => sum + Number(coin.volume24h), 0);
 });
 
 const activeMemecoins = computed(() => {

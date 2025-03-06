@@ -115,8 +115,10 @@ export const useMarketStore = defineStore("market", () => {
   function startPriceUpdates() {
     // Update prices every 30 seconds by refreshing the memecoin list
     priceUpdateInterval = window.setInterval(() => {
-      fetchMemecoins();
-    }, 30000);
+      for (const memecoin of memecoinsList.value) {
+        fetchMemecoinBySymbol(memecoin.symbol);
+      }
+    }, 5000);
   }
 
   function stopPriceUpdates() {

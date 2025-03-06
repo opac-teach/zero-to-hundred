@@ -12,7 +12,7 @@ import { Wallet } from '../entities/wallet.entity';
 import { Transaction, TransactionType } from '../entities/transaction.entity';
 import { CreateMemecoinDto, MemecoinResponseDto } from './dto';
 import BigNumber from 'bignumber.js';
-import { calculatePrice } from 'src/trading/bonding-curve';
+import { calculatePrice } from '../trading/bonding-curve';
 
 @Injectable()
 export class MemecoinService {
@@ -139,7 +139,6 @@ export class MemecoinService {
       memecoin.creatorId = userId;
       memecoin.totalSupply = '0';
       memecoin.currentPrice = calculatePrice(0);
-      memecoin.marketCap = '0';
       memecoin.volume24h = '0';
 
       const savedMemecoin = await queryRunner.manager.save(memecoin);

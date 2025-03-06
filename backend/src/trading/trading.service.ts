@@ -18,6 +18,7 @@ import {
 } from './bonding-curve';
 import BigNumber from 'bignumber.js';
 import { TradeMemecoinDto } from './dto/trade-memecoin.dto';
+import { TradeEstimationResponseDto } from './dto/estimate-trade-response.dto';
 
 @Injectable()
 export class TradingService {
@@ -34,6 +35,34 @@ export class TradingService {
     private readonly transactionRepository: Repository<Transaction>,
     private readonly dataSource: DataSource,
   ) {}
+
+  async estimateTradeMemecoin(
+    userId: string,
+    tradeDto: TradeMemecoinDto,
+  ): Promise<TradeEstimationResponseDto> {
+    const { memecoinId, amount, tradeType } = tradeDto;
+
+    const memecoin = await this.memecoinRepository.findOne({
+      where: { id: memecoinId },
+    });
+
+    if (!memecoin) {
+      throw new NotFoundException('Memecoin not found');
+    }
+
+    let cost = '0';
+    if (tradeType === 'buy') {
+      cost = calculateBuyPrice(amount, memecoin.totalSupply);
+    } else {
+      cost = calculateSellPrice(amount, memecoin.totalSupply);
+    }
+
+    return new TradeEstimationResponseDto({
+      cost,
+      amount,
+      memecoin,
+    });
+  }
 
   async tradeMemecoin(
     userId: string,
@@ -146,6 +175,7 @@ export class TradingService {
         holding.amount = new BigNumber(holding.amount).minus(amount).toString();
         if (new BigNumber(holding.amount).isEqualTo(0)) {
           await queryRunner.manager.remove(holding);
+          holding = null;
         } else {
           await queryRunner.manager.save(holding);
         }

@@ -7,16 +7,14 @@ import type {
   RegisterDto,
   LoginDto,
   CreateMemecoinDto,
-  BuyMemecoinDto,
-  SellMemecoinDto,
+  TradeMemecoinDto,
   TradeResponseDto,
   TradingVolumeDto,
   LeaderboardDto,
-  ApiError,
   AuthResponseDto,
   UpdateUserDto,
+  TradeEstimationResponseDto,
 } from "@/types/api";
-import router from "@/router";
 import { useUserStore } from "@/stores/user";
 
 const api = axios.create({
@@ -93,8 +91,9 @@ export const wallet = {
 
 // Trading endpoints
 export const trading = {
-  buy: (data: BuyMemecoinDto) => api.post<TradeResponseDto>("/trading/buy", data),
-  sell: (data: SellMemecoinDto) => api.post<TradeResponseDto>("/trading/sell", data),
+  estimate: (data: TradeMemecoinDto) =>
+    api.post<TradeEstimationResponseDto>("/trading/estimate", data),
+  trade: (data: TradeMemecoinDto) => api.post<TradeResponseDto>("/trading/trade", data),
 };
 
 // Statistics endpoints

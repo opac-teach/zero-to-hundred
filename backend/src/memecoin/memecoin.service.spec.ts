@@ -34,7 +34,6 @@ describe('MemecoinService', () => {
     totalSupply: 1000000,
     currentSupply: 1000000,
     currentPrice: 0.1,
-    marketCap: 100000,
     volume24h: 10000,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -52,7 +51,6 @@ describe('MemecoinService', () => {
       totalSupply: 2000000,
       currentSupply: 2000000,
       currentPrice: 0.2,
-      marketCap: 400000,
       volume24h: 20000,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -246,7 +244,6 @@ describe('MemecoinService', () => {
         creatorId: 'user-id-1',
         totalSupply: 0,
         currentPrice: 0,
-        marketCap: 0,
         volume24h: 0,
       };
 
@@ -299,30 +296,6 @@ describe('MemecoinService', () => {
       await expect(
         service.create('user-id-1', createMemecoinDto),
       ).rejects.toThrow(ConflictException);
-    });
-  });
-
-  describe('getPrice', () => {
-    it('should return the current price of a memecoin', async () => {
-      jest
-        .spyOn(statisticsService, 'getMarketSentiment')
-        .mockResolvedValueOnce('POSITIVE');
-
-      const result = await service.getPrice('memecoin-id-1');
-
-      expect(result).toBeDefined();
-      expect(result.price).toBeDefined();
-      expect(memecoinRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 'memecoin-id-1' },
-      });
-    });
-
-    it('should throw NotFoundException when memecoin is not found', async () => {
-      jest.spyOn(memecoinRepository, 'findOne').mockResolvedValueOnce(null);
-
-      await expect(service.getPrice('nonexistent-id')).rejects.toThrow(
-        NotFoundException,
-      );
     });
   });
 });

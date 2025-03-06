@@ -11,6 +11,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from './user.entity';
 import { WalletHolding } from './wallet-holding.entity';
+import { Exclude, Type } from 'class-transformer';
 
 @Entity('wallets')
 export class Wallet {
@@ -21,6 +22,7 @@ export class Wallet {
   @ApiProperty({ description: 'The owner of the wallet' })
   @OneToOne(() => User, (user) => user.wallet)
   @JoinColumn({ name: 'ownerId' })
+  @Exclude({ toPlainOnly: true })
   owner: User;
 
   @Column()

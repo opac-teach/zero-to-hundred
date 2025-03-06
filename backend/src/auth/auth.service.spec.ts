@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
 import { Wallet } from '../entities/wallet.entity';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import {
   ConflictException,
   NotFoundException,
@@ -28,6 +28,7 @@ describe('AuthService', () => {
   let jwtService: JwtService;
   let configService: ConfigService;
   let userService: UserService;
+  let dataSource: DataSource;
 
   const mockWallet = {
     id: 'wallet-id-1',
@@ -67,9 +68,7 @@ describe('AuthService', () => {
   };
 
   const mockWalletRepository = {
-    create: jest
-      .fn()
-      .mockReturnValue({ id: 'wallet-id-1', balance: 100 }),
+    create: jest.fn().mockReturnValue({ id: 'wallet-id-1', balance: 100 }),
     save: jest.fn().mockResolvedValue({
       id: 'wallet-id-1',
       balance: 100,
@@ -83,6 +82,21 @@ describe('AuthService', () => {
 
   const mockConfigService = {
     get: jest.fn().mockReturnValue('jwt-secret'),
+  };
+
+  const mockQueryRunner = {
+    connect: jest.fn().mockResolvedValue(undefined),
+    startTransaction: jest.fn().mockResolvedValue(undefined),
+    commitTransaction: jest.fn().mockResolvedValue(undefined),
+    rollbackTransaction: jest.fn().mockResolvedValue(undefined),
+    release: jest.fn().mockResolvedValue(undefined),
+    manager: {
+      save: jest.fn().mockImplementation((entity) => Promise.resolve(entity)),
+    },
+  };
+
+  const mockDataSource = {
+    createQueryRunner: jest.fn().mockReturnValue(mockQueryRunner),
   };
 
   beforeEach(async () => {
@@ -105,6 +119,10 @@ describe('AuthService', () => {
           provide: ConfigService,
           useValue: mockConfigService,
         },
+        {
+          provide: DataSource,
+          useValue: mockDataSource,
+        },
         UserService,
       ],
     }).compile();
@@ -117,6 +135,7 @@ describe('AuthService', () => {
     jwtService = module.get<JwtService>(JwtService);
     configService = module.get<ConfigService>(ConfigService);
     userService = module.get<UserService>(UserService);
+    dataSource = module.get<DataSource>(DataSource);
 
     // Reset mocks before each test
     jest.clearAllMocks();
@@ -193,9 +212,19 @@ describe('AuthService', () => {
           password: 'hashedpassword',
         }),
       );
-      expect(userRepository.save).toHaveBeenCalled();
-      expect(walletRepository.create).toHaveBeenCalled();
-      expect(walletRepository.save).toHaveBeenCalled();
+
+      // Verify transaction behavior
+      expect(dataSource.createQueryRunner).toHaveBeenCalled();
+      expect(mockQueryRunner.connect).toHaveBeenCalled();
+      expect(mockQueryRunner.startTransaction).toHaveBeenCalled();
+      expect(mockQueryRunner.manager.save).toHaveBeenCalledTimes(2); // Once for user, once for wallet
+      expect(mockQueryRunner.commitTransaction).toHaveBeenCalled();
+      expect(mockQueryRunner.release).toHaveBeenCalled();
+
+      expect(jwtService.sign).toHaveBeenCalledWith({
+        sub: mockUser.id,
+        email: mockUser.email,
+      });
     });
 
     it('should throw ConflictException when user already exists', async () => {
@@ -227,7 +256,37 @@ describe('AuthService', () => {
       expect(result.userId).toBe(mockUser.id);
       expect(result.username).toBe(mockUser.username);
       expect(result.email).toBe(mockUser.email);
-      expect(Object.prototype.hasOwnProperty.call(result, 'password')).toBe(false);
+      expect(Object.prototype.hasOwnProperty.call(result, 'password')).toBe(
+        false,
+      );
+
+      // Verify transaction behavior
+      expect(dataSource.createQueryRunner).toHaveBeenCalled();
+      expect(mockQueryRunner.connect).toHaveBeenCalled();
+      expect(mockQueryRunner.startTransaction).toHaveBeenCalled();
+      expect(mockQueryRunner.commitTransaction).toHaveBeenCalled();
+      expect(mockQueryRunner.release).toHaveBeenCalled();
+    });
+
+    it('should rollback transaction on error', async () => {
+      jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(null);
+      mockQueryRunner.manager.save.mockRejectedValueOnce(
+        new Error('Database error'),
+      );
+
+      const registerDto = {
+        username: 'newuser',
+        email: 'new@example.com',
+        password: 'password',
+        fullName: 'New User',
+      };
+
+      await expect(service.register(registerDto)).rejects.toThrow(
+        'Database error',
+      );
+
+      expect(mockQueryRunner.rollbackTransaction).toHaveBeenCalled();
+      expect(mockQueryRunner.release).toHaveBeenCalled();
     });
   });
 
@@ -245,7 +304,9 @@ describe('AuthService', () => {
         sub: mockUser.id,
         email: mockUser.email,
       });
-      expect(Object.prototype.hasOwnProperty.call(result, 'password')).toBe(false);
+      expect(Object.prototype.hasOwnProperty.call(result, 'password')).toBe(
+        false,
+      );
     });
   });
 

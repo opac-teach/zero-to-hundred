@@ -115,7 +115,13 @@ export const useWalletStore = defineStore("wallet", () => {
     }
   }
 
-  async function buyMemecoin(memecoinId: string, amount: string, slippageTolerance: number = 1) {
+  async function tradeMemecoin(
+    memecoinId: string,
+    amount: string,
+    requestCost: string,
+    slippageTolerance: number = 1,
+    tradeType: "buy" | "sell"
+  ) {
     try {
       isLoading.value = true;
       error.value = null;
@@ -128,19 +134,12 @@ export const useWalletStore = defineStore("wallet", () => {
         throw new Error("Unable to find memecoin");
       }
 
-      // Log the request payload
-      console.log("Buy request payload:", {
+      const response = await trading.trade({
         memecoinId,
         amount,
-        requestPrice: memecoin.currentPrice,
+        requestCost,
         slippageTolerance,
-      });
-
-      const response = await trading.buy({
-        memecoinId,
-        amount,
-        requestPrice: memecoin.currentPrice,
-        slippageTolerance,
+        tradeType,
       });
 
       // Log the successful response
@@ -148,6 +147,7 @@ export const useWalletStore = defineStore("wallet", () => {
 
       // Fetch fresh wallet data to ensure UI displays updated balances
       await fetchWallet();
+      await marketStore.fetchMemecoins();
 
       return response.data;
     } catch (err: any) {
@@ -155,52 +155,6 @@ export const useWalletStore = defineStore("wallet", () => {
       console.error("Buy error:", err);
       console.error("Error response:", err.response?.data);
       error.value = err.response?.data?.message || "Failed to execute buy";
-      throw err;
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  async function sellMemecoin(memecoinId: string, amount: string, slippageTolerance: number = 1) {
-    try {
-      isLoading.value = true;
-      error.value = null;
-
-      // Get the current price from the market store
-      const marketStore = useMarketStore();
-      const memecoin = marketStore.memecoinsList.find((m) => m.id === memecoinId);
-
-      if (!memecoin) {
-        throw new Error("Unable to find memecoin");
-      }
-
-      // Log the request payload
-      console.log("Sell request payload:", {
-        memecoinId,
-        amount,
-        requestPrice: memecoin.currentPrice,
-        slippageTolerance,
-      });
-
-      const response = await trading.sell({
-        memecoinId,
-        amount,
-        requestPrice: memecoin.currentPrice,
-        slippageTolerance,
-      });
-
-      // Log the successful response
-      console.log("Sell response:", response.data);
-
-      // Fetch fresh wallet data to ensure UI displays updated balances
-      await fetchWallet();
-
-      return response.data;
-    } catch (err: any) {
-      // Log the full error object
-      console.error("Sell error:", err);
-      console.error("Error response:", err.response?.data);
-      error.value = err.response?.data?.message || "Failed to execute sell";
       throw err;
     } finally {
       isLoading.value = false;
@@ -221,7 +175,6 @@ export const useWalletStore = defineStore("wallet", () => {
     fetchTransactions,
     updateBalance,
     updateHolding,
-    buyMemecoin,
-    sellMemecoin,
+    tradeMemecoin,
   };
 });

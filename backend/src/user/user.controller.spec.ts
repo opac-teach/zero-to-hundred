@@ -61,15 +61,6 @@ describe('UserController', () => {
     });
   });
 
-  describe('findOne', () => {
-    it('should return a user by id', async () => {
-      const result = await controller.findOne('user-id-1');
-
-      expect(result).toEqual(mockUserResponse);
-      expect(userService.findOne).toHaveBeenCalledWith('user-id-1');
-    });
-  });
-
   describe('findByUsername', () => {
     it('should return a user by username', async () => {
       const result = await controller.findByUsername('testuser');

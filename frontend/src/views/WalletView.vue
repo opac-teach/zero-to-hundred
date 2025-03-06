@@ -7,7 +7,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg px-6 py-3">
           <div class="text-sm text-gray-500 dark:text-gray-400">ZTH Balance</div>
           <div class="text-2xl font-bold text-gray-900 dark:text-white">
-            {{ walletStore.zthBalance.toLocaleString() }} ZTH
+            {{ walletStore.zthBalance }} ZTH
           </div>
         </div>
       </div>
@@ -65,14 +65,10 @@
           </div>
           <div class="text-right">
             <div class="font-medium text-gray-900 dark:text-white">
-              {{ holding.amount.toLocaleString() }} {{ holding.memecoin.symbol }}
+              {{ holding.amount }} {{ holding.memecoin.symbol }}
             </div>
             <div class="text-sm text-gray-500 dark:text-gray-400">
-              {{
-                (
-                  parseFloat(holding.amount) * parseFloat(holding.memecoin.currentPrice)
-                ).toLocaleString()
-              }}
+              {{ parseFloat(holding.amount) * parseFloat(holding.memecoin.currentPrice) }}
               ZTH
             </div>
           </div>

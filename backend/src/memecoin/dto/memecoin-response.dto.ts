@@ -41,10 +41,6 @@ export class MemecoinResponseDto {
   @Expose()
   currentPrice: string;
 
-  @ApiProperty({ description: 'The market cap of the memecoin' })
-  @Expose()
-  marketCap: string;
-
   @ApiProperty({ description: 'The 24h trading volume of the memecoin' })
   @Expose()
   volume24h: string;

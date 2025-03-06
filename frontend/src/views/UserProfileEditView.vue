@@ -198,7 +198,7 @@
               <div class="flex justify-between items-center">
                 <span class="text-gray-600 dark:text-gray-400">ZTH Balance</span>
                 <span class="font-medium text-gray-900 dark:text-white"
-                  >{{ walletStore.zthBalance.toLocaleString() }} ZTH</span
+                  >{{ walletStore.zthBalance }} ZTH</span
                 >
               </div>
             </CardContent>
@@ -208,7 +208,7 @@
               <div class="flex justify-between items-center">
                 <span class="text-gray-600 dark:text-gray-400">Total Holdings</span>
                 <span class="font-medium text-gray-900 dark:text-white"
-                  >{{ tradingStore.stats.totalHoldings.toLocaleString() }} ZTH</span
+                  >{{ tradingStore.stats.totalHoldings }} ZTH</span
                 >
               </div>
             </CardContent>

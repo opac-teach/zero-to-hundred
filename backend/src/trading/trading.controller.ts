@@ -8,6 +8,7 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
+import { TradeEstimationResponseDto } from './dto/estimate-trade-response.dto';
 
 @ApiTags('trading')
 @Controller('trading')
@@ -34,5 +35,29 @@ export class TradingController {
     @Body() tradeMemecoinDto: TradeMemecoinDto,
   ): Promise<TradeResponseDto> {
     return this.tradingService.tradeMemecoin(req.user.id, tradeMemecoinDto);
+  }
+  @ApiOperation({ summary: 'Get trade cost estimation' })
+  @ApiResponse({
+    status: 201,
+    description: 'Trade cost estimation',
+    type: TradeEstimationResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid input or insufficient balance',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Memecoin or user not found' })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post('estimate')
+  async estimateTradeMemecoin(
+    @Request() req,
+    @Body() tradeMemecoinDto: TradeMemecoinDto,
+  ): Promise<TradeEstimationResponseDto> {
+    return this.tradingService.estimateTradeMemecoin(
+      req.user.id,
+      tradeMemecoinDto,
+    );
   }
 }

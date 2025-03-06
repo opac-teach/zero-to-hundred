@@ -53,12 +53,6 @@ export class Memecoin {
   @Column({ type: 'decimal', precision: 24, scale: 8, default: '1' })
   currentPrice: string;
 
-  @ApiProperty({
-    description: 'The market cap of the memecoin in ZTH (reserve)',
-  })
-  @Column({ type: 'decimal', precision: 24, scale: 8, default: '0' })
-  marketCap: string;
-
   @ApiProperty({ description: 'The 24-hour trading volume in ZTH' })
   @Column({ type: 'decimal', precision: 24, scale: 8, default: '0' })
   volume24h: string;

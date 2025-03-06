@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose, Transform, Type } from 'class-transformer';
-import { WalletResponseDto } from 'src/wallet/dto';
 
 @Exclude()
 export class UserResponseDto {

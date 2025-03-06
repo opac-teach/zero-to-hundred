@@ -5,7 +5,7 @@ import { MemecoinResponseDto } from '../../memecoin/dto';
 import {
   TransactionResponseDto,
   WalletHoldingResponseDto,
-} from 'src/wallet/dto';
+} from '../../wallet/dto';
 
 @Exclude()
 export class TradeResponseDto {

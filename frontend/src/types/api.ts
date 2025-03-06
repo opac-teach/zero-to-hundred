@@ -23,7 +23,6 @@ export interface Memecoin {
   creatorId: string;
   totalSupply: string;
   currentPrice: string;
-  marketCap: string;
   volume24h: string;
   createdAt: string;
   updatedAt: string;
@@ -181,24 +180,24 @@ export interface TransactionResponseDto {
   createdAt: string;
 }
 
-export interface BuyMemecoinDto {
+export interface TradeMemecoinDto {
   memecoinId: string;
   amount: string;
-  requestPrice: string;
+  requestCost: string;
   slippageTolerance?: number;
-}
-
-export interface SellMemecoinDto {
-  memecoinId: string;
-  amount: string;
-  requestPrice: string;
-  slippageTolerance?: number;
+  tradeType: "buy" | "sell";
 }
 
 export interface TradeResponseDto {
   transaction: TransactionResponseDto;
   memecoin: MemecoinResponseDto;
   walletHolding: WalletHoldingResponseDto;
+}
+
+export interface TradeEstimationResponseDto {
+  memecoin: MemecoinResponseDto;
+  cost: string;
+  amount: string;
 }
 
 export interface MemecoinVolumeDto {

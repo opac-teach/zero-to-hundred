@@ -4,11 +4,9 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToMany,
   OneToOne,
-  JoinColumn,
 } from 'typeorm';
-import { Exclude } from 'class-transformer';
+import { Exclude, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { Wallet } from './wallet.entity';
 
@@ -60,6 +58,7 @@ export class User {
 
   @ApiProperty({ description: "The user's wallet" })
   @OneToOne(() => Wallet, (wallet) => wallet.owner)
+  @Exclude({ toPlainOnly: true })
   wallet: Wallet;
 
   @ApiProperty({ description: 'The date when the user was created' })

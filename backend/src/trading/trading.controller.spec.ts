@@ -8,7 +8,7 @@ import { Transaction } from '../entities/transaction.entity';
 import { Memecoin } from '../entities/memecoin.entity';
 import { User } from '../entities/user.entity';
 import { Wallet } from '../entities/wallet.entity';
-import { WalletHolding } from 'src/entities/wallet-holding.entity';
+import { WalletHolding } from '../entities/wallet-holding.entity';
 
 describe('TradingController', () => {
   let controller: TradingController;
@@ -53,7 +53,6 @@ describe('TradingController', () => {
     creatorId: 'creator-id-1',
     totalSupply: '1000000',
     currentPrice: '0.5',
-    marketCap: '1000000',
     volume24h: '500000',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -94,7 +93,7 @@ describe('TradingController', () => {
   });
 
   const mockTradingService = {
-    tradeMemeCoin: jest.fn().mockResolvedValue(mockTradeResponse),
+    tradeMemecoin: jest.fn().mockResolvedValue(mockTradeResponse),
   };
 
   beforeEach(async () => {

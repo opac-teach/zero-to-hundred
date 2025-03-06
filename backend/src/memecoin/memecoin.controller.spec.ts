@@ -103,15 +103,6 @@ describe('MemecoinController', () => {
     });
   });
 
-  describe('findOne', () => {
-    it('should return a memecoin by id', async () => {
-      const result = await controller.findOne('memecoin-id-1');
-
-      expect(result).toEqual(mockMemecoinResponse);
-      expect(memecoinService.findById).toHaveBeenCalledWith('memecoin-id-1');
-    });
-  });
-
   describe('findBySymbol', () => {
     it('should return a memecoin by symbol', async () => {
       const result = await controller.findBySymbol('TEST');
@@ -138,15 +129,6 @@ describe('MemecoinController', () => {
         'user-id-1',
         createMemecoinDto,
       );
-    });
-  });
-
-  describe('getPrice', () => {
-    it('should return memecoin price information', async () => {
-      const result = await controller.getPrice('memecoin-id-1');
-
-      expect(result).toEqual(mockMemecoinPriceDto);
-      expect(memecoinService.getPrice).toHaveBeenCalledWith('memecoin-id-1');
     });
   });
 

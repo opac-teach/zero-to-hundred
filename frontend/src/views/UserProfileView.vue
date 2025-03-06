@@ -56,7 +56,7 @@
               <div>
                 <p class="text-sm text-gray-500 dark:text-gray-400">ZTH Balance</p>
                 <p class="text-xl font-medium text-gray-900 dark:text-white">
-                  {{ parseFloat(walletData?.zthBalance || "0").toLocaleString() }} ZTH
+                  {{ parseFloat(walletData?.zthBalance || "0") }} ZTH
                 </p>
               </div>
               <div>

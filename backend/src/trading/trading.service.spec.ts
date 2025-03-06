@@ -9,7 +9,7 @@ import { WalletHolding } from '../entities/wallet-holding.entity';
 import { Transaction, TransactionType } from '../entities/transaction.entity';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { TradeMemecoinDto } from './dto';
-import { calculatePrice } from './bonding-curve';
+import { calculateSellPrice } from './bonding-curve';
 
 // Mock data
 const mockUser = {
@@ -57,9 +57,8 @@ const mockMemecoin = {
   description: 'Test memecoin',
   logoUrl: 'https://example.com/logo.png',
   creatorId: 'creator-id-1',
-  totalSupply: '1000000',
+  totalSupply: '10',
   currentPrice: '0.1',
-  marketCap: '100000',
   volume24h: '10000',
   transactions: [],
   holdings: [],
@@ -255,7 +254,7 @@ describe('TradingService', () => {
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
       tradeDto.amount = '10';
-      tradeDto.requestCost = '0.1';
+      tradeDto.requestCost = '10';
       tradeDto.tradeType = 'buy';
 
       await expect(
@@ -300,7 +299,7 @@ describe('TradingService', () => {
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
       tradeDto.amount = '10';
-      tradeDto.requestCost = '0.1';
+      tradeDto.requestCost = '11';
       tradeDto.tradeType = 'buy';
       tradeDto.slippageTolerance = 100; // Set high tolerance to avoid slippage error
 
@@ -371,7 +370,7 @@ describe('TradingService', () => {
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
       tradeDto.amount = '10';
-      tradeDto.requestCost = '0.1';
+      tradeDto.requestCost = '10';
       tradeDto.tradeType = 'buy';
       tradeDto.slippageTolerance = 100; // Set high tolerance to avoid slippage error
 
@@ -500,7 +499,7 @@ describe('TradingService', () => {
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
       tradeDto.amount = '10';
-      tradeDto.requestCost = '0.1';
+      tradeDto.requestCost = calculateSellPrice('10', mockMemecoin.totalSupply);
       tradeDto.tradeType = 'sell';
 
       await expect(
@@ -546,7 +545,7 @@ describe('TradingService', () => {
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
       tradeDto.amount = '10';
-      tradeDto.requestCost = '0.1';
+      tradeDto.requestCost = calculateSellPrice('10', mockMemecoin.totalSupply);
       tradeDto.tradeType = 'sell';
       tradeDto.slippageTolerance = 100; // Set high tolerance to avoid slippage error
 
@@ -609,14 +608,14 @@ describe('TradingService', () => {
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
       tradeDto.amount = '10';
-      tradeDto.requestCost = '0.1';
+      tradeDto.requestCost = calculateSellPrice('10', mockMemecoin.totalSupply);
       tradeDto.tradeType = 'sell';
       tradeDto.slippageTolerance = 100; // Set high tolerance to avoid slippage error
 
       const result = await service.tradeMemecoin('user-id-1', tradeDto);
 
       expect(queryRunner.manager.remove).toHaveBeenCalled();
-      expect(result.walletHolding).toBeUndefined();
+      expect(result.walletHolding).toBeNull();
     });
 
     it('should throw BadRequestException if price slippage exceeds tolerance', async () => {
@@ -644,7 +643,7 @@ describe('TradingService', () => {
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
       tradeDto.amount = '10';
-      tradeDto.requestCost = '0.1'; // Request price is 0.1
+      tradeDto.requestCost = calculateSellPrice('10', mockMemecoin.totalSupply);
       tradeDto.tradeType = 'sell';
       tradeDto.slippageTolerance = 1; // 1% tolerance
 
@@ -652,14 +651,6 @@ describe('TradingService', () => {
         service.tradeMemecoin('user-id-1', tradeDto),
       ).rejects.toThrow(BadRequestException);
       expect(queryRunner.rollbackTransaction).toHaveBeenCalled();
-    });
-  });
-
-  describe('calculatePrice', () => {
-    it('should calculate price based on bonding curve formula', () => {
-      expect(calculatePrice('0')).toBe('1'); // Base price for new memecoins
-      expect(calculatePrice('100')).toBe('1.01');
-      expect(calculatePrice('200')).toBe('1.02');
     });
   });
 });

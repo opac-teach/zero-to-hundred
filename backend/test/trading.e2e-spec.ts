@@ -39,7 +39,6 @@ const mockMemecoin = {
   creatorId: 'creator-id-1',
   totalSupply: '1000000',
   currentPrice: '0.1',
-  marketCap: '100000',
   volume24h: '10000',
   createdAt: new Date(),
   updatedAt: new Date(),
