@@ -60,7 +60,6 @@ export class User {
 
   @ApiProperty({ description: "The user's wallet" })
   @OneToOne(() => Wallet, (wallet) => wallet.owner)
-  @JoinColumn()
   wallet: Wallet;
 
   @ApiProperty({ description: 'The date when the user was created' })

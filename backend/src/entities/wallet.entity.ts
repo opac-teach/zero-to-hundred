@@ -19,7 +19,7 @@ export class Wallet {
   id: string;
 
   @ApiProperty({ description: 'The owner of the wallet' })
-  @OneToOne(() => User)
+  @OneToOne(() => User, (user) => user.wallet)
   @JoinColumn({ name: 'ownerId' })
   owner: User;
 

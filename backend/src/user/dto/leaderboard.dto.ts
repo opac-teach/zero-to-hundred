@@ -1,33 +1,39 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import { UserResponseDto } from './user-response.dto';
+import { WalletResponseDto } from '../../wallet/dto';
 
-export class LeaderboardItem {
-  @ApiProperty({ description: 'The unique identifier of the user' })
+class UserResponseWithWalletDto extends UserResponseDto {
+  @ApiProperty({ description: 'The wallet of the user' })
   @Expose()
-  user: UserResponseDto;
+  @Type(() => WalletResponseDto)
+  wallet: WalletResponseDto;
+}
+
+export class LeaderboardItemDto {
+  @ApiProperty({ description: 'The user' })
+  @Expose()
+  @Type(() => UserResponseWithWalletDto)
+  user: UserResponseWithWalletDto;
+
   @ApiProperty({ description: 'The rank of the user in the leaderboard' })
   @Expose()
   rank: number;
-  @ApiProperty({ description: 'The ZTH balance of the user' })
-  @Expose()
-  zthBalance: number;
 
-  constructor(
-    user: Partial<UserResponseDto>,
-    rank: number,
-    zthBalance: number,
-  ) {
-    Object.assign(this.user, user);
-    this.rank = rank;
-    this.zthBalance = zthBalance;
+  constructor(user: Partial<UserResponseDto>, rank: number) {
+    Object.assign(this, { user, rank });
   }
 }
 
 export class LeaderboardDto {
-  @ApiProperty({ description: 'The leaderboard items' })
+  @ApiProperty({
+    description: 'The leaderboard items',
+    type: [LeaderboardItemDto],
+  })
   @Expose()
-  leaderboard: Array<LeaderboardItem>;
+  @Type(() => LeaderboardItemDto)
+  leaderboard: LeaderboardItemDto[];
+
   @ApiProperty({ description: 'The total number of users in the leaderboard' })
   @Expose()
   total: number;

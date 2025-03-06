@@ -3,17 +3,6 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
       <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Leaderboard</h1>
-      <div class="flex items-center space-x-4 w-full sm:w-auto">
-        <select
-          v-model="timeframe"
-          class="rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-indigo-500 focus:border-indigo-500"
-          :disabled="isLoading"
-        >
-          <option value="24h">Last 24 Hours</option>
-          <option value="7d">Last 7 Days</option>
-          <option value="30d">Last 30 Days</option>
-        </select>
-      </div>
     </div>
 
     <!-- Loading State -->
@@ -22,15 +11,24 @@
     </div>
 
     <!-- Error State -->
-    <div v-else-if="error" class="bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-800 rounded-lg p-4">
+    <div
+      v-else-if="error"
+      class="bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-800 rounded-lg p-4"
+    >
       <div class="flex">
         <div class="flex-shrink-0">
           <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            <path
+              fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+              clip-rule="evenodd"
+            />
           </svg>
         </div>
         <div class="ml-3">
-          <h3 class="text-sm font-medium text-red-800 dark:text-red-200">Error loading leaderboard</h3>
+          <h3 class="text-sm font-medium text-red-800 dark:text-red-200">
+            Error loading leaderboard
+          </h3>
           <div class="mt-2 text-sm text-red-700 dark:text-red-300">
             {{ error }}
           </div>
@@ -46,46 +44,70 @@
           <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead class="bg-gray-50 dark:bg-gray-700">
               <tr>
-                <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-20">
+                <th
+                  scope="col"
+                  class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-20"
+                >
                   Rank
                 </th>
-                <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th
+                  scope="col"
+                  class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                >
                   User
                 </th>
-                <th scope="col" class="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th
+                  scope="col"
+                  class="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                >
                   Balance
                 </th>
-                <th scope="col" class="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24">
+                <th
+                  scope="col"
+                  class="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24"
+                >
                   Profile
                 </th>
               </tr>
             </thead>
             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              <tr v-for="(trader, index) in traders" :key="trader.id" class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              <tr
+                v-for="(leaderboardUser, index) in leaderboard?.leaderboard"
+                :key="leaderboardUser.user.id"
+                class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
-                    <span class="text-sm font-medium text-gray-900 dark:text-white">{{ index + 1 }}</span>
+                    <span class="text-sm font-medium text-gray-900 dark:text-white">{{
+                      index + 1
+                    }}</span>
                   </div>
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex items-center">
-                    <img 
-                      :src="trader.profilePictureUrl || '/default-avatar.svg'" 
-                      :alt="trader.username" 
-                      class="h-10 w-10 rounded-full object-cover" 
+                    <img
+                      :src="leaderboardUser.user.profilePictureUrl || '/default-avatar.svg'"
+                      :alt="leaderboardUser.user.username"
+                      class="h-10 w-10 rounded-full object-cover"
                     />
                     <div class="ml-4">
-                      <div class="text-sm font-medium text-gray-900 dark:text-white">{{ trader.username }}</div>
-                      <div class="text-sm text-gray-500 dark:text-gray-400">{{ trader.fullName || 'No name set' }}</div>
+                      <div class="text-sm font-medium text-gray-900 dark:text-white">
+                        {{ leaderboardUser.user.username }}
+                      </div>
+                      <div class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ leaderboardUser.user.fullName || "No name set" }}
+                      </div>
                     </div>
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right">
-                  <div class="text-sm font-medium text-gray-900 dark:text-white">{{ trader.zthBalance.toLocaleString() }} ZTH</div>
+                  <div class="text-sm font-medium text-gray-900 dark:text-white">
+                    {{ leaderboardUser.user.wallet.zthBalance }} ZTH
+                  </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right">
-                  <router-link 
-                    :to="`/profile/${trader.id}`" 
+                  <router-link
+                    :to="`/user/${leaderboardUser.user.username}`"
                     class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 dark:text-indigo-200 dark:bg-indigo-900 dark:hover:bg-indigo-800"
                   >
                     View Profile
@@ -101,11 +123,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
-import { useUserStore } from '@/stores/user';
-import { users } from '@/api/client';
-import { useToast } from 'vue-toastification';
-import type { UserResponseDto, LeaderboardResponse } from '@/types/api';
+import { ref, onMounted } from "vue";
+import { useUserStore } from "@/stores/user";
+import { users } from "@/api/client";
+import { useToast } from "vue-toastification";
+import type { LeaderboardDto } from "@/types/api";
 
 interface Trader {
   id: string;
@@ -118,37 +140,29 @@ interface Trader {
 
 const userStore = useUserStore();
 const toast = useToast();
-const timeframe = ref<'24h' | '7d' | '30d'>('24h');
 const isLoading = ref(false);
 const error = ref<string | null>(null);
 
-const traders = ref<Trader[]>([]);
+const leaderboard = ref<LeaderboardDto | null>(null);
 
 // Fetch leaderboard data
 async function fetchLeaderboard() {
   try {
     isLoading.value = true;
     error.value = null;
-    const response = await users.getLeaderboard(1, 100, timeframe.value);
-    const leaderboardData = response.data as LeaderboardResponse;
-    
-    if (leaderboardData && Array.isArray(leaderboardData.users)) {
-      traders.value = leaderboardData.users.map(user => ({
-        id: user.id,
-        username: user.username,
-        fullName: user.fullName,
-        profilePictureUrl: user.profilePictureUrl,
-        zthBalance: user.zthBalance,
-        rank: user.rank
-      })) as Trader[];
+    const response = await users.getLeaderboard(1, 100);
+    const leaderboardData = response.data as LeaderboardDto;
+
+    if (leaderboardData) {
+      leaderboard.value = leaderboardData;
     } else {
-      traders.value = [];
-      error.value = 'Invalid response format from leaderboard API';
-      console.error('Invalid response format from leaderboard API');
+      leaderboard.value = null;
+      error.value = "Invalid response format from leaderboard API";
+      console.error("Invalid response format from leaderboard API");
     }
   } catch (error: any) {
-    traders.value = [];
-    error.value = error.message || 'Failed to fetch leaderboard data';
+    leaderboard.value = null;
+    error.value = error.message || "Failed to fetch leaderboard data";
     toast.error(error.value);
   } finally {
     isLoading.value = false;
@@ -157,7 +171,4 @@ async function fetchLeaderboard() {
 
 // Initial fetch
 onMounted(fetchLeaderboard);
-
-// Watch for timeframe changes
-watch(timeframe, fetchLeaderboard);
-</script> 
+</script>

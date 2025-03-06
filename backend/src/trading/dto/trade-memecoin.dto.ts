@@ -4,15 +4,14 @@ import {
   IsString,
   IsNumber,
   IsOptional,
-  Min,
   IsPositive,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { BigNumber } from 'bignumber.js';
+import BigNumber from 'bignumber.js';
 
-export class BuyMemecoinDto {
+export class TradeMemecoinDto {
   @ApiProperty({
-    description: 'The ID of the memecoin to buy',
+    description: 'The ID of the memecoin to sell',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
   @IsString()
@@ -20,8 +19,16 @@ export class BuyMemecoinDto {
   memecoinId: string;
 
   @ApiProperty({
-    description: 'The amount of ZTH to spend',
-    example: '10',
+    description: 'The type of trade to perform',
+    example: 'buy',
+  })
+  @IsString()
+  @IsNotEmpty()
+  tradeType: 'buy' | 'sell';
+
+  @ApiProperty({
+    description: 'The amount of memecoin tokens to sell',
+    example: '5',
   })
   @IsString()
   @IsNotEmpty()
@@ -29,13 +36,13 @@ export class BuyMemecoinDto {
   amount: string;
 
   @ApiProperty({
-    description: 'The price of the memecoin at the time of the request',
+    description: 'The cost of the trade (in ZTH) at the time of the request',
     example: '0.1',
   })
   @IsString()
   @IsNotEmpty()
   @Transform(({ value }) => new BigNumber(value).toString())
-  requestPrice: string;
+  requestCost: string;
 
   @ApiProperty({
     description: 'The maximum slippage tolerance in percentage',

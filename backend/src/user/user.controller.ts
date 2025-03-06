@@ -44,15 +44,7 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: 'Return the leaderboard',
-    schema: {
-      properties: {
-        users: {
-          type: 'array',
-          items: { $ref: '#/components/schemas/UserResponseDto' },
-        },
-        total: { type: 'number' },
-      },
-    },
+    type: LeaderboardDto,
   })
   @ApiQuery({
     name: 'page',

@@ -1,6 +1,6 @@
-import { ref, onMounted, onUnmounted } from 'vue';
-import { useMarketStore } from '@/stores/market';
-import { useUIStore } from '@/stores/ui';
+import { ref, onMounted, onUnmounted } from "vue";
+import { useMarketStore } from "@/stores/market";
+import { useUIStore } from "@/stores/ui";
 
 export function useRealTimeUpdates() {
   const marketStore = useMarketStore();
@@ -15,13 +15,13 @@ export function useRealTimeUpdates() {
     try {
       // Update prices for all memecoins
       await Promise.all(
-        marketStore.memecoinsList.map(memecoin => 
-          marketStore.fetchMemecoinPrice(memecoin.id)
+        marketStore.memecoinsList.map((memecoin) =>
+          marketStore.fetchMemecoinDetails(memecoin.symbol)
         )
       );
     } catch (error) {
-      console.error('Failed to update prices:', error);
-      uiStore.setError('Failed to update prices');
+      console.error("Failed to update prices:", error);
+      uiStore.setError("Failed to update prices");
     }
   }
 
@@ -29,15 +29,15 @@ export function useRealTimeUpdates() {
     try {
       await marketStore.fetchTradingVolume();
     } catch (error) {
-      console.error('Failed to update trading volume:', error);
-      uiStore.setError('Failed to update trading volume');
+      console.error("Failed to update trading volume:", error);
+      uiStore.setError("Failed to update trading volume");
     }
   }
 
   function startUpdates() {
     // Start price updates
     priceInterval = window.setInterval(updatePrices, 5000);
-    
+
     // Start trading volume updates
     volumeInterval = window.setInterval(updateTradingVolume, 60000);
 
@@ -71,4 +71,4 @@ export function useRealTimeUpdates() {
     startUpdates,
     stopUpdates,
   };
-} 
+}

@@ -1,7 +1,9 @@
 <template>
   <div class="min-h-screen bg-background">
     <!-- Navigation -->
-    <header class="sticky top-0 z-[100] w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header
+      class="sticky top-0 z-[100] w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+    >
       <div class="container flex h-14 items-center">
         <div class="mr-4 flex flex-1">
           <!-- Logo -->
@@ -16,11 +18,7 @@
               :key="item.name"
               :to="item.href"
               class="transition-colors hover:text-foreground/80"
-              :class="[
-                route.path === item.href
-                  ? 'text-foreground'
-                  : 'text-foreground/60',
-              ]"
+              :class="[route.path === item.href ? 'text-foreground' : 'text-foreground/60']"
             >
               {{ item.name }}
             </router-link>
@@ -30,11 +28,7 @@
         <!-- Right side -->
         <div class="flex flex-1 items-center justify-end space-x-4">
           <!-- Theme toggle -->
-          <Button
-            variant="ghost"
-            size="icon"
-            @click="uiStore.toggleDarkMode"
-          >
+          <Button variant="ghost" size="icon" @click="uiStore.toggleDarkMode">
             <sun-icon v-if="uiStore.isDarkMode" class="h-4 w-4" />
             <moon-icon v-else class="h-4 w-4" />
           </Button>
@@ -42,9 +36,7 @@
           <!-- User menu -->
           <div v-if="userStore.isAuthenticated" class="flex items-center space-x-4">
             <!-- ZTH Balance -->
-            <div class="text-sm font-medium">
-              {{ walletStore.zthBalance }} ZTH
-            </div>
+            <div class="text-sm font-medium">{{ walletStore.zthBalance }} ZTH</div>
 
             <!-- Profile dropdown -->
             <div class="relative">
@@ -54,8 +46,13 @@
                 @click="isProfileMenuOpen = !isProfileMenuOpen"
               >
                 <Avatar class="h-9 w-9">
-                  <AvatarImage :src="userStore.currentUser?.profilePictureUrl || '/default-avatar.svg'" :alt="userStore.currentUser?.username" />
-                  <AvatarFallback>{{ userStore.currentUser?.username?.charAt(0).toUpperCase() }}</AvatarFallback>
+                  <AvatarImage
+                    :src="userStore.currentUser?.profilePictureUrl || '/default-avatar.svg'"
+                    :alt="userStore.currentUser?.username"
+                  />
+                  <AvatarFallback>{{
+                    userStore.currentUser?.username?.charAt(0).toUpperCase()
+                  }}</AvatarFallback>
                 </Avatar>
               </Button>
               <div
@@ -63,7 +60,7 @@
                 class="absolute right-0 mt-2 w-48 bg-background border rounded-md shadow-lg z-10"
               >
                 <router-link
-                  to="/profile"
+                  to="/user"
                   class="block px-4 py-2 hover:bg-accent cursor-pointer"
                   @click="isProfileMenuOpen = false"
                 >
@@ -89,14 +86,10 @@
           <!-- Login/Register buttons -->
           <div v-else class="flex items-center space-x-4">
             <Button variant="ghost" as-child>
-              <router-link to="/login">
-                Login
-              </router-link>
+              <router-link to="/login"> Login </router-link>
             </Button>
             <Button as-child>
-              <router-link to="/register">
-                Register
-              </router-link>
+              <router-link to="/register"> Register </router-link>
             </Button>
           </div>
         </div>
@@ -111,14 +104,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineComponent, onMounted, onUnmounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
-import { useUserStore } from '@/stores/user';
-import { useWalletStore } from '@/stores/wallet';
-import { useUIStore } from '@/stores/ui';
-import { SunIcon, MoonIcon } from 'lucide-vue-next';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { ref, defineComponent, onMounted, onUnmounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { useUserStore } from "@/stores/user";
+import { useWalletStore } from "@/stores/wallet";
+import { useUIStore } from "@/stores/ui";
+import { SunIcon, MoonIcon } from "lucide-vue-next";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const router = useRouter();
 const route = useRoute();
@@ -128,16 +121,16 @@ const uiStore = useUIStore();
 const isProfileMenuOpen = ref(false);
 
 const navigationItems = [
-  { name: 'Home', href: '/' },
-  { name: 'Memecoins', href: '/memecoins' },
-  { name: 'Leaderboard', href: '/leaderboard' },
-  { name: 'Create Memecoin', href: '/create-memecoin' },
+  { name: "Home", href: "/" },
+  { name: "Memecoins", href: "/memecoins" },
+  { name: "Leaderboard", href: "/leaderboard" },
+  { name: "Create Memecoin", href: "/create-memecoin" },
 ];
 
 async function handleLogout() {
   isProfileMenuOpen.value = false;
   await userStore.logout();
-  router.push('/login');
+  router.push("/login");
 }
 </script>
 
@@ -152,4 +145,4 @@ async function handleLogout() {
 .fade-leave-to {
   opacity: 0;
 }
-</style> 
+</style>

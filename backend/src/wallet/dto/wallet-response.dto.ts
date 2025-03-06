@@ -1,9 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude, Expose, Transform, Type } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import { WalletHoldingResponseDto } from './wallet-holding-response.dto';
-import { UserResponseDto } from 'src/user/dto/user-response.dto';
+import { UserResponseDto } from '../../user/dto/user-response.dto';
 
-@Exclude()
 export class WalletResponseDto {
   @ApiProperty({ description: 'The unique identifier of the wallet' })
   @Expose()

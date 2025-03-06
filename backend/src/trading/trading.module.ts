@@ -7,6 +7,8 @@ import { User } from '../entities/user.entity';
 import { Wallet } from '../entities/wallet.entity';
 import { WalletHolding } from '../entities/wallet-holding.entity';
 import { Transaction } from '../entities/transaction.entity';
+import appConfig from 'src/config/app.config';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -17,6 +19,9 @@ import { Transaction } from '../entities/transaction.entity';
       WalletHolding,
       Transaction,
     ]),
+    ConfigModule.forRoot({
+      load: [appConfig],
+    }),
   ],
   providers: [TradingService],
   controllers: [TradingController],

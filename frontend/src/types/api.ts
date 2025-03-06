@@ -3,14 +3,12 @@ export interface User {
   username: string;
   email: string;
   fullName: string;
-  role: string;
   profilePictureUrl: string;
   bannerUrl: string;
   description: string;
   backgroundColor: string;
   textColor: string;
-  zthBalance: number;
-  rank: number;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -21,13 +19,12 @@ export interface Memecoin {
   symbol: string;
   description: string;
   logoUrl: string;
-  totalSupply: number;
-  currentPrice: number;
-  marketCap: number;
-  volume24h: number;
   creator: User;
   creatorId: string;
-  isActive: boolean;
+  totalSupply: string;
+  currentPrice: string;
+  marketCap: string;
+  volume24h: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -37,17 +34,16 @@ export interface WalletHolding {
   walletId: string;
   memecoin: Memecoin;
   memecoinId: string;
-  amount: number;
-  valueUsd: number;
+  amount: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface Wallet {
   id: string;
-  address: string;
-  balance: number;
+  zthBalance: string;
   ownerId: string;
+  owner: User;
   holdings: WalletHolding[];
   createdAt: string;
   updatedAt: string;
@@ -55,10 +51,10 @@ export interface Wallet {
 
 export interface Transaction {
   id: string;
-  type: 'buy' | 'sell' | 'create';
-  amount: number;
-  price: number;
-  totalValue: number;
+  type: "BUY" | "SELL" | "CREATE";
+  memeCoinAmount: string;
+  zthAmount: string;
+  price: string;
   user: User;
   userId: string;
   memecoin: Memecoin;
@@ -100,16 +96,17 @@ export interface UserResponseDto {
   username: string;
   email: string;
   fullName: string;
-  role: string;
   profilePictureUrl: string;
   bannerUrl: string;
   description: string;
   backgroundColor: string;
   textColor: string;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  zthBalance: number;
-  rank: number;
+}
+export interface UserWithWalletResponseDto extends UserResponseDto {
+  wallet: WalletResponseDto;
 }
 
 export interface UpdateUserDto {
@@ -128,13 +125,12 @@ export interface MemecoinResponseDto {
   symbol: string;
   description: string;
   logoUrl: string;
-  totalSupply: number;
-  currentPrice: number;
-  marketCap: number;
-  volume24h: number;
   creator: UserResponseDto;
   creatorId: string;
-  isActive: boolean;
+  totalSupply: string;
+  currentPrice: string;
+  marketCap: string;
+  volume24h: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -147,9 +143,9 @@ export interface CreateMemecoinDto {
 }
 
 export interface MemecoinPriceDto {
-  price: number;
-  supply: number;
-  marketSentiment: 'POSITIVE' | 'NEUTRAL' | 'NEGATIVE';
+  price: string;
+  supply: string;
+  marketSentiment: "POSITIVE" | "NEUTRAL" | "NEGATIVE";
 }
 
 export interface WalletHoldingResponseDto {
@@ -157,17 +153,16 @@ export interface WalletHoldingResponseDto {
   walletId: string;
   memecoin: MemecoinResponseDto;
   memecoinId: string;
-  amount: number;
-  valueUsd: number;
+  amount: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface WalletResponseDto {
   id: string;
-  zthBalance: number;
+  zthBalance: string;
   ownerId: string;
-  isActive: boolean;
+  owner: UserResponseDto;
   holdings: WalletHoldingResponseDto[];
   createdAt: string;
   updatedAt: string;
@@ -175,10 +170,10 @@ export interface WalletResponseDto {
 
 export interface TransactionResponseDto {
   id: string;
-  type: 'buy' | 'sell' | 'create';
-  amount: number;
-  price: number;
-  totalValue: number;
+  type: "BUY" | "SELL" | "CREATE";
+  memeCoinAmount: string;
+  zthAmount: string;
+  price: string;
   user: UserResponseDto;
   userId: string;
   memecoin: MemecoinResponseDto;
@@ -188,42 +183,45 @@ export interface TransactionResponseDto {
 
 export interface BuyMemecoinDto {
   memecoinId: string;
-  amount: number;
-  requestPrice: number;
+  amount: string;
+  requestPrice: string;
   slippageTolerance?: number;
 }
 
 export interface SellMemecoinDto {
   memecoinId: string;
-  amount: number;
-  requestPrice: number;
+  amount: string;
+  requestPrice: string;
   slippageTolerance?: number;
 }
 
 export interface TradeResponseDto {
-  transactionId: string;
-  type: 'buy' | 'sell' | 'create';
-  memecoinId: string;
-  memecoinSymbol: string;
-  newHoldingAmount: number;
+  transaction: TransactionResponseDto;
+  memecoin: MemecoinResponseDto;
+  walletHolding: WalletHoldingResponseDto;
 }
 
 export interface MemecoinVolumeDto {
   id: string;
   ticker: string;
-  volume: number;
+  volume: string;
 }
 
 export interface TradingVolumeDto {
-  totalVolume: number;
-  buyVolume: number;
-  sellVolume: number;
-  timeframe: '24h' | '7d' | '30d';
+  totalVolume: string;
+  buyVolume: string;
+  sellVolume: string;
+  timeframe: "24h" | "7d" | "30d";
   memecoins: MemecoinVolumeDto[];
 }
 
-export interface LeaderboardResponse {
-  users: UserResponseDto[];
+export interface LeaderboardItemDto {
+  user: UserWithWalletResponseDto;
+  rank: number;
+}
+
+export interface LeaderboardDto {
+  leaderboard: LeaderboardItemDto[];
   total: number;
 }
 
@@ -231,4 +229,4 @@ export interface ApiError {
   message: string;
   code?: string;
   status?: number;
-} 
+}

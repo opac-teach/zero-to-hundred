@@ -4,21 +4,17 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
-import { Wallet } from '../entities/wallet.entity';
-import { BigNumber } from 'bignumber.js';
-import { LeaderboardDto, LeaderboardItem } from './dto/leaderboard.dto';
+import { LeaderboardDto, LeaderboardItemDto } from './dto/leaderboard.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    @InjectRepository(Wallet)
-    private walletRepository: Repository<Wallet>,
   ) {}
 
   async findAll(): Promise<UserResponseDto[]> {
@@ -100,12 +96,11 @@ export class UserService {
     const usersWithRank = users.map((user, index) => ({
       ...user,
       rank: (page - 1) * limit + index + 1,
-      zthBalance: new BigNumber(user.wallet?.zthBalance || '0').toNumber(),
     }));
 
     return {
       leaderboard: usersWithRank.map(
-        (user) => new LeaderboardItem(user, user.rank, user.zthBalance),
+        (user) => new LeaderboardItemDto(user, user.rank),
       ),
       total,
     };

@@ -1,19 +1,32 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import MainLayout from '@/layouts/MainLayout.vue'
-import { useUserStore } from '@/stores/user'
-import { useUIStore } from '@/stores/ui'
+import { onMounted, watch } from "vue";
+import MainLayout from "@/layouts/MainLayout.vue";
+import { useUserStore } from "@/stores/user";
+import { useUIStore } from "@/stores/ui";
+import { useWalletStore } from "@/stores/wallet";
 
-const userStore = useUserStore()
-const uiStore = useUIStore()
+const userStore = useUserStore();
+const uiStore = useUIStore();
+const walletStore = useWalletStore();
+
+// Initialize wallet when user is authenticated
+watch(
+  () => userStore.isAuthenticated,
+  (isAuthenticated) => {
+    if (isAuthenticated) {
+      walletStore.initializeWallet();
+    }
+  },
+  { immediate: true }
+);
 
 onMounted(() => {
-  userStore.initializeFromStorage()
+  userStore.initializeFromStorage();
   // Apply dark mode class if needed
   if (uiStore.isDarkMode) {
-    document.documentElement.classList.add('dark')
+    document.documentElement.classList.add("dark");
   }
-})
+});
 </script>
 
 <template>

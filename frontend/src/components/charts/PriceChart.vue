@@ -13,7 +13,7 @@
             'px-3 py-1 rounded-md text-sm font-medium',
             selectedPeriod === period
               ? 'bg-indigo-600 text-white'
-              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600',
           ]"
         >
           {{ period }}
@@ -22,7 +22,10 @@
     </div>
     <div class="relative h-[300px]">
       <canvas ref="chartRef"></canvas>
-      <div v-if="isLoading" class="absolute inset-0 flex items-center justify-center bg-white dark:bg-gray-800 bg-opacity-75">
+      <div
+        v-if="isLoading"
+        class="absolute inset-0 flex items-center justify-center bg-white dark:bg-gray-800 bg-opacity-75"
+      >
         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
       </div>
     </div>
@@ -30,16 +33,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue';
-import Chart from 'chart.js/auto';
-import type { MemecoinResponseDto } from '@/types/api';
+import { ref, onMounted, onUnmounted, watch } from "vue";
+import Chart from "chart.js/auto";
+import type { MemecoinResponseDto } from "@/types/api";
 
 const props = defineProps<{
   memecoin: MemecoinResponseDto;
 }>();
 
-const periods = ['24h', '7d', '30d'];
-const selectedPeriod = ref('24h');
+const periods = ["24h", "7d", "30d"];
+const selectedPeriod = ref("24h");
 const chartRef = ref<HTMLCanvasElement | null>(null);
 const chart = ref<Chart | null>(null);
 const isLoading = ref(false);
@@ -53,15 +56,15 @@ const generateMockData = (period: string) => {
   let count: number;
 
   switch (period) {
-    case '24h':
+    case "24h":
       interval = 3600000; // 1 hour
       count = 24;
       break;
-    case '7d':
+    case "7d":
       interval = 86400000; // 1 day
       count = 7;
       break;
-    case '30d':
+    case "30d":
       interval = 86400000; // 1 day
       count = 30;
       break;
@@ -73,7 +76,7 @@ const generateMockData = (period: string) => {
   for (let i = count - 1; i >= 0; i--) {
     const time = new Date(now.getTime() - i * interval);
     labels.push(time.toLocaleTimeString());
-    data.push(props.memecoin.currentPrice * (1 + Math.random() * 0.1 - 0.05));
+    data.push(Number(props.memecoin.currentPrice) * (1 + Math.random() * 0.1 - 0.05));
   }
 
   return { labels, data };
@@ -82,21 +85,21 @@ const generateMockData = (period: string) => {
 function initChart() {
   if (!chartRef.value) return;
 
-  const ctx = chartRef.value.getContext('2d');
+  const ctx = chartRef.value.getContext("2d");
   if (!ctx) return;
 
   const { labels, data } = generateMockData(selectedPeriod.value);
 
   chart.value = new Chart(ctx, {
-    type: 'line',
+    type: "line",
     data: {
       labels,
       datasets: [
         {
-          label: 'Price (ZTH)',
+          label: "Price (ZTH)",
           data,
-          borderColor: '#4F46E5',
-          backgroundColor: 'rgba(79, 70, 229, 0.1)',
+          borderColor: "#4F46E5",
+          backgroundColor: "rgba(79, 70, 229, 0.1)",
           tension: 0.4,
           fill: true,
         },
@@ -114,10 +117,10 @@ function initChart() {
         y: {
           beginAtZero: false,
           grid: {
-            color: 'rgba(0, 0, 0, 0.1)',
+            color: "rgba(0, 0, 0, 0.1)",
           },
           ticks: {
-            color: '#6B7280',
+            color: "#6B7280",
           },
         },
         x: {
@@ -125,7 +128,7 @@ function initChart() {
             display: false,
           },
           ticks: {
-            color: '#6B7280',
+            color: "#6B7280",
           },
         },
       },
@@ -160,4 +163,4 @@ onUnmounted(() => {
     chart.value.destroy();
   }
 });
-</script> 
+</script>
