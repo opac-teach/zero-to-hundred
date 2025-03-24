@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import type { MemecoinResponseDto, TradingVolumeDto, CreateMemecoinDto } from "@/types/api";
+import type { MemecoinResponseDto, TradingVolumeDto, CreateMemecoinDto } from "@/api/types";
 import { memecoins, statistics } from "@/api/client";
 import { useWalletStore } from "@/stores/wallet";
 

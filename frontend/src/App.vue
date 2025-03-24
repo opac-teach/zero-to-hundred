@@ -21,7 +21,6 @@ watch(
 );
 
 onMounted(() => {
-  userStore.initializeFromStorage();
   // Apply dark mode class if needed
   if (uiStore.isDarkMode) {
     document.documentElement.classList.add("dark");

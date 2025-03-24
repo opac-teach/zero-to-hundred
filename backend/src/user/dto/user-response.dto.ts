@@ -11,10 +11,6 @@ export class UserResponseDto {
   @Expose()
   username: string;
 
-  @ApiProperty({ description: 'The email of the user' })
-  @Expose()
-  email: string;
-
   @ApiProperty({ description: 'The full name of the user' })
   @Expose()
   fullName: string;
@@ -52,6 +48,18 @@ export class UserResponseDto {
   updatedAt: Date;
 
   constructor(partial: Partial<UserResponseDto>) {
+    Object.assign(this, partial);
+  }
+}
+
+@Exclude()
+export class MyUserResponseDto extends UserResponseDto {
+  @ApiProperty({ description: 'The email of the user' })
+  @Expose()
+  email: string;
+
+  constructor(partial: Partial<MyUserResponseDto>) {
+    super(partial);
     Object.assign(this, partial);
   }
 }

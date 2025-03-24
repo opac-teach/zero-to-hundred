@@ -125,9 +125,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useUserStore } from "@/stores/user";
-import { users } from "@/api/client";
+import { users } from "@/api";
 import { useToast } from "vue-toastification";
-import type { LeaderboardDto } from "@/types/api";
+import type { LeaderboardDto } from "@/api";
 
 interface Trader {
   id: string;

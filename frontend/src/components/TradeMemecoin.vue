@@ -125,9 +125,9 @@ import { Input } from "@/components/ui/input";
 import { Info } from "lucide-vue-next";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { TradeEstimationResponseDto } from "@/types/api";
+import type { TradeEstimationResponseDto } from "@/api";
 import { trading } from "@/api/client";
-import type { MemecoinResponseDto } from "@/types/api";
+import type { MemecoinResponseDto } from "@/api";
 
 const { memecoin } = defineProps<{
   memecoin?: MemecoinResponseDto;

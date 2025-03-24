@@ -49,6 +49,11 @@
           </router-link>
         </div>
 
+        <Card v-if="user?.description">
+          <CardContent class="mt-4">
+            <div v-html="marked.parse(user?.description || '')" class="prose"></div>
+          </CardContent>
+        </Card>
         <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Statistics</h2>
@@ -108,42 +113,225 @@
         </div>
       </div>
     </div>
+
+    <!-- Statistics -->
+    <Card>
+      <CardHeader>
+        <CardTitle>Trading Statistics</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card>
+            <CardContent class="pt-6">
+              <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Trades</div>
+              <div class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
+                {{ tradingStore.stats.totalTrades }}
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent class="pt-6">
+              <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Win Rate</div>
+              <div class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
+                {{ (tradingStore.stats.winRate || 0).toFixed(1) }}%
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent class="pt-6">
+              <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Avg. Return</div>
+              <div
+                class="mt-1 text-2xl font-semibold"
+                :class="
+                  (tradingStore.stats.averageReturn || 0) >= 0
+                    ? 'text-green-600 dark:text-green-400'
+                    : 'text-red-600 dark:text-red-400'
+                "
+              >
+                {{ (tradingStore.stats.averageReturn || 0).toFixed(2) }} ZTH
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent class="pt-6">
+              <div class="text-sm font-medium text-gray-500 dark:text-gray-400">24h Change</div>
+              <div
+                class="mt-1 text-2xl font-semibold"
+                :class="
+                  (tradingStore.stats.change24h || 0) >= 0
+                    ? 'text-green-600 dark:text-green-400'
+                    : 'text-red-600 dark:text-red-400'
+                "
+              >
+                {{ tradingStore.stats.change24h >= 0 ? "+" : ""
+                }}{{ tradingStore.stats.change24h.toFixed(2) }}%
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card>
+            <CardContent class="pt-6">
+              <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Best Trade</div>
+              <div class="mt-1">
+                <div class="text-lg font-semibold text-gray-900 dark:text-white">
+                  {{ tradingStore.stats.bestTrade.memecoinName }}
+                </div>
+                <div class="text-sm text-green-600 dark:text-green-400">
+                  +{{ tradingStore.stats.bestTrade.profit }} ZTH
+                </div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">
+                  {{ new Date(tradingStore.stats.bestTrade.date).toLocaleDateString() }}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent class="pt-6">
+              <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                Trading Activity
+              </div>
+              <div class="mt-1">
+                <div class="text-lg font-semibold text-gray-900 dark:text-white">
+                  {{ (tradingStore.stats.tradingFrequency || 0).toFixed(1) }}
+                </div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">trades per day</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">
+                  Avg. holding time:
+                  {{ (tradingStore.stats.averageHoldingTime || 0).toFixed(1) }} days
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </CardContent>
+    </Card>
+
+    <!-- Portfolio Value -->
+    <Card>
+      <CardHeader>
+        <CardTitle>Portfolio Value</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div class="space-y-4">
+          <Card>
+            <CardContent class="pt-6">
+              <div class="flex justify-between items-center">
+                <span class="text-gray-600 dark:text-gray-400">ZTH Balance</span>
+                <span class="font-medium text-gray-900 dark:text-white"
+                  >{{ walletStore.zthBalance }} ZTH</span
+                >
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent class="pt-6">
+              <div class="flex justify-between items-center">
+                <span class="text-gray-600 dark:text-gray-400">Total Holdings</span>
+                <span class="font-medium text-gray-900 dark:text-white"
+                  >{{ tradingStore.stats.totalHoldings }} ZTH</span
+                >
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent class="pt-6">
+              <div class="flex justify-between items-center">
+                <span class="text-gray-600 dark:text-gray-400">24h Change</span>
+                <span
+                  :class="[
+                    'font-medium',
+                    tradingStore.stats.change24h >= 0
+                      ? 'text-green-600 dark:text-green-400'
+                      : 'text-red-600 dark:text-red-400',
+                  ]"
+                >
+                  {{ tradingStore.stats.change24h >= 0 ? "+" : ""
+                  }}{{ tradingStore.stats.change24h.toFixed(2) }}%
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </CardContent>
+    </Card>
+
+    <!-- Created Memecoins -->
+    <Card>
+      <CardHeader>
+        <CardTitle>Created Memecoins</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div class="space-y-4">
+          <Card v-for="memecoin in createdMemecoins" :key="memecoin.id">
+            <CardContent class="pt-6">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <Avatar>
+                    <AvatarImage
+                      :src="memecoin.logoUrl || assetsStore.defaultMemecoinLogo"
+                      :alt="memecoin.name"
+                    />
+                    <AvatarFallback>{{ memecoin.symbol }}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div class="font-medium text-gray-900 dark:text-white">{{ memecoin.name }}</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                      {{ memecoin.symbol }}
+                    </div>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="font-medium text-gray-900 dark:text-white">
+                    {{ parseFloat(memecoin.currentPrice).toFixed(6) }} ZTH
+                  </div>
+                  <div class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ memecoin.volume24h }} ZTH 24h
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </CardContent>
+    </Card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import { useRoute } from "vue-router";
 import { users, wallet } from "@/api/client";
 import { useToast } from "vue-toastification";
 import { usePageTitle } from "@/composables/usePageTitle";
-import type { UserResponseDto, TransactionResponseDto, WalletResponseDto } from "@/types/api";
+import type { UserResponseDto, TransactionResponseDto, WalletResponseDto } from "@/api";
 import { useUserStore } from "@/stores/user";
 import { Button } from "@/components/ui/button";
+import { marked } from "marked";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useMarketStore } from "@/stores/market";
+import { useTradingStore } from "@/stores/trading";
+import { useWalletStore } from "@/stores/wallet";
+import { useAssetsStore } from "@/stores/assets";
 
 const userStore = useUserStore();
+const marketStore = useMarketStore();
+const walletStore = useWalletStore();
+const tradingStore = useTradingStore();
+const assetsStore = useAssetsStore();
 const route = useRoute();
 const toast = useToast();
 const isLoading = ref(false);
 const error = ref<string | null>(null);
-const user = ref<UserResponseDto | null>(null);
 const transactions = ref<TransactionResponseDto[]>([]);
 const walletData = ref<WalletResponseDto | null>(null);
 
-// Dynamic page title based on username
-const { updateTitle } = usePageTitle(() =>
-  user.value?.username ? `${user.value.username}'s Profile` : "User Profile"
-);
+const user = ref<UserResponseDto | null>(null);
 
-// Update title when user data changes
-watch(
-  () => user.value,
-  () => {
-    if (user.value) {
-      updateTitle();
-    }
-  },
-  { immediate: true }
+usePageTitle(user, (userValue) =>
+  userValue?.username ? `${userValue.username}'s Profile` : "User Profile"
 );
 
 function formatDate(dateString?: string) {
@@ -159,15 +347,12 @@ async function fetchUserProfile() {
   try {
     isLoading.value = true;
     error.value = null;
-    const username = route.params.username as string;
-    if (username) {
-      // Use users.getAll and filter by ID since getById doesn't exist
-      const response = await users.getByUsername(username);
-      user.value = response.data;
-    } else {
-      const response = await users.getMyProfile();
-      user.value = response.data;
+    let username = route.params.username as string;
+    if (!username) {
+      username = userStore.currentUser?.username || "";
     }
+    const response = await users.getByUsername(username);
+    user.value = response.data;
   } catch (error: any) {
     error.value = error.message || "Failed to fetch user profile";
     toast.error(error.value);
@@ -193,6 +378,10 @@ async function fetchTransactions() {
     console.error("Failed to fetch transactions:", error);
   }
 }
+
+const createdMemecoins = computed(() =>
+  marketStore.memecoinsList.filter((m) => m.creatorId === user.value?.id)
+);
 
 onMounted(async () => {
   await Promise.all([fetchUserProfile(), fetchTransactions(), fetchWallet()]);

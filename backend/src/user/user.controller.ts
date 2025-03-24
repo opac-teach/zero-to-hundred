@@ -21,7 +21,7 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { UserResponseDto } from './dto/user-response.dto';
+import { UserResponseDto, MyUserResponseDto } from './dto/user-response.dto';
 import { LeaderboardDto } from './dto/leaderboard.dto';
 
 @ApiTags('users')
@@ -76,7 +76,7 @@ export class UserController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  async getProfile(@Request() req): Promise<UserResponseDto> {
+  async getProfile(@Request() req): Promise<MyUserResponseDto> {
     return this.userService.findOne(req.user.id);
   }
 
@@ -109,7 +109,7 @@ export class UserController {
   async updateProfile(
     @Request() req,
     @Body() updateUserDto: UpdateUserDto,
-  ): Promise<UserResponseDto> {
+  ): Promise<MyUserResponseDto> {
     return this.userService.update(req.user.id, updateUserDto);
   }
 }

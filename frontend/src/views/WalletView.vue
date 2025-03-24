@@ -183,28 +183,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useWalletStore } from "@/stores/wallet";
-import { useMarketStore } from "@/stores/market";
 import { useAssetsStore } from "@/stores/assets";
 import { useToast } from "vue-toastification";
-import type { Transaction } from "@/types/api";
-
-interface Holding {
-  id: string;
-  memecoin: {
-    id: string;
-    name: string;
-    symbol: string;
-    logoUrl: string;
-  };
-  amount: number;
-  valueUsd: number;
-}
 
 const walletStore = useWalletStore();
-const marketStore = useMarketStore();
 const assetsStore = useAssetsStore();
 const toast = useToast();
-const showDepositModal = ref(false);
 const sortHoldingsBy = ref<"value" | "amount">("value");
 const selectedFilter = ref("all");
 

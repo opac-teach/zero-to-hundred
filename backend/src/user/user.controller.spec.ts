@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
-import { UserResponseDto } from './dto/user-response.dto';
+import { MyUserResponseDto, UserResponseDto } from './dto/user-response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 describe('UserController', () => {
@@ -11,10 +11,13 @@ describe('UserController', () => {
   const mockUserResponse = new UserResponseDto({
     id: 'user-id-1',
     username: 'testuser',
-    email: 'test@example.com',
     fullName: 'Test User',
     createdAt: new Date(),
     updatedAt: new Date(),
+  });
+  const mockMyUserResponse = new MyUserResponseDto({
+    ...mockUserResponse,
+    email: 'test@example.com',
   });
 
   const mockLeaderboardResponse = {
@@ -76,7 +79,7 @@ describe('UserController', () => {
 
       const result = await controller.getProfile(req);
 
-      expect(result).toEqual(mockUserResponse);
+      expect(result).toEqual(mockMyUserResponse);
       expect(userService.findOne).toHaveBeenCalledWith('user-id-1');
     });
   });
@@ -88,7 +91,7 @@ describe('UserController', () => {
 
       const result = await controller.updateProfile(req, updateUserDto);
 
-      expect(result).toEqual(mockUserResponse);
+      expect(result).toEqual(mockMyUserResponse);
       expect(userService.update).toHaveBeenCalledWith(
         'user-id-1',
         updateUserDto,

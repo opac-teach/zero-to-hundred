@@ -1,13 +1,13 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import type { UserResponseDto, UpdateUserDto } from "@/types/api";
+import type { MyUserResponseDto, UpdateUserDto } from "@/api";
 import { auth, users } from "@/api/client";
 import { useAssetsStore } from "./assets";
 import { useWalletStore } from "./wallet";
 import { api } from "@/api/client";
 
 export const useUserStore = defineStore("user", () => {
-  const currentUser = ref<UserResponseDto | null>(null);
+  const currentUser = ref<MyUserResponseDto | null>(null);
   const token = ref<string | null>(null);
   const isLoading = ref(false);
   const error = ref<string | null>(null);
@@ -16,7 +16,6 @@ export const useUserStore = defineStore("user", () => {
 
   const isAuthenticated = computed(() => !!token.value);
 
-  // Initialize from localStorage
   const initializeFromStorage = () => {
     const storedToken = localStorage.getItem("token");
     if (storedToken) {
@@ -51,7 +50,7 @@ export const useUserStore = defineStore("user", () => {
       isLoading.value = true;
       error.value = null;
       const response = await auth.login({ email, password });
-      const { accessToken, userId, username, email: userEmail } = response.data;
+      const { accessToken } = response.data;
 
       setToken(accessToken);
       await fetchProfile();
@@ -133,6 +132,8 @@ export const useUserStore = defineStore("user", () => {
     }
   }
 
+  initializeFromStorage();
+
   return {
     currentUser,
     token,
@@ -144,7 +145,6 @@ export const useUserStore = defineStore("user", () => {
     logout,
     fetchProfile,
     updateProfile,
-    initializeFromStorage,
     clearToken,
   };
 });

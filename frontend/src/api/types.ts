@@ -1,66 +1,3 @@
-export interface User {
-  id: string;
-  username: string;
-  email: string;
-  fullName: string;
-  profilePictureUrl: string;
-  bannerUrl: string;
-  description: string;
-  backgroundColor: string;
-  textColor: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Memecoin {
-  id: string;
-  name: string;
-  symbol: string;
-  description: string;
-  logoUrl: string;
-  creator: User;
-  creatorId: string;
-  totalSupply: string;
-  currentPrice: string;
-  volume24h: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface WalletHolding {
-  id: string;
-  walletId: string;
-  memecoin: Memecoin;
-  memecoinId: string;
-  amount: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Wallet {
-  id: string;
-  zthBalance: string;
-  ownerId: string;
-  owner: User;
-  holdings: WalletHolding[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Transaction {
-  id: string;
-  type: "BUY" | "SELL" | "CREATE";
-  memeCoinAmount: string;
-  zthAmount: string;
-  price: string;
-  user: User;
-  userId: string;
-  memecoin: Memecoin;
-  memecoinId: string;
-  createdAt: string;
-}
-
 export interface RegisterDto {
   username: string;
   email: string;
@@ -93,7 +30,6 @@ export interface AuthResponseDto {
 export interface UserResponseDto {
   id: string;
   username: string;
-  email: string;
   fullName: string;
   profilePictureUrl: string;
   bannerUrl: string;
@@ -104,6 +40,11 @@ export interface UserResponseDto {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface MyUserResponseDto extends UserResponseDto {
+  email: string;
+}
+
 export interface UserWithWalletResponseDto extends UserResponseDto {
   wallet: WalletResponseDto;
 }

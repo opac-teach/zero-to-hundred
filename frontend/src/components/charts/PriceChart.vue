@@ -35,7 +35,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from "vue";
 import Chart from "chart.js/auto";
-import type { MemecoinResponseDto } from "@/types/api";
+import type { MemecoinResponseDto } from "@/api";
 
 const props = defineProps<{
   memecoin: MemecoinResponseDto;

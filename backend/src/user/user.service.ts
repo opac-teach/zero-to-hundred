@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserResponseDto } from './dto/user-response.dto';
+import { MyUserResponseDto, UserResponseDto } from './dto/user-response.dto';
 import { LeaderboardDto, LeaderboardItemDto } from './dto/leaderboard.dto';
 
 @Injectable()
@@ -27,14 +27,14 @@ export class UserService {
     return users.map((user) => new UserResponseDto(user));
   }
 
-  async findOne(id: string): Promise<UserResponseDto> {
+  async findOne(id: string): Promise<MyUserResponseDto> {
     const user = await this.userRepository.findOne({ where: { id } });
 
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    return new UserResponseDto(user);
+    return new MyUserResponseDto(user);
   }
 
   async findByUsername(username: string): Promise<UserResponseDto> {
@@ -50,7 +50,7 @@ export class UserService {
   async update(
     id: string,
     updateUserDto: UpdateUserDto,
-  ): Promise<UserResponseDto> {
+  ): Promise<MyUserResponseDto> {
     const user = await this.userRepository.findOne({ where: { id } });
 
     if (!user) {
@@ -74,7 +74,7 @@ export class UserService {
     Object.assign(user, updateUserDto);
 
     const updatedUser = await this.userRepository.save(user);
-    return new UserResponseDto(updatedUser);
+    return new MyUserResponseDto(updatedUser);
   }
 
   async getLeaderboard(

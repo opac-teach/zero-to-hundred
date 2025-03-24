@@ -14,7 +14,8 @@ import type {
   AuthResponseDto,
   UpdateUserDto,
   TradeEstimationResponseDto,
-} from "@/types/api";
+  MyUserResponseDto,
+} from "./types";
 import { useUserStore } from "@/stores/user";
 
 const api = axios.create({
@@ -53,8 +54,8 @@ export const auth = {
 export const users = {
   getAll: () => api.get<UserResponseDto[]>("/users"),
   getByUsername: (username: string) => api.get<UserResponseDto>(`/users/username/${username}`),
-  getMyProfile: () => api.get<UserResponseDto>("/users/me"),
-  updateProfile: (data: UpdateUserDto) => api.put<UserResponseDto>("/users/me", data),
+  getMyProfile: () => api.get<MyUserResponseDto>("/users/me"),
+  updateProfile: (data: UpdateUserDto) => api.put<MyUserResponseDto>("/users/me", data),
   getLeaderboard: (page?: number, limit?: number) =>
     api.get<LeaderboardDto>("/users/leaderboard", { params: { page, limit } }),
 };

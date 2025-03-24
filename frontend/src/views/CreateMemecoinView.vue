@@ -134,7 +134,7 @@ import { useRouter } from "vue-router";
 import { useMarketStore } from "@/stores/market";
 import { useWalletStore } from "@/stores/wallet";
 import { useToast } from "vue-toastification";
-import type { CreateMemecoinDto } from "@/types/api";
+import type { CreateMemecoinDto } from "@/api/types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";

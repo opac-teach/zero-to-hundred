@@ -179,7 +179,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { MemecoinResponseDto } from "@/types/api";
+import type { MemecoinResponseDto } from "@/api/types";
 
 const marketStore = useMarketStore();
 const assetsStore = useAssetsStore();

@@ -5,7 +5,7 @@ import type {
   TransactionResponseDto,
   TradeResponseDto,
   MemecoinResponseDto,
-} from "@/types/api";
+} from "@/api";
 import { wallet, trading } from "@/api/client";
 import { useMarketStore } from "@/stores/market";
 

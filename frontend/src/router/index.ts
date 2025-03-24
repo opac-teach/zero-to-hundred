@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useUserStore } from "@/stores/user";
-import { useUIStore } from "@/stores/ui";
 import { setPageTitle } from "@/utils/title";
 
 const router = createRouter({
@@ -100,6 +99,11 @@ router.beforeEach((to, from, next) => {
   // Handle authenticated users trying to access guest-only routes
   if (to.meta.requiresGuest && userStore.isAuthenticated) {
     next({ name: "home" });
+    return;
+  }
+
+  if (to.name === "user" && userStore.currentUser) {
+    next({ name: "user-profile", params: { username: userStore.currentUser.username } });
     return;
   }
 

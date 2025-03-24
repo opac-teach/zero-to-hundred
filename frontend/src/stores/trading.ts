@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import type { TransactionResponseDto } from "@/types/api";
+import type { TransactionResponseDto } from "@/api";
 
 interface TradeStats {
   totalTrades: number;
