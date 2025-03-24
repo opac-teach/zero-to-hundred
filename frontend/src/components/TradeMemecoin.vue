@@ -132,6 +132,7 @@ import type { MemecoinResponseDto } from "@/api";
 const { memecoin } = defineProps<{
   memecoin?: MemecoinResponseDto;
 }>();
+const emit = defineEmits(["update-amount"]);
 
 const walletStore = useWalletStore();
 const toast = useToast();
@@ -176,6 +177,9 @@ watch(
       tradeAmountError.value = "Please enter a valid number";
       return false;
     }
+
+    emit("update-amount", amount * (tradeType.value == "buy" ? 1 : -1));
+
     if (
       newTradeType == "sell" &&
       (!newWalletHolding || Number(newTradeAmount) > Number(newWalletHolding?.amount))
@@ -199,7 +203,6 @@ watch(
       Number(tradeEstimation.value?.cost) > Number(walletData.value?.zthBalance)
     ) {
       tradeAmountError.value = "Insufficient balance";
-      return false;
     }
   }
 );

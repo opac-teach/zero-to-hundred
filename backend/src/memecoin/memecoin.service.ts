@@ -12,7 +12,7 @@ import { Wallet } from '../entities/wallet.entity';
 import { Transaction, TransactionType } from '../entities/transaction.entity';
 import { CreateMemecoinDto, MemecoinResponseDto } from './dto';
 import BigNumber from 'bignumber.js';
-import { calculatePrice } from '../trading/bonding-curve';
+import { calculatePrice, defaultCurveConfig } from '../trading/bonding-curve';
 
 @Injectable()
 export class MemecoinService {
@@ -80,7 +80,13 @@ export class MemecoinService {
     userId: string,
     createMemecoinDto: CreateMemecoinDto,
   ): Promise<MemecoinResponseDto> {
-    const { name, symbol, description, logoUrl } = createMemecoinDto;
+    const {
+      name,
+      symbol,
+      description,
+      logoUrl,
+      curveConfig = defaultCurveConfig,
+    } = createMemecoinDto;
 
     // Check if memecoin with the same name or symbol already exists
     const existingMemecoin = await this.memecoinRepository.findOne({
@@ -103,28 +109,26 @@ export class MemecoinService {
       throw new NotFoundException('User not found');
     }
 
-    // Get the user's wallet
-    const wallet = await this.walletRepository.findOne({
-      where: { ownerId: userId },
-    });
-
-    if (!wallet) {
-      throw new NotFoundException('Wallet not found');
-    }
-
-    // Check if the user has enough ZTH to create a memecoin (1 ZTH)
-    if (BigNumber(wallet.zthBalance).lt(1)) {
-      throw new BadRequestException(
-        'Insufficient ZTH balance to create a memecoin',
-      );
-    }
-
     // Use a transaction to ensure data consistency
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
+      const wallet = await queryRunner.manager.findOne(Wallet, {
+        where: { ownerId: userId },
+      });
+
+      if (!wallet) {
+        throw new NotFoundException('Wallet not found');
+      }
+
+      // Check if the user has enough ZTH to create a memecoin (1 ZTH)
+      if (BigNumber(wallet.zthBalance).lt(1)) {
+        throw new BadRequestException(
+          'Insufficient ZTH balance to create a memecoin',
+        );
+      }
       // Deduct 1 ZTH from the user's wallet
       wallet.zthBalance = String(BigNumber(wallet.zthBalance).minus(1));
       await queryRunner.manager.save(wallet);
@@ -140,7 +144,7 @@ export class MemecoinService {
       memecoin.totalSupply = '0';
       memecoin.currentPrice = calculatePrice(0);
       memecoin.volume24h = '0';
-
+      memecoin.curveConfig = curveConfig;
       const savedMemecoin = await queryRunner.manager.save(memecoin);
 
       // Create a transaction record

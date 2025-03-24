@@ -6,6 +6,10 @@ import {
   MaxLength,
   Matches,
 } from 'class-validator';
+import {
+  BondingCurveConfig,
+  defaultCurveConfig,
+} from 'src/trading/bonding-curve';
 
 export class CreateMemecoinDto {
   @ApiProperty({
@@ -48,4 +52,11 @@ export class CreateMemecoinDto {
   @IsString()
   @IsOptional()
   logoUrl?: string;
+
+  @ApiProperty({
+    description: 'The bonding curve configuration',
+    example: defaultCurveConfig,
+  })
+  @IsOptional()
+  curveConfig: BondingCurveConfig;
 }

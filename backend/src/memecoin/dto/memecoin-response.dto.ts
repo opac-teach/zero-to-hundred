@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose, Type } from 'class-transformer';
 import { UserResponseDto } from '../../user/dto/user-response.dto';
+import { BondingCurveConfig } from 'src/trading/bonding-curve';
 
 @Exclude()
 export class MemecoinResponseDto {
@@ -52,6 +53,10 @@ export class MemecoinResponseDto {
   @ApiProperty({ description: 'The date when the memecoin was last updated' })
   @Expose()
   updatedAt: Date;
+
+  @ApiProperty({ description: 'The bonding curve configuration' })
+  @Expose()
+  curveConfig: BondingCurveConfig;
 
   constructor(partial: Partial<MemecoinResponseDto>) {
     Object.assign(this, partial);

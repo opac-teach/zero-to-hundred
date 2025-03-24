@@ -6,8 +6,8 @@ export interface BondingCurveConfig {
   curveType: 'linear' | 'exponential';
 }
 
-const defaultCurveConfig: BondingCurveConfig = {
-  slope: '0.005',
+export const defaultCurveConfig: BondingCurveConfig = {
+  slope: '2',
   startingPrice: '1',
   curveType: 'linear',
 };

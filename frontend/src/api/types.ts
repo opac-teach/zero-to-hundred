@@ -1,3 +1,5 @@
+import type { BondingCurveConfig } from "@/lib/bonding-curve";
+
 export interface RegisterDto {
   username: string;
   email: string;
@@ -73,6 +75,7 @@ export interface MemecoinResponseDto {
   volume24h: string;
   createdAt: string;
   updatedAt: string;
+  curveConfig?: BondingCurveConfig;
 }
 
 export interface CreateMemecoinDto {
@@ -80,6 +83,7 @@ export interface CreateMemecoinDto {
   symbol: string;
   description?: string;
   logoUrl?: string;
+  curveConfig: BondingCurveConfig;
 }
 
 export interface MemecoinPriceDto {

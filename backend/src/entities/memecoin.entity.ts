@@ -12,8 +12,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { User } from './user.entity';
 import { Transaction } from './transaction.entity';
 import { WalletHolding } from './wallet-holding.entity';
-import BigNumber from 'bignumber.js';
-import { Transform } from 'stream';
+import {
+  BondingCurveConfig,
+  defaultCurveConfig,
+} from '../trading/bonding-curve';
 
 @Entity('memecoins')
 export class Memecoin {
@@ -74,4 +76,8 @@ export class Memecoin {
   @ApiProperty({ description: 'The date when the memecoin was last updated' })
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @ApiProperty({ description: 'The bonding curve configuration' })
+  @Column({ type: 'jsonb', default: defaultCurveConfig })
+  curveConfig: BondingCurveConfig;
 }

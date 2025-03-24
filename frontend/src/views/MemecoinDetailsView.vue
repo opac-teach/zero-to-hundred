@@ -48,7 +48,7 @@
       </Card>
       <Card>
         <CardContent class="pt-6">
-          <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Supply</h3>
+          <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Current Supply</h3>
           <p class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">
             {{ memecoin?.totalSupply }} ZTH
           </p>
@@ -62,19 +62,17 @@
           </p>
         </CardContent>
       </Card>
-      <Card>
-        <CardContent class="pt-6">
-          <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Supply</h3>
-          <p class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">
-            {{ memecoin?.totalSupply }}
-          </p>
-        </CardContent>
-      </Card>
     </div>
 
     <!-- Charts and Trading Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <TradeMemecoin :memecoin="memecoin" />
+      <TradeMemecoin :memecoin="memecoin" @update-amount="updateTargetSupply" />
+
+      <BondingCurvePreview
+        :curveConfig="memecoin?.curveConfig"
+        :currentSupply="memecoin?.totalSupply"
+        :targetSupply="targetSupply"
+      />
 
       <!-- Price Chart -->
       <Card>
@@ -130,12 +128,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { marked } from "marked";
 import TradeMemecoin from "@/components/TradeMemecoin.vue";
+import BondingCurvePreview from "@/components/BondingCurvePreview.vue";
 
 const route = useRoute();
 const router = useRouter();
 const marketStore = useMarketStore();
 const assetsStore = useAssetsStore();
 const toast = useToast();
+const targetSupply = ref<string | undefined>(undefined);
 
 const memecoin = computed(() =>
   marketStore.memecoinsList.find((coin) => coin.symbol === route.params.symbol)
@@ -144,6 +144,11 @@ const selectedTimeframe = ref<"24h" | "7d" | "30d">("24h");
 const timeframes = ["24h", "7d", "30d"] as const;
 
 const description = computed(() => marked.parse(memecoin.value?.description || ""));
+
+function updateTargetSupply(amount: string) {
+  targetSupply.value = (Number(memecoin.value?.totalSupply) + Number(amount)).toString();
+  console.log(targetSupply.value);
+}
 
 const priceData = computed(() => {
   if (!memecoin.value) return [];
