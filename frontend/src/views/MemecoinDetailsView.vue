@@ -18,6 +18,14 @@
       </div>
     </div>
 
+    <div v-if="memecoin?.description">
+      <Card>
+        <CardContent class="pt-6">
+          <div v-html="description" class="prose"></div>
+        </CardContent>
+      </Card>
+    </div>
+
     <!-- Memecoin Stats -->
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
       <Card>
@@ -64,123 +72,47 @@
       </Card>
     </div>
 
-    <div>
-      <!-- Trading Section -->
+    <!-- Charts and Trading Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <TradeMemecoin :memecoin="memecoin" />
+
+      <!-- Price Chart -->
       <Card>
         <CardHeader>
-          <CardTitle>Trade {{ memecoin?.name }}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div class="space-y-4">
-            <div class="space-y-2">
-              <label class="text-sm font-medium">Amount of memecoin to {{ tradeType }}</label>
-              <Input
-                v-model="tradeAmount"
-                type="number"
-                min="0"
-                step="0.000001"
-                :class="{ 'border-red-500': tradeAmountError }"
-              />
-              <div class="flex">
-                <div>Balance: {{ walletHolding?.amount || "0" }}</div>
-                <Button
-                  v-if="tradeType == 'sell'"
-                  variant="outline"
-                  @click="tradeAmount = walletHolding?.amount || '0'"
-                >
-                  All
-                </Button>
-              </div>
-              <p v-if="tradeAmountError" class="text-sm text-red-500">{{ tradeAmountError }}</p>
-            </div>
-
-            <div class="space-y-2">
-              <div class="flex justify-between items-center">
-                <label class="text-sm font-medium">Cost</label>
-                <span class="text-sm text-gray-500">{{ tradeEstimation?.cost }} ZTH</span>
-              </div>
-            </div>
-
-            <div class="space-y-2">
-              <div class="flex justify-between items-center">
-                <label class="text-sm font-medium">Slippage Tolerance</label>
-                <span class="text-sm text-gray-500">{{ slippageTolerance }}%</span>
-              </div>
-              <input
-                v-model="slippageTolerance"
-                type="range"
-                min="0"
-                max="30"
-                step="0.1"
-                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
-              />
-            </div>
-
-            <div>
-              <label class="text-sm font-medium">Trade Type</label>
-              <select v-model="tradeType" class="w-full">
-                <option value="buy">Buy</option>
-                <option value="sell">Sell</option>
-              </select>
-            </div>
-            <div class="flex space-x-3">
+          <CardTitle class="flex justify-between items-center">
+            Price Chart
+            <div class="flex space-x-2">
               <Button
-                variant="outline"
-                class="flex-1"
-                @click="handleTrade()"
-                :disabled="!isTradeFormValid || isLoading || tradeAmount == '0'"
+                v-for="timeframe in timeframes"
+                :key="timeframe"
+                variant="ghost"
+                size="sm"
+                @click="selectedTimeframe = timeframe"
+                :class="selectedTimeframe === timeframe ? 'bg-primary text-primary-foreground' : ''"
               >
-                {{ isLoading ? "Processing..." : "Trade" }}
+                {{ timeframe }}
               </Button>
             </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div class="h-96">
+            <price-chart :data="priceData" :timeframe="selectedTimeframe" />
           </div>
         </CardContent>
       </Card>
-    </div>
-    <!-- Charts and Trading Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- Charts -->
-      <div class="space-y-6">
-        <!-- Price Chart -->
-        <Card>
-          <CardHeader>
-            <CardTitle class="flex justify-between items-center">
-              Price Chart
-              <div class="flex space-x-2">
-                <Button
-                  v-for="timeframe in timeframes"
-                  :key="timeframe"
-                  variant="ghost"
-                  size="sm"
-                  @click="selectedTimeframe = timeframe"
-                  :class="
-                    selectedTimeframe === timeframe ? 'bg-primary text-primary-foreground' : ''
-                  "
-                >
-                  {{ timeframe }}
-                </Button>
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div class="h-96">
-              <price-chart :data="priceData" :timeframe="selectedTimeframe" />
-            </div>
-          </CardContent>
-        </Card>
 
-        <!-- Volume Chart -->
-        <Card>
-          <CardHeader>
-            <CardTitle>Trading Volume</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div class="h-48">
-              <volume-chart :data="volumeData" :timeframe="selectedTimeframe" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <!-- Volume Chart -->
+      <Card>
+        <CardHeader>
+          <CardTitle>Trading Volume</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div class="h-48">
+            <volume-chart :data="volumeData" :timeframe="selectedTimeframe" />
+          </div>
+        </CardContent>
+      </Card>
     </div>
   </div>
 </template>
@@ -189,99 +121,29 @@
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useMarketStore } from "@/stores/market";
-import { useWalletStore } from "@/stores/wallet";
 import { useAssetsStore } from "@/stores/assets";
 import { useToast } from "vue-toastification";
 import { usePageTitle } from "@/composables/usePageTitle";
 import PriceChart from "@/components/PriceChart.vue";
 import VolumeChart from "@/components/VolumeChart.vue";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { TradeEstimationResponseDto } from "@/types/api";
-import { trading } from "@/api/client";
+import { marked } from "marked";
+import TradeMemecoin from "@/components/TradeMemecoin.vue";
 
 const route = useRoute();
 const router = useRouter();
 const marketStore = useMarketStore();
-const walletStore = useWalletStore();
 const assetsStore = useAssetsStore();
 const toast = useToast();
 
 const memecoin = computed(() =>
   marketStore.memecoinsList.find((coin) => coin.symbol === route.params.symbol)
 );
-const walletData = computed(() => walletStore.walletData);
-const walletHolding = computed(() =>
-  walletStore.holdings.find((holding) => holding.memecoinId === memecoin.value?.id)
-);
-const tradeAmount = ref("0");
-const slippageTolerance = ref("5");
-const isLoading = ref(false);
 const selectedTimeframe = ref<"24h" | "7d" | "30d">("24h");
 const timeframes = ["24h", "7d", "30d"] as const;
-const tradeEstimation = ref<TradeEstimationResponseDto | null>(null);
-const tradeType = ref<"buy" | "sell">("buy");
 
-// Validation state
-const tradeAmountError = ref("");
-
-// Computed properties for validation
-const isTradeAmountValid = computed(() => {
-  const amount = parseFloat(tradeAmount.value);
-  return !isNaN(amount) && amount > 0;
-});
-
-const isSlippageValid = computed(() => {
-  const slippage = parseFloat(slippageTolerance.value);
-  return !isNaN(slippage) && slippage >= 0 && slippage <= 30;
-});
-
-const isTradeFormValid = computed(() => {
-  return isTradeAmountValid.value && isSlippageValid.value;
-});
-
-watch(
-  [tradeAmount, tradeType, walletHolding],
-  ([newTradeAmount, newTradeType, newWalletHolding]) => {
-    if (!newTradeAmount) return;
-    tradeEstimation.value = null;
-    tradeAmountError.value = "";
-
-    const amount = parseFloat(newTradeAmount);
-    if (isNaN(amount)) {
-      tradeAmountError.value = "Please enter a valid number";
-      return false;
-    }
-    if (
-      newTradeType == "sell" &&
-      (!newWalletHolding || Number(newTradeAmount) > Number(newWalletHolding?.amount))
-    ) {
-      tradeAmountError.value = "Insufficient balance";
-      return false;
-    }
-
-    if (!memecoin.value) return;
-    trading
-      .estimate({
-        memecoinId: memecoin.value.id,
-        amount: newTradeAmount,
-        requestCost: memecoin.value.currentPrice,
-        tradeType: newTradeType,
-      })
-      .then((response) => {
-        tradeEstimation.value = response.data;
-
-        if (
-          newTradeType == "buy" &&
-          Number(tradeEstimation.value?.cost) > Number(walletData.value?.zthBalance)
-        ) {
-          tradeAmountError.value = "Insufficient balance";
-          return false;
-        }
-      });
-  }
-);
+const description = computed(() => marked.parse(memecoin.value?.description || ""));
 
 const priceData = computed(() => {
   if (!memecoin.value) return [];
@@ -319,32 +181,6 @@ function getPriceChange() {
   // In a real app, you'd track historical prices to calculate this
   const randomChange = (Math.random() * 2 - 1) * 5; // Random change between -5% and +5%
   return `${randomChange >= 0 ? "+" : ""}${randomChange.toFixed(2)}%`;
-}
-
-async function handleTrade() {
-  if (!memecoin.value || !tradeAmount.value) return;
-
-  try {
-    isLoading.value = true;
-
-    if (!tradeEstimation.value) {
-      throw new Error("Trade estimation not found");
-    }
-    await walletStore.tradeMemecoin(
-      memecoin.value.id,
-      tradeAmount.value,
-      tradeEstimation.value.cost,
-      parseFloat(slippageTolerance.value),
-      tradeType.value
-    );
-
-    tradeAmount.value = "0";
-    toast.success(`Trade ${tradeType.value} executed successfully!`);
-  } catch (error) {
-    toast.error("Failed to execute trade. Please try again.");
-  } finally {
-    isLoading.value = false;
-  }
 }
 
 // Dynamic page title based on memecoin name

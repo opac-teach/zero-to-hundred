@@ -12,7 +12,7 @@
           </router-link>
 
           <!-- Navigation Links -->
-          <nav class="flex items-center space-x-8 text-sm font-medium">
+          <nav class="flex items-center gap-4 text-sm font-medium">
             <router-link
               v-for="item in navigationItems"
               :key="item.name"
@@ -39,8 +39,8 @@
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem :value="false">Default API</SelectItem>
-                <SelectItem :value="true" :disabled="!uiStore.customAPIURL">Custom API</SelectItem>
+                <SelectItem value="false">Default API</SelectItem>
+                <SelectItem value="true" :disabled="!uiStore.customAPIURL">Custom API</SelectItem>
               </SelectGroup>
               <div class="p-1">
                 <Label for="custom-api-url">Custom API URL</Label>

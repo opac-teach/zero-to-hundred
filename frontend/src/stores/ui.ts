@@ -10,7 +10,7 @@ export const useUIStore = defineStore("ui", () => {
   const isSidebarOpen = ref(false);
   const isMobile = ref(false);
   const hasCompletedOnboarding = ref(false);
-  const useCustomAPI = ref(false);
+  const useCustomAPI = ref("false");
   const customAPIURL = ref("");
 
   function toggleDarkMode() {
@@ -48,12 +48,12 @@ export const useUIStore = defineStore("ui", () => {
   }
   const storedUsedCustomAPI = localStorage.getItem("usedCustomAPI");
   if (storedUsedCustomAPI) {
-    useCustomAPI.value = storedUsedCustomAPI === "true";
-    if (useCustomAPI.value) setBaseUrl(customAPIURL.value);
+    useCustomAPI.value = storedUsedCustomAPI;
+    if (useCustomAPI.value === "true") setBaseUrl(customAPIURL.value);
   }
   watch([useCustomAPI, customAPIURL], ([use, url]) => {
     if (use) setBaseUrl(url);
-    localStorage.setItem("usedCustomAPI", use.toString());
+    localStorage.setItem("usedCustomAPI", use);
     localStorage.setItem("customApiUrl", url);
   });
 

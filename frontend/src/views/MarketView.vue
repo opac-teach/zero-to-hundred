@@ -100,11 +100,15 @@
               <TableHead>24h Change</TableHead>
               <TableHead>Total Supply</TableHead>
               <TableHead>24h Volume</TableHead>
-              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow v-for="memecoin in sortedMemecoins" :key="memecoin.id">
+            <TableRow
+              v-for="memecoin in sortedMemecoins"
+              :key="memecoin.id"
+              @click="$router.push(`/memecoin/${memecoin.symbol}`)"
+              class="cursor-pointer"
+            >
               <TableCell>
                 <div class="flex items-center">
                   <img
@@ -144,15 +148,6 @@
               </TableCell>
               <TableCell class="text-sm text-gray-900 dark:text-white">
                 {{ memecoin.volume24h }} ZTH
-              </TableCell>
-              <TableCell>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  @click="$router.push(`/memecoin/${memecoin.symbol}`)"
-                >
-                  View Details
-                </Button>
               </TableCell>
             </TableRow>
           </TableBody>

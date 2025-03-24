@@ -3,9 +3,7 @@
     <!-- Header -->
     <div class="flex justify-between items-center">
       <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Create Memecoin</h1>
-      <div class="text-sm text-gray-500 dark:text-gray-400">
-        Cost: 1 ZTH
-      </div>
+      <div class="text-sm text-gray-500 dark:text-gray-400">Cost: 1 ZTH</div>
     </div>
 
     <!-- Form -->
@@ -13,11 +11,11 @@
       <!-- Basic Info -->
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 space-y-6">
         <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Basic Information</h2>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
-            <input
+            <Label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</Label>
+            <Input
               v-model="form.name"
               type="text"
               required
@@ -26,11 +24,13 @@
               :class="{ 'border-red-500 dark:border-red-500': errors.name }"
               placeholder="e.g., Doge Coin"
             />
-            <p v-if="errors.name" class="mt-1 text-sm text-red-600 dark:text-red-400">{{ errors.name }}</p>
+            <p v-if="errors.name" class="mt-1 text-sm text-red-600 dark:text-red-400">
+              {{ errors.name }}
+            </p>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Symbol</label>
-            <input
+            <Label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Symbol</Label>
+            <Input
               v-model="form.symbol"
               type="text"
               required
@@ -40,25 +40,31 @@
               :class="{ 'border-red-500 dark:border-red-500': errors.symbol }"
               placeholder="e.g., DOGE"
             />
-            <p v-if="errors.symbol" class="mt-1 text-sm text-red-600 dark:text-red-400">{{ errors.symbol }}</p>
+            <p v-if="errors.symbol" class="mt-1 text-sm text-red-600 dark:text-red-400">
+              {{ errors.symbol }}
+            </p>
           </div>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
-          <textarea
+          <Label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Description <i>(Markdown supported)</i>
+          </Label>
+          <Textarea
             v-model="form.description"
             rows="3"
             @input="validateDescription"
             class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-xs focus:border-indigo-500 focus:ring-indigo-500"
             :class="{ 'border-red-500 dark:border-red-500': errors.description }"
             placeholder="Describe your memecoin..."
-          ></textarea>
-          <p v-if="errors.description" class="mt-1 text-sm text-red-600 dark:text-red-400">{{ errors.description }}</p>
+          />
+          <p v-if="errors.description" class="mt-1 text-sm text-red-600 dark:text-red-400">
+            {{ errors.description }}
+          </p>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Logo</label>
+          <Label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Logo</Label>
           <div class="mt-1 flex items-center space-x-4">
             <img
               v-if="logoPreview"
@@ -86,17 +92,23 @@
 
       <!-- Bonding Curve Preview -->
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Bonding Curve Preview</h2>
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+          Bonding Curve Preview
+        </h2>
         <div class="h-64">
           <canvas ref="curveCanvas"></canvas>
         </div>
         <div class="mt-4 grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Initial Price</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >Initial Price</label
+            >
             <p class="mt-1 text-lg font-medium text-gray-900 dark:text-white">0.0001 ZTH</p>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Price at 1000 Supply</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >Price at 1000 Supply</label
+            >
             <p class="mt-1 text-lg font-medium text-gray-900 dark:text-white">0.1 ZTH</p>
           </div>
         </div>
@@ -109,7 +121,7 @@
           :disabled="isLoading || !isValid"
           class="px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {{ isLoading ? 'Creating...' : 'Create Memecoin' }}
+          {{ isLoading ? "Creating..." : "Create Memecoin" }}
         </button>
       </div>
     </form>
@@ -117,12 +129,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
-import { useRouter } from 'vue-router';
-import { useMarketStore } from '@/stores/market';
-import { useWalletStore } from '@/stores/wallet';
-import { useToast } from 'vue-toastification';
-import type { CreateMemecoinDto } from '@/types/api';
+import { ref, computed, onMounted, watch } from "vue";
+import { useRouter } from "vue-router";
+import { useMarketStore } from "@/stores/market";
+import { useWalletStore } from "@/stores/wallet";
+import { useToast } from "vue-toastification";
+import type { CreateMemecoinDto } from "@/types/api";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 const router = useRouter();
 const marketStore = useMarketStore();
@@ -130,16 +145,16 @@ const walletStore = useWalletStore();
 const toast = useToast();
 
 const form = ref<CreateMemecoinDto>({
-  name: '',
-  symbol: '',
-  description: '',
-  logoUrl: '',
+  name: "",
+  symbol: "",
+  description: "",
+  logoUrl: "",
 });
 
 const errors = ref({
-  name: '',
-  symbol: '',
-  description: '',
+  name: "",
+  symbol: "",
+  description: "",
 });
 
 const isLoading = ref(false);
@@ -162,29 +177,30 @@ const isValid = computed(() => {
 
 function validateName() {
   if (form.value.name.length < 3) {
-    errors.value.name = 'Name must be at least 3 characters long';
+    errors.value.name = "Name must be at least 3 characters long";
   } else {
-    errors.value.name = '';
+    errors.value.name = "";
   }
 }
 
 function validateSymbol() {
+  form.value.symbol = form.value.symbol.toUpperCase();
   if (form.value.symbol.length < 2) {
-    errors.value.symbol = 'Symbol must be at least 2 characters long';
+    errors.value.symbol = "Symbol must be at least 2 characters long";
   } else if (form.value.symbol.length > 5) {
-    errors.value.symbol = 'Symbol must be at most 5 characters long';
+    errors.value.symbol = "Symbol must be at most 5 characters long";
   } else if (!/^[A-Z0-9]+$/.test(form.value.symbol)) {
-    errors.value.symbol = 'Symbol must contain only uppercase letters and numbers';
+    errors.value.symbol = "Symbol must contain only uppercase letters and numbers";
   } else {
-    errors.value.symbol = '';
+    errors.value.symbol = "";
   }
 }
 
 function validateDescription() {
   if ((form.value.description?.length ?? 0) < 10) {
-    errors.value.description = 'Description must be at least 10 characters long';
+    errors.value.description = "Description must be at least 10 characters long";
   } else {
-    errors.value.description = '';
+    errors.value.description = "";
   }
 }
 
@@ -210,7 +226,7 @@ function drawBondingCurve() {
   const canvas = curveCanvas.value;
   if (!canvas) return;
 
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
   const width = canvas.width;
@@ -222,7 +238,7 @@ function drawBondingCurve() {
 
   // Draw axes
   ctx.beginPath();
-  ctx.strokeStyle = '#6B7280';
+  ctx.strokeStyle = "#6B7280";
   ctx.lineWidth = 1;
   ctx.moveTo(padding, padding);
   ctx.lineTo(padding, height - padding);
@@ -231,7 +247,7 @@ function drawBondingCurve() {
 
   // Draw curve
   ctx.beginPath();
-  ctx.strokeStyle = '#4F46E5';
+  ctx.strokeStyle = "#4F46E5";
   ctx.lineWidth = 2;
   ctx.moveTo(padding, height - padding);
 
@@ -247,17 +263,17 @@ function drawBondingCurve() {
 
 async function handleSubmit() {
   if (!isValid.value) {
-    toast.error('Please fill in all required fields correctly');
+    toast.error("Please fill in all required fields correctly");
     return;
   }
 
   try {
     isLoading.value = true;
     await marketStore.createMemecoin(form.value);
-    toast.success('Memecoin created successfully! 🎉');
-    router.push('/memecoins');
+    toast.success("Memecoin created successfully! 🎉");
+    router.push("/memecoins");
   } catch (error: any) {
-    toast.error(error.message || 'Failed to create memecoin');
+    toast.error(error.message || "Failed to create memecoin");
   } finally {
     isLoading.value = false;
   }
@@ -268,5 +284,5 @@ onMounted(() => {
 });
 
 // Redraw curve when window is resized
-window.addEventListener('resize', drawBondingCurve);
-</script> 
+window.addEventListener("resize", drawBondingCurve);
+</script>
