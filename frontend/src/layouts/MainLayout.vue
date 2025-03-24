@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-background">
     <!-- Navigation -->
     <header
-      class="sticky top-0 z-[100] w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+      class="sticky top-0 z-100 w-full border-b bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/60"
     >
       <div class="container flex h-14 items-center">
         <div class="mr-4 flex flex-1">

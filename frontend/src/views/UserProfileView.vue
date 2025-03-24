@@ -11,7 +11,7 @@
       class="bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-800 rounded-lg p-4"
     >
       <div class="flex">
-        <div class="flex-shrink-0">
+        <div class="shrink-0">
           <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
             <path
               fill-rule="evenodd"

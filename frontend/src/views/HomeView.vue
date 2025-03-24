@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator';
     <!-- Hero section -->
     <div class="relative overflow-hidden">
       <!-- Background animation -->
-      <div class="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 animate-gradient">
+      <div class="absolute inset-0 bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 animate-gradient">
         <div class="absolute inset-0 bg-black opacity-50"></div>
       </div>
 
@@ -181,7 +181,7 @@ import { Separator } from '@/components/ui/separator';
             <div class="space-y-12">
               <div class="relative">
                 <div class="flex items-center">
-                  <div class="flex-shrink-0">
+                  <div class="shrink-0">
                     <div class="flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
                       1
                     </div>
@@ -197,7 +197,7 @@ import { Separator } from '@/components/ui/separator';
 
               <div class="relative">
                 <div class="flex items-center">
-                  <div class="flex-shrink-0">
+                  <div class="shrink-0">
                     <div class="flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
                       2
                     </div>
@@ -213,7 +213,7 @@ import { Separator } from '@/components/ui/separator';
 
               <div class="relative">
                 <div class="flex items-center">
-                  <div class="flex-shrink-0">
+                  <div class="shrink-0">
                     <div class="flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
                       3
                     </div>

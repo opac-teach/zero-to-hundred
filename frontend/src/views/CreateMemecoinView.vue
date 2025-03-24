@@ -22,7 +22,7 @@
               type="text"
               required
               @input="validateName"
-              class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-xs focus:border-indigo-500 focus:ring-indigo-500"
               :class="{ 'border-red-500 dark:border-red-500': errors.name }"
               placeholder="e.g., Doge Coin"
             />
@@ -36,7 +36,7 @@
               required
               maxlength="5"
               @input="validateSymbol"
-              class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-xs focus:border-indigo-500 focus:ring-indigo-500"
               :class="{ 'border-red-500 dark:border-red-500': errors.symbol }"
               placeholder="e.g., DOGE"
             />
@@ -50,7 +50,7 @@
             v-model="form.description"
             rows="3"
             @input="validateDescription"
-            class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-xs focus:border-indigo-500 focus:ring-indigo-500"
             :class="{ 'border-red-500 dark:border-red-500': errors.description }"
             placeholder="Describe your memecoin..."
           ></textarea>

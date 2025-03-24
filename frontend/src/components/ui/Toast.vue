@@ -20,7 +20,7 @@
         ]"
       >
         <div class="flex items-start">
-          <div class="flex-shrink-0">
+          <div class="shrink-0">
             <component
               :is="type === 'error' ? ExclamationCircleIcon : CheckCircleIcon"
               :class="[
@@ -48,10 +48,10 @@
               {{ description }}
             </p>
           </div>
-          <div class="ml-4 flex-shrink-0 flex">
+          <div class="ml-4 shrink-0 flex">
             <button
               @click="close"
-              class="inline-flex rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2"
+              class="inline-flex rounded-md focus:outline-hidden focus:ring-2 focus:ring-offset-2"
               :class="[
                 type === 'error'
                   ? 'focus:ring-red-500 focus:ring-offset-red-50 dark:focus:ring-offset-red-900'
