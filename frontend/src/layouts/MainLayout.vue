@@ -33,6 +33,27 @@
             <moon-icon v-else class="h-4 w-4" />
           </Button>
 
+          <Select v-model="uiStore.useCustomAPI">
+            <SelectTrigger class="w-[120px]">
+              <SelectValue :value="uiStore.useCustomAPI" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem :value="false">Default API</SelectItem>
+                <SelectItem :value="true" :disabled="!uiStore.customAPIURL">Custom API</SelectItem>
+              </SelectGroup>
+              <div class="p-1">
+                <Label for="custom-api-url">Custom API URL</Label>
+                <Input
+                  id="custom-api-url"
+                  v-model="uiStore.customAPIURL"
+                  type="text"
+                  placeholder="http://localhost:3000/api"
+                />
+              </div>
+            </SelectContent>
+          </Select>
+
           <!-- User menu -->
           <div v-if="userStore.isAuthenticated" class="flex items-center space-x-4">
             <!-- ZTH Balance -->
@@ -104,7 +125,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineComponent, onMounted, onUnmounted } from "vue";
+import { ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useUserStore } from "@/stores/user";
 import { useWalletStore } from "@/stores/wallet";
@@ -112,7 +133,17 @@ import { useUIStore } from "@/stores/ui";
 import { SunIcon, MoonIcon } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();

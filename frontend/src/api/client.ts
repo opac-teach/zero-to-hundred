@@ -23,8 +23,10 @@ const api = axios.create({
     "Content-Type": "application/json",
   },
 });
-
-export { api };
+const setBaseUrl = (baseUrl: string) => {
+  api.defaults.baseURL = baseUrl;
+};
+export { api, setBaseUrl };
 
 // Add response interceptor to handle token expiration
 api.interceptors.response.use(

@@ -1,7 +1,8 @@
-import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { setBaseUrl } from "@/api/client";
+import { defineStore } from "pinia";
+import { ref, watch } from "vue";
 
-export const useUIStore = defineStore('ui', () => {
+export const useUIStore = defineStore("ui", () => {
   const isDarkMode = ref(false);
   const isLoading = ref(false);
   const error = ref<string | null>(null);
@@ -9,10 +10,12 @@ export const useUIStore = defineStore('ui', () => {
   const isSidebarOpen = ref(false);
   const isMobile = ref(false);
   const hasCompletedOnboarding = ref(false);
+  const useCustomAPI = ref(false);
+  const customAPIURL = ref("");
 
   function toggleDarkMode() {
     isDarkMode.value = !isDarkMode.value;
-    document.documentElement.classList.toggle('dark');
+    document.documentElement.classList.toggle("dark");
   }
 
   function setLoading(loading: boolean) {
@@ -39,6 +42,21 @@ export const useUIStore = defineStore('ui', () => {
     hasCompletedOnboarding.value = completed;
   }
 
+  const storedUrl = localStorage.getItem("customApiUrl");
+  if (storedUrl) {
+    customAPIURL.value = storedUrl;
+  }
+  const storedUsedCustomAPI = localStorage.getItem("usedCustomAPI");
+  if (storedUsedCustomAPI) {
+    useCustomAPI.value = storedUsedCustomAPI === "true";
+    if (useCustomAPI.value) setBaseUrl(customAPIURL.value);
+  }
+  watch([useCustomAPI, customAPIURL], ([use, url]) => {
+    if (use) setBaseUrl(url);
+    localStorage.setItem("usedCustomAPI", use.toString());
+    localStorage.setItem("customApiUrl", url);
+  });
+
   return {
     isDarkMode,
     isLoading,
@@ -47,6 +65,8 @@ export const useUIStore = defineStore('ui', () => {
     isSidebarOpen,
     isMobile,
     hasCompletedOnboarding,
+    useCustomAPI,
+    customAPIURL,
     toggleDarkMode,
     setLoading,
     setError,
@@ -55,4 +75,4 @@ export const useUIStore = defineStore('ui', () => {
     setMobile,
     setHasCompletedOnboarding,
   };
-}); 
+});
