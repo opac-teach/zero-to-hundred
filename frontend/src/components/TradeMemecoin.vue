@@ -166,8 +166,8 @@ const isTradeFormValid = computed(() => {
 
 watch(
   [tradeAmount, tradeType, walletHolding],
-  ([newTradeAmount, newTradeType, newWalletHolding]) => {
-    if (!newTradeAmount) return;
+  async ([newTradeAmount, newTradeType, newWalletHolding]) => {
+    if (!newTradeAmount || newTradeAmount === "0") return;
     tradeEstimation.value = null;
     tradeAmountError.value = "";
 
@@ -185,24 +185,22 @@ watch(
     }
 
     if (!memecoin) return;
-    trading
-      .estimate({
-        memecoinId: memecoin.id,
-        amount: newTradeAmount,
-        requestCost: memecoin.currentPrice,
-        tradeType: newTradeType,
-      })
-      .then((response) => {
-        tradeEstimation.value = response.data;
 
-        if (
-          newTradeType == "buy" &&
-          Number(tradeEstimation.value?.cost) > Number(walletData.value?.zthBalance)
-        ) {
-          tradeAmountError.value = "Insufficient balance";
-          return false;
-        }
-      });
+    const response = await trading.estimate({
+      memecoinId: memecoin.id,
+      amount: newTradeAmount,
+      requestCost: memecoin.currentPrice,
+      tradeType: newTradeType,
+    });
+    tradeEstimation.value = response.data;
+
+    if (
+      newTradeType == "buy" &&
+      Number(tradeEstimation.value?.cost) > Number(walletData.value?.zthBalance)
+    ) {
+      tradeAmountError.value = "Insufficient balance";
+      return false;
+    }
   }
 );
 

@@ -183,20 +183,8 @@ function getPriceChange() {
   return `${randomChange >= 0 ? "+" : ""}${randomChange.toFixed(2)}%`;
 }
 
-// Dynamic page title based on memecoin name
-const { updateTitle } = usePageTitle(() =>
-  memecoin.value?.name ? `${memecoin.value.name} (${memecoin.value.symbol})` : "Memecoin Details"
-);
-
-// Update title when memecoin data changes
-watch(
-  () => memecoin.value,
-  () => {
-    if (memecoin.value) {
-      updateTitle();
-    }
-  },
-  { immediate: true }
+usePageTitle(memecoin, (memecoinValue) =>
+  memecoinValue?.name ? `${memecoinValue.name} (${memecoinValue.symbol})` : "Memecoin Details"
 );
 
 onMounted(async () => {
