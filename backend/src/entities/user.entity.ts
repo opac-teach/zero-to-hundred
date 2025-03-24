@@ -26,7 +26,7 @@ export class User {
 
   @ApiProperty({ description: 'The full name of the user' })
   @Column({ nullable: true })
-  fullName: string;
+  userTitle: string;
 
   @Exclude()
   @Column()

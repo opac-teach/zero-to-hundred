@@ -2,7 +2,7 @@ export interface RegisterDto {
   username: string;
   email: string;
   password: string;
-  fullName?: string;
+  userTitle?: string;
 }
 
 export interface LoginDto {
@@ -30,7 +30,7 @@ export interface AuthResponseDto {
 export interface UserResponseDto {
   id: string;
   username: string;
-  fullName: string;
+  userTitle: string;
   profilePictureUrl: string;
   bannerUrl: string;
   description: string;
@@ -51,7 +51,7 @@ export interface UserWithWalletResponseDto extends UserResponseDto {
 
 export interface UpdateUserDto {
   username?: string;
-  fullName?: string;
+  userTitle?: string;
   profilePictureUrl?: string;
   bannerUrl?: string;
   description?: string;

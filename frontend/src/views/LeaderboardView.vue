@@ -95,7 +95,7 @@
                         {{ leaderboardUser.user.username }}
                       </div>
                       <div class="text-sm text-gray-500 dark:text-gray-400">
-                        {{ leaderboardUser.user.fullName || "No name set" }}
+                        {{ leaderboardUser.user.userTitle || "No name set" }}
                       </div>
                     </div>
                   </div>
@@ -132,7 +132,7 @@ import type { LeaderboardDto } from "@/api";
 interface Trader {
   id: string;
   username: string;
-  fullName: string;
+  userTitle: string;
   profilePictureUrl: string;
   zthBalance: number;
   rank: number;

@@ -40,5 +40,5 @@ export class RegisterDto {
   })
   @IsString()
   @IsOptional()
-  fullName?: string;
+  userTitle?: string;
 }

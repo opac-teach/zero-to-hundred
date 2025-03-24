@@ -67,7 +67,7 @@ export const useUserStore = defineStore("user", () => {
     }
   }
 
-  async function register(email: string, password: string, fullName?: string) {
+  async function register(email: string, password: string, userTitle?: string) {
     try {
       isLoading.value = true;
       error.value = null;
@@ -81,7 +81,7 @@ export const useUserStore = defineStore("user", () => {
       const response = await auth.register({
         email,
         password,
-        fullName,
+        userTitle,
         username: randomUsername,
       });
 

@@ -11,7 +11,7 @@ describe('UserController', () => {
   const mockUserResponse = new UserResponseDto({
     id: 'user-id-1',
     username: 'testuser',
-    fullName: 'Test User',
+    userTitle: 'Test User',
     createdAt: new Date(),
     updatedAt: new Date(),
   });
@@ -87,7 +87,7 @@ describe('UserController', () => {
   describe('updateProfile', () => {
     it('should update the current user profile', async () => {
       const req = { user: { id: 'user-id-1' } };
-      const updateUserDto: UpdateUserDto = { fullName: 'Updated Name' };
+      const updateUserDto: UpdateUserDto = { userTitle: 'Updated Name' };
 
       const result = await controller.updateProfile(req, updateUserDto);
 

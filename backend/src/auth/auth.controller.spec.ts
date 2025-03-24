@@ -49,7 +49,7 @@ describe('AuthController', () => {
         username: 'testuser',
         email: 'test@example.com',
         password: 'password',
-        fullName: 'Test User',
+        userTitle: 'Test User',
       };
 
       const result = await controller.register(registerDto);

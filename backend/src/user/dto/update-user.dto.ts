@@ -18,7 +18,7 @@ export class UpdateUserDto {
   })
   @IsString()
   @IsOptional()
-  fullName?: string;
+  userTitle?: string;
 
   @ApiProperty({
     description: 'The profile picture URL of the user',

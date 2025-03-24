@@ -14,8 +14,8 @@
                 <Input v-model="editedUser.username" type="text" />
               </div>
               <div class="space-y-2">
-                <Label>Full Name</Label>
-                <Input v-model="editedUser.fullName" type="text" />
+                <Label>Title</Label>
+                <Input v-model="editedUser.userTitle" type="text" placeholder="shiba inu eater" />
               </div>
             </div>
 
@@ -47,7 +47,12 @@
             </div>
           </div>
         </div>
-        <Button class="w-full mt-3" @click="saveChanges">Save Changes</Button>
+        <div class="flex space-x-4">
+          <Button class="w-full mt-3" variant="outline" @click="router.push('/user')"
+            >Cancel</Button
+          >
+          <Button class="w-full mt-3" @click="saveChanges">Save Changes</Button>
+        </div>
       </CardContent>
     </Card>
   </div>
@@ -80,8 +85,10 @@ onMounted(async () => {
     if (user.value) {
       editedUser.value = {
         username: user.value.username,
-        fullName: user.value.fullName || "",
+        userTitle: user.value.userTitle || "",
         description: user.value.description || "",
+        profilePictureUrl: user.value.profilePictureUrl || "",
+        bannerUrl: user.value.bannerUrl || "",
         backgroundColor: user.value.backgroundColor,
         textColor: user.value.textColor,
       };

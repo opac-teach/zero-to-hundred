@@ -46,7 +46,7 @@ describe('AuthService', () => {
     username: 'testuser',
     email: 'test@example.com',
     password: 'password123',
-    fullName: 'Test User',
+    userTitle: 'Test User',
     role: 'user',
     profilePictureUrl: 'https://example.com/pic.jpg',
     bannerUrl: 'https://example.com/banner.jpg',
@@ -194,7 +194,7 @@ describe('AuthService', () => {
         username: 'newuser',
         email: 'new@example.com',
         password: 'password',
-        fullName: 'New User',
+        userTitle: 'New User',
       };
 
       const result = await service.register(registerDto);
@@ -233,7 +233,7 @@ describe('AuthService', () => {
           username: 'testuser',
           email: 'test@example.com',
           password: 'password',
-          fullName: 'Test User',
+          userTitle: 'Test User',
         }),
       ).rejects.toThrow(ConflictException);
     });
@@ -243,7 +243,7 @@ describe('AuthService', () => {
         username: 'testuser',
         email: 'test@example.com',
         password: 'password',
-        fullName: 'Test User',
+        userTitle: 'Test User',
       };
 
       // Mock findOne to return null for this test case
@@ -278,7 +278,7 @@ describe('AuthService', () => {
         username: 'newuser',
         email: 'new@example.com',
         password: 'password',
-        fullName: 'New User',
+        userTitle: 'New User',
       };
 
       await expect(service.register(registerDto)).rejects.toThrow(

@@ -40,7 +40,7 @@
           />
           <div>
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ user?.username }}</h1>
-            <p class="text-gray-500 dark:text-gray-400">{{ user?.fullName || "No name set" }}</p>
+            <p class="text-gray-500 dark:text-gray-400">{{ user?.userTitle || "No name set" }}</p>
           </div>
           <router-link to="/user/edit">
             <Button v-if="user?.id === userStore.currentUser?.id" class="flex-end">
@@ -49,7 +49,7 @@
           </router-link>
         </div>
 
-        <Card v-if="user?.description">
+        <Card v-if="user?.description" class="mt-4">
           <CardContent class="mt-4">
             <div v-html="marked.parse(user?.description || '')" class="prose"></div>
           </CardContent>

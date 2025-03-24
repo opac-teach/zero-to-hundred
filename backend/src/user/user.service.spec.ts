@@ -27,7 +27,7 @@ describe('UserService', () => {
     username: 'testuser',
     email: 'test@example.com',
     password: 'password123',
-    fullName: 'Test User',
+    userTitle: 'Test User',
     role: 'user',
     profilePictureUrl: 'https://example.com/pic.jpg',
     bannerUrl: 'https://example.com/banner.jpg',
@@ -49,7 +49,7 @@ describe('UserService', () => {
       username: 'testuser2',
       email: 'test2@example.com',
       password: 'hashedpassword',
-      fullName: 'Test User 2',
+      userTitle: 'Test User 2',
       role: 'user',
       profilePictureUrl: null,
       bannerUrl: null,
@@ -170,7 +170,7 @@ describe('UserService', () => {
   describe('update', () => {
     it('should update a user', async () => {
       const updateUserDto: UpdateUserDto = {
-        fullName: 'Updated Name',
+        userTitle: 'Updated Name',
       };
 
       const result = await service.update('user-id-1', updateUserDto);
@@ -186,7 +186,7 @@ describe('UserService', () => {
       jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(null);
 
       await expect(
-        service.update('nonexistent-id', { fullName: 'Updated Name' }),
+        service.update('nonexistent-id', { userTitle: 'Updated Name' }),
       ).rejects.toThrow(NotFoundException);
     });
 

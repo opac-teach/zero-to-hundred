@@ -17,7 +17,7 @@ const mockUser = {
   username: 'testuser',
   email: 'test@example.com',
   password: 'password123',
-  fullName: 'Test User',
+  userTitle: 'Test User',
   role: 'user',
   profilePictureUrl: 'https://example.com/pic.jpg',
   bannerUrl: 'https://example.com/banner.jpg',

@@ -13,7 +13,7 @@ export class UserResponseDto {
 
   @ApiProperty({ description: 'The full name of the user' })
   @Expose()
-  fullName: string;
+  userTitle: string;
 
   @ApiProperty({ description: 'The profile picture URL of the user' })
   @Expose()
