@@ -11,4 +11,5 @@ export const databaseConfig: TypeOrmModuleOptions = {
   synchronize: process.env.NODE_ENV !== 'production',
   // logging: process.env.NODE_ENV !== 'production',
   logging: false,
+  ssl: process.env.DATABASE_SSL === 'true',
 };

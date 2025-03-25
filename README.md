@@ -2,6 +2,10 @@
 
 A memecoin platform that allows users to create, buy, and sell memecoins.
 
+https://zero-to-hundred-frontend.onrender.com
+
+https://zero-to-hundred-backend.onrender.com
+
 ## Project Structure
 
 ```
@@ -27,12 +31,14 @@ zero-to-hundred/
 ### Development
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/yourusername/zero-to-hundred.git
    cd zero-to-hundred
    ```
 
 2. Start the development environment:
+
    ```bash
    docker-compose -f docker/docker-compose.dev.yml up
    ```
@@ -45,6 +51,7 @@ zero-to-hundred/
 ### Production
 
 1. Set up environment variables:
+
    ```bash
    cp .env.example .env
    # Edit .env file with your production values
@@ -61,4 +68,4 @@ For more detailed documentation, please refer to the [doc](./doc) directory.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
+This project is licensed under the MIT License - see the LICENSE file for details.
