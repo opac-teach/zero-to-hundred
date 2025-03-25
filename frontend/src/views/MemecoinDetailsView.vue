@@ -147,7 +147,6 @@ const description = computed(() => marked.parse(memecoin.value?.description || "
 
 function updateTargetSupply(amount: string) {
   targetSupply.value = (Number(memecoin.value?.totalSupply) + Number(amount)).toString();
-  console.log(targetSupply.value);
 }
 
 const priceData = computed(() => {

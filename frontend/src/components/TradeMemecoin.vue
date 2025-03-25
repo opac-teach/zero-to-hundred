@@ -103,12 +103,16 @@
         </div>
         <div class="flex space-x-3">
           <Button
+            v-if="userStore.isAuthenticated"
             variant="default"
             class="flex-1"
             @click="handleTrade()"
             :disabled="!isTradeFormValid || isLoading || tradeAmount == '0'"
           >
             {{ isLoading ? "Processing..." : "Trade" }}
+          </Button>
+          <Button v-else variant="default" class="flex-1" @click="router.push('/login')">
+            Login to trade
           </Button>
         </div>
       </div>
@@ -128,12 +132,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { TradeEstimationResponseDto } from "@/api";
 import { trading } from "@/api/client";
 import type { MemecoinResponseDto } from "@/api";
+import { useUserStore } from "@/stores/user";
+import { useRouter } from "vue-router";
+const router = useRouter();
 
 const { memecoin } = defineProps<{
   memecoin?: MemecoinResponseDto;
 }>();
 const emit = defineEmits(["update-amount"]);
 
+const userStore = useUserStore();
 const walletStore = useWalletStore();
 const toast = useToast();
 
@@ -179,8 +187,23 @@ watch(
     }
 
     emit("update-amount", amount * (tradeType.value == "buy" ? 1 : -1));
+    if (!memecoin) return;
+
+    try {
+      const response = await trading.estimate({
+        memecoinId: memecoin.id,
+        amount: newTradeAmount,
+        requestCost: memecoin.currentPrice,
+        tradeType: newTradeType,
+      });
+      tradeEstimation.value = response.data;
+    } catch (error: any) {
+      tradeAmountError.value = error.response?.data?.message;
+      return false;
+    }
 
     if (
+      userStore.isAuthenticated &&
       newTradeType == "sell" &&
       (!newWalletHolding || Number(newTradeAmount) > Number(newWalletHolding?.amount))
     ) {
@@ -188,17 +211,8 @@ watch(
       return false;
     }
 
-    if (!memecoin) return;
-
-    const response = await trading.estimate({
-      memecoinId: memecoin.id,
-      amount: newTradeAmount,
-      requestCost: memecoin.currentPrice,
-      tradeType: newTradeType,
-    });
-    tradeEstimation.value = response.data;
-
     if (
+      userStore.isAuthenticated &&
       newTradeType == "buy" &&
       Number(tradeEstimation.value?.cost) > Number(walletData.value?.zthBalance)
     ) {

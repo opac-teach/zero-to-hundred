@@ -9,7 +9,7 @@ import { WalletHolding } from '../entities/wallet-holding.entity';
 import { Transaction, TransactionType } from '../entities/transaction.entity';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { TradeMemecoinDto } from './dto';
-import { calculateSellPrice } from './bonding-curve';
+import { calculateSellPrice, defaultCurveConfig } from './bonding-curve';
 
 // Mock data
 const mockUser = {
@@ -65,6 +65,7 @@ const mockMemecoin = {
   creator: mockUser,
   createdAt: new Date(),
   updatedAt: new Date(),
+  curveConfig: defaultCurveConfig,
 } as Memecoin;
 
 const mockWalletHolding = {

@@ -48,16 +48,11 @@ export class TradingController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Memecoin or user not found' })
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Post('estimate')
   async estimateTradeMemecoin(
     @Request() req,
     @Body() tradeMemecoinDto: TradeMemecoinDto,
   ): Promise<TradeEstimationResponseDto> {
-    return this.tradingService.estimateTradeMemecoin(
-      req.user.id,
-      tradeMemecoinDto,
-    );
+    return this.tradingService.estimateTradeMemecoin(tradeMemecoinDto);
   }
 }

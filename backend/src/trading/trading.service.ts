@@ -37,7 +37,6 @@ export class TradingService {
   ) {}
 
   async estimateTradeMemecoin(
-    userId: string,
     tradeDto: TradeMemecoinDto,
   ): Promise<TradeEstimationResponseDto> {
     const { memecoinId, amount, tradeType } = tradeDto;
@@ -50,18 +49,21 @@ export class TradingService {
       throw new NotFoundException('Memecoin not found');
     }
 
-    let cost = '0';
-    if (tradeType === 'buy') {
-      cost = calculateBuyPrice(amount, memecoin.totalSupply);
-    } else {
-      cost = calculateSellPrice(amount, memecoin.totalSupply);
+    try {
+      let cost = '0';
+      if (tradeType === 'buy') {
+        cost = calculateBuyPrice(amount, memecoin.totalSupply);
+      } else {
+        cost = calculateSellPrice(amount, memecoin.totalSupply);
+      }
+      return new TradeEstimationResponseDto({
+        cost,
+        amount,
+        memecoin,
+      });
+    } catch (error) {
+      throw new BadRequestException(error.message);
     }
-
-    return new TradeEstimationResponseDto({
-      cost,
-      amount,
-      memecoin,
-    });
   }
 
   async tradeMemecoin(
