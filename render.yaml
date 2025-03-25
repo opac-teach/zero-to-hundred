@@ -1,0 +1,62 @@
+databases:
+  - name: zero-to-hundred-db
+    databaseName: zero_to_hundred
+    user: zth
+    plan: free
+    region: frankfurt
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: everywhere
+    postgresMajorVersion: "16"
+
+services:
+  - type: web
+    name: zero-to-hundred-backend
+    runtime: node
+    repo: https://github.com/opac-teach/zero-to-hundred
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_USER
+        fromDatabase:
+          name: zero-to-hundred-db
+          property: user
+      - key: DATABASE_PORT
+        fromDatabase:
+          name: zero-to-hundred-db
+          property: port
+      - key: DATABASE_PASSWORD
+        fromDatabase:
+          name: zero-to-hundred-db
+          property: password
+      - key: DATABASE_NAME
+        fromDatabase:
+          name: zero-to-hundred-db
+          property: database
+      - key: DATABASE_HOST
+        fromDatabase:
+          name: zero-to-hundred-db
+          property: host
+    region: frankfurt
+    buildCommand: npm i --include=dev && npm run build
+    startCommand: npm run start:prod
+    healthCheckPath: /api/memecoins
+    rootDir: backend
+  - type: web
+    name: zero-to-hundred-frontend
+    runtime: static
+    repo: https://github.com/opac-teach/zero-to-hundred
+    envVars:
+      - key: VITE_API_URL
+        sync: false
+    buildCommand: npm i && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    rootDir: frontend
+version: "1"
