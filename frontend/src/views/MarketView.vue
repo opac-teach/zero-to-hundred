@@ -111,11 +111,7 @@
             >
               <TableCell>
                 <div class="flex items-center">
-                  <img
-                    :src="memecoin.logoUrl || assetsStore.defaultMemecoinLogo"
-                    :alt="memecoin.name"
-                    class="h-10 w-10 rounded-full"
-                  />
+                  <Avatar :src="memecoin.logoUrl" :alt="memecoin.symbol" class="h-10 w-10" />
                   <div class="ml-4">
                     <div class="text-sm font-medium text-gray-900 dark:text-white">
                       {{ memecoin.name }}
@@ -180,9 +176,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { MemecoinResponseDto } from "@/api/types";
+import Avatar from "@/components/Logo.vue";
 
 const marketStore = useMarketStore();
-const assetsStore = useAssetsStore();
 const toast = useToast();
 
 const sortBy = ref<"createdAt" | "name" | "symbol" | "totalSupply">("createdAt");

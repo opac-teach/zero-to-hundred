@@ -62,19 +62,14 @@
                 >
                   Balance
                 </th>
-                <th
-                  scope="col"
-                  class="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24"
-                >
-                  Profile
-                </th>
               </tr>
             </thead>
             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               <tr
                 v-for="(leaderboardUser, index) in leaderboard?.leaderboard"
                 :key="leaderboardUser.user.id"
-                class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                class="hover:bg-gray-50 cursor-pointer dark:hover:bg-gray-700 transition-colors"
+                @click="$router.push(`/user/${leaderboardUser.user.username}`)"
               >
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
@@ -85,10 +80,10 @@
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex items-center">
-                    <img
-                      :src="leaderboardUser.user.profilePictureUrl || '/default-avatar.svg'"
+                    <Avatar
+                      :src="leaderboardUser.user.profilePictureUrl"
                       :alt="leaderboardUser.user.username"
-                      class="h-10 w-10 rounded-full object-cover"
+                      class="h-10 w-10"
                     />
                     <div class="ml-4">
                       <div class="text-sm font-medium text-gray-900 dark:text-white">
@@ -105,14 +100,6 @@
                     {{ leaderboardUser.user.wallet.zthBalance }} ZTH
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right">
-                  <router-link
-                    :to="`/user/${leaderboardUser.user.username}`"
-                    class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 dark:text-indigo-200 dark:bg-indigo-900 dark:hover:bg-indigo-800"
-                  >
-                    View Profile
-                  </router-link>
-                </td>
               </tr>
             </tbody>
           </table>
@@ -128,15 +115,7 @@ import { useUserStore } from "@/stores/user";
 import { users } from "@/api";
 import { useToast } from "vue-toastification";
 import type { LeaderboardDto } from "@/api";
-
-interface Trader {
-  id: string;
-  username: string;
-  userTitle: string;
-  profilePictureUrl: string;
-  zthBalance: number;
-  rank: number;
-}
+import Avatar from "@/components/Logo.vue";
 
 const userStore = useUserStore();
 const toast = useToast();

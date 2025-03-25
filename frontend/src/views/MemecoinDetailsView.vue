@@ -3,11 +3,7 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
       <div class="flex items-center space-x-4">
-        <img
-          :src="memecoin?.logoUrl || assetsStore.defaultMemecoinLogo"
-          :alt="memecoin?.name"
-          class="h-12 w-12 rounded-full"
-        />
+        <Avatar :src="memecoin?.logoUrl" :alt="memecoin?.symbol" class="h-16 w-16" />
         <div>
           <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ memecoin?.name }}</h1>
           <p class="text-gray-500 dark:text-gray-400">{{ memecoin?.symbol }}</p>
@@ -122,14 +118,14 @@ import { useMarketStore } from "@/stores/market";
 import { useAssetsStore } from "@/stores/assets";
 import { useToast } from "vue-toastification";
 import { usePageTitle } from "@/composables/usePageTitle";
-import PriceChart from "@/components/PriceChart.vue";
-import VolumeChart from "@/components/VolumeChart.vue";
+import PriceChart from "@/components/charts/PriceChartBis.vue";
+import VolumeChart from "@/components/charts/VolumeChart.vue";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { marked } from "marked";
 import TradeMemecoin from "@/components/TradeMemecoin.vue";
-import BondingCurvePreview from "@/components/BondingCurvePreview.vue";
-
+import BondingCurvePreview from "@/components/charts/BondingCurvePreview.vue";
+import Avatar from "@/components/Logo.vue";
 const route = useRoute();
 const router = useRouter();
 const marketStore = useMarketStore();

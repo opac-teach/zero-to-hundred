@@ -66,15 +66,11 @@
                 class="relative h-9 w-9 rounded-full"
                 @click="isProfileMenuOpen = !isProfileMenuOpen"
               >
-                <Avatar class="h-9 w-9">
-                  <AvatarImage
-                    :src="userStore.currentUser?.profilePictureUrl || '/default-avatar.svg'"
-                    :alt="userStore.currentUser?.username"
-                  />
-                  <AvatarFallback>{{
-                    userStore.currentUser?.username?.charAt(0).toUpperCase()
-                  }}</AvatarFallback>
-                </Avatar>
+                <Avatar
+                  :src="userStore.currentUser?.profilePictureUrl"
+                  :alt="userStore.currentUser?.username"
+                  class="w-8 h-8"
+                />
               </Button>
               <div
                 v-if="isProfileMenuOpen"
@@ -132,7 +128,7 @@ import { useWalletStore } from "@/stores/wallet";
 import { useUIStore } from "@/stores/ui";
 import { SunIcon, MoonIcon } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import Avatar from "@/components/Logo.vue";
 import {
   Select,
   SelectTrigger,

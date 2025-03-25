@@ -49,10 +49,10 @@
           class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
         >
           <div class="flex items-center space-x-4">
-            <img
-              :src="holding.memecoin.logoUrl || assetsStore.defaultMemecoinLogo"
-              :alt="holding.memecoin.name"
-              class="w-12 h-12 rounded-full"
+            <Avatar
+              :src="holding.memecoin.logoUrl"
+              :alt="holding.memecoin.symbol"
+              class="w-12 h-12"
             />
             <div>
               <div class="font-medium text-gray-900 dark:text-white">
@@ -150,10 +150,10 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center">
-                  <img
-                    :src="transaction.memecoin.logoUrl || assetsStore.defaultMemecoinLogo"
-                    :alt="transaction.memecoin.name"
-                    class="h-8 w-8 rounded-full"
+                  <Avatar
+                    :src="transaction.memecoin.logoUrl"
+                    :alt="transaction.memecoin.symbol"
+                    class="h-8 w-8"
                   />
                   <div class="ml-3">
                     <div class="text-sm font-medium text-gray-900 dark:text-white">
@@ -185,6 +185,7 @@ import { ref, computed, onMounted } from "vue";
 import { useWalletStore } from "@/stores/wallet";
 import { useAssetsStore } from "@/stores/assets";
 import { useToast } from "vue-toastification";
+import Avatar from "@/components/Logo.vue";
 
 const walletStore = useWalletStore();
 const assetsStore = useAssetsStore();

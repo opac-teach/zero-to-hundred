@@ -33,11 +33,7 @@
     <div v-else class="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
       <div class="px-6 py-8">
         <div class="flex items-center space-x-6">
-          <img
-            :src="user?.profilePictureUrl || '/default-avatar.svg'"
-            :alt="user?.username"
-            class="h-24 w-24 rounded-full object-cover"
-          />
+          <Avatar :src="user?.profilePictureUrl" :alt="user?.username" class="h-24 w-24" />
           <div>
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ user?.username }}</h1>
             <p class="text-gray-500 dark:text-gray-400">{{ user?.userTitle || "No name set" }}</p>
@@ -268,13 +264,7 @@
             <CardContent class="pt-6">
               <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
-                  <Avatar>
-                    <AvatarImage
-                      :src="memecoin.logoUrl || assetsStore.defaultMemecoinLogo"
-                      :alt="memecoin.name"
-                    />
-                    <AvatarFallback>{{ memecoin.symbol }}</AvatarFallback>
-                  </Avatar>
+                  <Avatar :src="memecoin.logoUrl" :alt="memecoin.symbol" />
                   <div>
                     <div class="font-medium text-gray-900 dark:text-white">{{ memecoin.name }}</div>
                     <div class="text-sm text-gray-500 dark:text-gray-400">
@@ -310,12 +300,11 @@ import { useUserStore } from "@/stores/user";
 import { Button } from "@/components/ui/button";
 import { marked } from "marked";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useMarketStore } from "@/stores/market";
 import { useTradingStore } from "@/stores/trading";
 import { useWalletStore } from "@/stores/wallet";
 import { useAssetsStore } from "@/stores/assets";
-
+import Avatar from "@/components/Logo.vue";
 const userStore = useUserStore();
 const marketStore = useMarketStore();
 const walletStore = useWalletStore();

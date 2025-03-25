@@ -62,9 +62,23 @@
           </p>
         </div>
 
-        <div>
-          <Label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Logo URL</Label>
-          <Input type="text" v-model="form.logoUrl" placeholder="https://example.com/logo.png" />
+        <div class="flex items-end space-x-4">
+          <div class="flex-1">
+            <Label class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >Logo URL</Label
+            >
+            <Input
+              type="text"
+              v-model="form.logoUrl"
+              placeholder="https://example.com/logo.png"
+              @input="validateLogoURL"
+            />
+
+            <p v-if="errors.logoUrl" class="mt-1 text-sm text-red-600 dark:text-red-400">
+              {{ errors.logoUrl }}
+            </p>
+          </div>
+          <Avatar :src="form.logoUrl" :alt="form.symbol" class="w-10 h-10" />
         </div>
 
         <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Curve Configuration</h2>
@@ -151,8 +165,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import BondingCurvePreview from "@/components/BondingCurvePreview.vue";
+import BondingCurvePreview from "@/components/charts/BondingCurvePreview.vue";
 import { useWalletStore } from "@/stores/wallet";
+import Avatar from "@/components/Logo.vue";
+
 const router = useRouter();
 const marketStore = useMarketStore();
 const toast = useToast();
@@ -177,6 +193,7 @@ const errors = ref({
   name: "",
   symbol: "",
   description: "",
+  logoUrl: "",
 });
 
 const isLoading = ref(false);
@@ -223,6 +240,17 @@ function validateDescription() {
   }
 }
 
+function validateLogoURL() {
+  if (
+    form.value.logoUrl &&
+    form.value.logoUrl.length > 0 &&
+    !/^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/.test(form.value.logoUrl)
+  ) {
+    errors.value.logoUrl = "Invalid logo URL";
+  } else {
+    errors.value.logoUrl = "";
+  }
+}
 async function handleSubmit() {
   if (!isValid.value) {
     toast.error("Please fill in all required fields correctly");
