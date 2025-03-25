@@ -6,7 +6,7 @@ import { WalletHolding } from '../entities/wallet-holding.entity';
 import { Transaction } from '../entities/transaction.entity';
 import { WalletResponseDto } from './dto/wallet-response.dto';
 import { TransactionResponseDto } from './dto/transaction-response.dto';
-import { BigNumber } from 'bignumber.js';
+import { Decimal } from 'decimal.js';
 
 @Injectable()
 export class WalletService {

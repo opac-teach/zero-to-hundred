@@ -16,7 +16,7 @@ import {
   calculatePrice,
   calculateSellPrice,
 } from './bonding-curve';
-import BigNumber from 'bignumber.js';
+import Decimal from 'decimal.js';
 import { TradeMemecoinDto } from './dto/trade-memecoin.dto';
 import { TradeEstimationResponseDto } from './dto/estimate-trade-response.dto';
 
@@ -78,7 +78,7 @@ export class TradingService {
       tradeType,
     } = tradeDto;
 
-    if (new BigNumber(amount).isLessThanOrEqualTo(0)) {
+    if (new Decimal(amount).lessThanOrEqualTo(0)) {
       throw new BadRequestException('Amount must be greater than 0');
     }
 
@@ -119,27 +119,27 @@ export class TradingService {
 
       if (
         tradeType === 'buy' &&
-        new BigNumber(wallet.zthBalance).isLessThan(cost)
+        new Decimal(wallet.zthBalance).lessThan(cost)
       ) {
         throw new BadRequestException('Insufficient ZTH balance');
       } else if (tradeType === 'sell') {
-        if (!holding || new BigNumber(holding.amount).isLessThan(amount)) {
+        if (!holding || new Decimal(holding.amount).lessThan(amount)) {
           throw new BadRequestException('Insufficient memecoin balance');
         }
       }
 
-      const costChange = new BigNumber(cost)
+      const costChange = new Decimal(cost)
         .minus(requestCost)
         .div(requestCost)
         .abs()
         .times(100);
-      if (costChange.isGreaterThan(slippageTolerance)) {
+      if (costChange.greaterThan(slippageTolerance)) {
         throw new BadRequestException(
           `Cost slippage exceeds tolerance: ${costChange.toFixed(2)}%`,
         );
       }
 
-      let walletZTHBalance = new BigNumber(wallet.zthBalance);
+      let walletZTHBalance = new Decimal(wallet.zthBalance);
       if (tradeType === 'buy') {
         walletZTHBalance = walletZTHBalance.minus(cost);
       } else {
@@ -148,7 +148,7 @@ export class TradingService {
       wallet.zthBalance = walletZTHBalance.toString();
       await queryRunner.manager.save(wallet);
 
-      let newSupply = new BigNumber(memecoin.totalSupply);
+      let newSupply = new Decimal(memecoin.totalSupply);
       if (tradeType === 'buy') {
         newSupply = newSupply.plus(amount);
       } else {
@@ -162,9 +162,7 @@ export class TradingService {
 
       if (tradeType === 'buy') {
         if (holding) {
-          holding.amount = new BigNumber(holding.amount)
-            .plus(amount)
-            .toString();
+          holding.amount = new Decimal(holding.amount).plus(amount).toString();
         } else {
           holding = this.walletHoldingRepository.create({
             walletId: wallet.id,
@@ -174,8 +172,8 @@ export class TradingService {
         }
         holding = await queryRunner.manager.save(holding);
       } else {
-        holding.amount = new BigNumber(holding.amount).minus(amount).toString();
-        if (new BigNumber(holding.amount).isEqualTo(0)) {
+        holding.amount = new Decimal(holding.amount).minus(amount).toString();
+        if (new Decimal(holding.amount).eq(0)) {
           await queryRunner.manager.remove(holding);
           holding = null;
         } else {

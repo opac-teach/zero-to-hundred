@@ -1,4 +1,4 @@
-import BigNumber from 'bignumber.js';
+import Decimal from 'decimal.js';
 import {
   BondingCurveConfig,
   calculateBuyPrice,
@@ -62,7 +62,7 @@ describe('bonding curve - linear', () => {
 
   describe('iterative buy/sell', () => {
     it('iterate by 1', () => {
-      let pool = new BigNumber(0);
+      let pool = new Decimal(0);
       for (let i = 0; i < 100; i++) {
         pool = pool.plus(
           Number(calculateBuyPrice('1', i.toString(), curveConfig)),
@@ -76,19 +76,19 @@ describe('bonding curve - linear', () => {
       expect(pool.toString()).toBe('0');
     });
     it('iterate by 1.5', () => {
-      let pool = new BigNumber(0);
-      let amount = new BigNumber(0);
+      let pool = new Decimal(0);
+      let amount = new Decimal(0);
       for (let i = 0; i < 100; i++) {
         pool = pool.plus(
           Number(calculateBuyPrice('1.5', amount.toString(), curveConfig)),
         );
-        amount = amount.plus(new BigNumber(1.5));
+        amount = amount.plus(new Decimal(1.5));
       }
       for (let i = 100; i > 0; i--) {
         pool = pool.minus(
           Number(calculateSellPrice('1.5', amount.toString(), curveConfig)),
         );
-        amount = amount.minus(new BigNumber(1.5));
+        amount = amount.minus(new Decimal(1.5));
       }
       expect(amount.toString()).toBe('0');
       expect(pool.toString()).toBe('0');
@@ -145,7 +145,7 @@ describe('bonding curve - exponential', () => {
 
   describe('iterative buy/sell', () => {
     it('iterate by 1', () => {
-      let pool = new BigNumber(0);
+      let pool = new Decimal(0);
       let amount = 0;
       for (let i = 0; i < 100; i++) {
         pool = pool.plus(
@@ -163,7 +163,7 @@ describe('bonding curve - exponential', () => {
       expect(pool.toString()).toBe('0');
     });
     it('iterate by 1.5', () => {
-      let pool = new BigNumber(0);
+      let pool = new Decimal(0);
       let amount = 0;
       for (let i = 0; i < 100; i++) {
         pool = pool.plus(

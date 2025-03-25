@@ -7,7 +7,7 @@ import {
   IsPositive,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-import BigNumber from 'bignumber.js';
+import Decimal from 'decimal.js';
 
 export class TradeMemecoinDto {
   @ApiProperty({
@@ -32,7 +32,7 @@ export class TradeMemecoinDto {
   })
   @IsString()
   @IsNotEmpty()
-  @Transform(({ value }) => new BigNumber(value).toString())
+  @Transform(({ value }) => new Decimal(value).toString())
   amount: string;
 
   @ApiProperty({
@@ -41,7 +41,7 @@ export class TradeMemecoinDto {
   })
   @IsString()
   @IsNotEmpty()
-  @Transform(({ value }) => new BigNumber(value).toString())
+  @Transform(({ value }) => new Decimal(value).toString())
   requestCost: string;
 
   @ApiProperty({

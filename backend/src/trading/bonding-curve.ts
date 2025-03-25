@@ -1,4 +1,4 @@
-import BigNumber from 'bignumber.js';
+import Decimal from 'decimal.js';
 
 export interface BondingCurveConfig {
   slope: string;
@@ -16,9 +16,9 @@ export function calculatePrice(
   supply: number | string,
   curveConfig: BondingCurveConfig = defaultCurveConfig,
 ): string {
-  const slope = new BigNumber(curveConfig.slope);
-  const startingPrice = new BigNumber(curveConfig.startingPrice);
-  const supplyBN = new BigNumber(supply);
+  const slope = new Decimal(curveConfig.slope);
+  const startingPrice = new Decimal(curveConfig.startingPrice);
+  const supplyBN = new Decimal(supply);
 
   if (curveConfig.curveType === 'linear') {
     return slope.times(supplyBN).plus(startingPrice).toString();
@@ -34,11 +34,11 @@ export function calculateBuyPrice(
   supply: string,
   curveConfig: BondingCurveConfig = defaultCurveConfig,
 ): string {
-  const slope = new BigNumber(curveConfig.slope);
-  const startingPrice = new BigNumber(curveConfig.startingPrice);
+  const slope = new Decimal(curveConfig.slope);
+  const startingPrice = new Decimal(curveConfig.startingPrice);
 
-  const amountBN = new BigNumber(amount);
-  const supplyBN = new BigNumber(supply);
+  const amountBN = new Decimal(amount);
+  const supplyBN = new Decimal(supply);
   const newSupplyBN = supplyBN.plus(amountBN);
 
   if (amountBN.lte(0)) {
@@ -69,11 +69,11 @@ export function calculateSellPrice(
   supply: string,
   curveConfig: BondingCurveConfig = defaultCurveConfig,
 ): string {
-  const slope = new BigNumber(curveConfig.slope);
-  const startingPrice = new BigNumber(curveConfig.startingPrice);
+  const slope = new Decimal(curveConfig.slope);
+  const startingPrice = new Decimal(curveConfig.startingPrice);
 
-  const amountBN = new BigNumber(amount);
-  const supplyBN = new BigNumber(supply);
+  const amountBN = new Decimal(amount);
+  const supplyBN = new Decimal(supply);
   const newSupplyBN = supplyBN.minus(amountBN);
   if (supplyBN.lt(0)) {
     throw new Error('Supply cannot be negative');

@@ -8,7 +8,7 @@ import {
   MemecoinVolumeDto,
   GlobalStatisticsDto,
 } from './dto';
-import { BigNumber } from 'bignumber.js';
+import Decimal from 'decimal.js';
 
 @Injectable()
 export class StatisticsService {
@@ -61,18 +61,18 @@ export class StatisticsService {
     const transactions = await queryBuilder.getMany();
 
     // Calculate total volume
-    let totalVolume = new BigNumber(0);
-    let buyVolume = new BigNumber(0);
-    let sellVolume = new BigNumber(0);
+    let totalVolume = new Decimal(0);
+    let buyVolume = new Decimal(0);
+    let sellVolume = new Decimal(0);
 
     // Group transactions by memecoin
     const memecoinVolumes = new Map<
       string,
-      { id: string; ticker: string; volume: BigNumber }
+      { id: string; ticker: string; volume: Decimal }
     >();
 
     for (const transaction of transactions) {
-      const totalValue = new BigNumber(transaction.zthAmount);
+      const totalValue = new Decimal(transaction.zthAmount);
       totalVolume = totalVolume.plus(totalValue);
 
       if (transaction.type === TransactionType.BUY) {
@@ -105,7 +105,7 @@ export class StatisticsService {
         ticker: item.ticker,
         volume: item.volume.toString(),
       }))
-      .sort((a, b) => new BigNumber(b.volume).minus(a.volume).toNumber()); // Sort by volume, highest first
+      .sort((a, b) => new Decimal(b.volume).minus(a.volume).toNumber()); // Sort by volume, highest first
 
     return new TradingVolumeDto({
       totalVolume: totalVolume.toString(),
@@ -146,15 +146,15 @@ export class StatisticsService {
       }
     }
 
-    // Determine sentiment using BigNumber for more precise comparison
-    const buyCountBN = new BigNumber(buyCount);
-    const sellCountBN = new BigNumber(sellCount);
-    const threshold = new BigNumber(1.2); // 20% threshold
+    // Determine sentiment using Decimal for more precise comparison
+    const buyCountBN = new Decimal(buyCount);
+    const sellCountBN = new Decimal(sellCount);
+    const threshold = new Decimal(1.2); // 20% threshold
 
-    if (buyCountBN.isGreaterThan(sellCountBN.times(threshold))) {
+    if (buyCountBN.greaterThan(sellCountBN.times(threshold))) {
       // 20% more buys than sells
       return 'POSITIVE';
-    } else if (sellCountBN.isGreaterThan(buyCountBN.times(threshold))) {
+    } else if (sellCountBN.greaterThan(buyCountBN.times(threshold))) {
       // 20% more sells than buys
       return 'NEGATIVE';
     } else {
@@ -167,16 +167,16 @@ export class StatisticsService {
       relations: ['memecoin'],
     });
 
-    let totalVolume = new BigNumber(0);
-    let buyVolume = new BigNumber(0);
-    let sellVolume = new BigNumber(0);
+    let totalVolume = new Decimal(0);
+    let buyVolume = new Decimal(0);
+    let sellVolume = new Decimal(0);
     const memecoinVolumes = new Map<
       string,
-      { id: string; ticker: string; volume: BigNumber }
+      { id: string; ticker: string; volume: Decimal }
     >();
 
     for (const transaction of transactions) {
-      const totalValue = new BigNumber(transaction.zthAmount);
+      const totalValue = new Decimal(transaction.zthAmount);
       totalVolume = totalVolume.plus(totalValue);
 
       if (transaction.type === TransactionType.BUY) {
@@ -188,7 +188,7 @@ export class StatisticsService {
       const memecoinVolume = memecoinVolumes.get(transaction.memecoinId) || {
         id: transaction.memecoinId,
         ticker: transaction.memecoin.symbol,
-        volume: new BigNumber(0),
+        volume: new Decimal(0),
       };
 
       memecoinVolume.volume = memecoinVolume.volume.plus(totalValue);

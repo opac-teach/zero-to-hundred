@@ -11,7 +11,7 @@ import { User } from '../entities/user.entity';
 import { Wallet } from '../entities/wallet.entity';
 import { Transaction, TransactionType } from '../entities/transaction.entity';
 import { CreateMemecoinDto, MemecoinResponseDto } from './dto';
-import BigNumber from 'bignumber.js';
+import Decimal from 'decimal.js';
 import { calculatePrice, defaultCurveConfig } from '../trading/bonding-curve';
 
 @Injectable()
@@ -124,13 +124,13 @@ export class MemecoinService {
       }
 
       // Check if the user has enough ZTH to create a memecoin (1 ZTH)
-      if (BigNumber(wallet.zthBalance).lt(1)) {
+      if (Decimal(wallet.zthBalance).lt(1)) {
         throw new BadRequestException(
           'Insufficient ZTH balance to create a memecoin',
         );
       }
       // Deduct 1 ZTH from the user's wallet
-      wallet.zthBalance = String(BigNumber(wallet.zthBalance).minus(1));
+      wallet.zthBalance = String(Decimal(wallet.zthBalance).minus(1));
       await queryRunner.manager.save(wallet);
 
       // Create the memecoin
