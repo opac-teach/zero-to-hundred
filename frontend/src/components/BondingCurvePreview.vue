@@ -29,6 +29,8 @@
 import { calculatePrice, defaultCurveConfig, type BondingCurveConfig } from "@/lib/bonding-curve";
 import { ref, onMounted, computed, watch, onUnmounted } from "vue";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Chart, type ChartData, type ChartDataset } from "chart.js/auto";
+
 const {
   curveConfig = defaultCurveConfig,
   currentSupply,
@@ -41,12 +43,12 @@ const {
 
 const curveCanvas = ref<HTMLCanvasElement | null>(null);
 
-const currentSupplyNumber = computed(() => (currentSupply ? Number(currentSupply) : 0));
+const currentSupplyNumber = computed(() => (currentSupply ? Number(currentSupply) : null));
 const maxSupply = computed(() => {
-  if (targetSupply && Number(targetSupply) > currentSupplyNumber.value * 4) {
+  if (targetSupply && Number(targetSupply) > (currentSupplyNumber.value || 0) * 4) {
     return Number(targetSupply) + 1;
   }
-  return currentSupplyNumber.value * 4 || 100;
+  return (currentSupplyNumber.value || 0) * 4 || 100;
 });
 const minPrice = computed(() => Number(calculatePrice(0, curveConfig || defaultCurveConfig)));
 const maxPrice = computed(() =>
@@ -54,145 +56,135 @@ const maxPrice = computed(() =>
 );
 const maxPriceDisplayed = computed(() => maxPrice.value * 1.2);
 
+let chart: Chart | null = null;
 let resizeTimeout: number | null = null;
 
-function drawBondingCurve() {
-  const canvas = curveCanvas.value;
-  if (!canvas) return;
-
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
-
-  const rect = canvas.getBoundingClientRect();
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = rect.width * dpr;
-  canvas.height = rect.height * dpr;
-  canvas.style.width = `${rect.width}px`;
-  canvas.style.height = `${rect.height}px`;
-
-  ctx.scale(dpr, dpr);
-  const width = rect.width;
-  const height = rect.height;
-
-  // Clear canvas
-  ctx.clearRect(0, 0, width, height);
-
-  // Draw axes
-  ctx.beginPath();
-  ctx.strokeStyle = "#6B7280";
-  ctx.lineWidth = 1;
-  ctx.moveTo(0, 0);
-  ctx.lineTo(0, height);
-  ctx.lineTo(width, height);
-  ctx.stroke();
-
-  // Draw labels
-  ctx.font = "10px sans-serif";
-  ctx.fillStyle = "#6B7280";
-
-  for (
-    let price = 0;
-    price <= maxPriceDisplayed.value;
-    price += Math.max(1, maxPriceDisplayed.value / 10)
-  ) {
-    ctx.fillText(price.toFixed(2), 5, height - (price / maxPriceDisplayed.value) * height);
-  }
-
-  for (
-    let supply = 0;
-    supply <= maxSupply.value;
-    supply += Math.max(1, Math.round(maxSupply.value / 10))
-  ) {
-    ctx.fillText(supply.toString(), (supply / maxSupply.value) * width, height - 5);
-  }
-
-  ctx.font = "12px sans-serif";
-  ctx.fillStyle = "#22c55e";
-
-  ctx.fillText("Price", 5, 10);
-  ctx.fillText("Supply", width - 38, height - 5);
-
-  if (curveConfig.slope === "0" && curveConfig.startingPrice === "0") {
-    ctx.fillText("Free Mooney", width / 2, height / 2);
-  } else {
-    // Draw cur ve
-    ctx.beginPath();
-    ctx.strokeStyle = "#4F46E5";
-    ctx.lineWidth = 2;
-
-    const step = Math.max(1, Math.floor(width / 200)); // Limit number of points for better performance
-    for (let drawCol = 0; drawCol <= width; drawCol += step) {
-      const supply = (drawCol / width) * maxSupply.value;
-      const price = Number(calculatePrice(supply, curveConfig || defaultCurveConfig));
-      const x = (supply / maxSupply.value) * width;
-      const y = height - (price / maxPriceDisplayed.value) * height;
-
-      if (drawCol === 0) {
-        ctx.moveTo(x, y);
-      }
-      ctx.lineTo(x, y);
-    }
-
-    ctx.stroke();
-  }
-
-  // Draw current supply point
-  if (currentSupplyNumber.value > 0) {
-    const currentPrice = Number(
-      calculatePrice(currentSupplyNumber.value, curveConfig || defaultCurveConfig)
-    );
-    const currentX = (currentSupplyNumber.value / maxSupply.value) * width;
-    const currentY = height - (currentPrice / maxPriceDisplayed.value) * height;
-    ctx.fillStyle = "#EF4444";
-    ctx.beginPath();
-    ctx.arc(currentX, currentY, 3, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillText("Current", currentX - 30, currentY - 10);
-  }
-
-  if (targetSupply) {
-    const targetPrice = Number(calculatePrice(targetSupply, curveConfig || defaultCurveConfig));
-    const targetX = (Number(targetSupply) / maxSupply.value) * width;
-    const targetY = height - (targetPrice / maxPriceDisplayed.value) * height;
-    ctx.fillStyle = "#22c55e";
-    ctx.beginPath();
-    ctx.arc(targetX, targetY, 3, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillText(
-      "Target",
-      targetX + (Number(targetSupply) < currentSupplyNumber.value ? 5 : -30),
-      targetY + 20
-    );
-  }
-}
-
-function debouncedDrawBondingCurve() {
+function debouncedCreateChart() {
   if (resizeTimeout) {
     window.clearTimeout(resizeTimeout);
   }
   resizeTimeout = window.setTimeout(() => {
-    drawBondingCurve();
+    createChart();
   }, 100);
 }
 
-onMounted(() => {
-  debouncedDrawBondingCurve();
-});
+function createChartData(): ChartData {
+  const dataPoints = [];
+  const labels = [];
+  const numPoints = 100; // Number of points to plot
 
-window.addEventListener("resize", debouncedDrawBondingCurve);
+  for (let i = 0; i <= numPoints; i++) {
+    const supply = (i / numPoints) * maxSupply.value;
+    const price = Number(calculatePrice(supply, curveConfig || defaultCurveConfig));
+    dataPoints.push(price);
+    labels.push(supply.toFixed(0));
+  }
+
+  const datasets: ChartDataset[] = [
+    {
+      label: "Price",
+      data: dataPoints,
+      borderColor: "#4F46E5",
+      tension: 0.4,
+      pointStyle: false,
+    },
+  ];
+
+  if (currentSupplyNumber.value !== null) {
+    const datapoints = Array(numPoints + 1).fill(null);
+    const currentSupplyAxis = Math.floor((currentSupplyNumber.value / maxSupply.value) * numPoints);
+    datapoints[currentSupplyAxis] = Number(
+      calculatePrice(currentSupplyNumber.value, curveConfig || defaultCurveConfig)
+    );
+
+    datasets.push({
+      label: "Current",
+      data: datapoints,
+      pointBackgroundColor: "#EF4444",
+      pointRadius: 6,
+      showLine: false,
+    });
+  }
+
+  if (targetSupply) {
+    const datapoints = Array(numPoints + 1).fill(null);
+    const targetSupplyAxis = Math.floor((Number(targetSupply) / maxSupply.value) * numPoints);
+    datapoints[targetSupplyAxis] = Number(
+      calculatePrice(Number(targetSupply), curveConfig || defaultCurveConfig)
+    );
+    datasets.push({
+      label: "Target",
+      data: datapoints,
+      pointBackgroundColor: "#22c55e",
+      pointRadius: 6,
+      showLine: false,
+    });
+  }
+
+  return {
+    labels,
+    datasets,
+  };
+}
+
+function createChart() {
+  const canvas = curveCanvas.value;
+  if (!canvas) return;
+
+  if (chart) {
+    chart.destroy();
+  }
+
+  chart = new Chart(canvas, {
+    type: "line",
+    data: createChartData(),
+    options: {
+      animation: false,
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: "Supply",
+          },
+        },
+        y: {
+          title: {
+            display: true,
+            text: "Price (ZTH)",
+          },
+          suggestedMin: 0,
+          suggestedMax: maxPriceDisplayed.value,
+        },
+      },
+      interaction: {
+        intersect: false,
+      },
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+    },
+  });
+}
+
+onMounted(() => {
+  debouncedCreateChart();
+});
 
 watch(
   [() => currentSupplyNumber.value, () => curveConfig, () => targetSupply],
   () => {
-    debouncedDrawBondingCurve();
+    debouncedCreateChart();
   },
   { deep: true }
 );
 
 onUnmounted(() => {
-  window.removeEventListener("resize", debouncedDrawBondingCurve);
-  if (resizeTimeout) {
-    window.clearTimeout(resizeTimeout);
+  if (chart) {
+    chart.destroy();
   }
 });
 </script>
