@@ -1,5 +1,5 @@
 import { config } from 'dotenv';
-config({ path: '.env.prod' });
+config();
 
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { databaseConfig } from './src/config/database.config';

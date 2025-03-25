@@ -6,6 +6,7 @@ import {
   MemecoinPriceDto,
   CreateMemecoinDto,
 } from './dto';
+import { defaultCurveConfig } from 'src/trading/bonding-curve';
 
 describe('MemecoinController', () => {
   let controller: MemecoinController;
@@ -120,6 +121,7 @@ describe('MemecoinController', () => {
         symbol: 'NEW',
         description: 'A new memecoin',
         logoUrl: 'https://example.com/logo.png',
+        curveConfig: defaultCurveConfig,
       };
 
       const result = await controller.create(req, createMemecoinDto);

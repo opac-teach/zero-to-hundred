@@ -14,6 +14,7 @@ import {
 import { StatisticsService } from '../statistics/statistics.service';
 import { CreateMemecoinDto } from './dto';
 import { MemecoinResponseDto } from './dto/memecoin-response.dto';
+import { defaultCurveConfig } from 'src/trading/bonding-curve';
 
 describe('MemecoinService', () => {
   let service: MemecoinService;
@@ -255,6 +256,7 @@ describe('MemecoinService', () => {
         symbol: 'TEST',
         description: 'A test memecoin',
         logoUrl: 'https://example.com/logo.png',
+        curveConfig: defaultCurveConfig,
       };
 
       const result = await service.create('user-id-1', createMemecoinDto);
@@ -275,6 +277,7 @@ describe('MemecoinService', () => {
         symbol: 'TEST',
         description: 'A test memecoin',
         logoUrl: 'https://example.com/logo.png',
+        curveConfig: defaultCurveConfig,
       };
 
       await expect(
@@ -291,6 +294,7 @@ describe('MemecoinService', () => {
         name: 'New Coin',
         symbol: 'TEST', // Same symbol as existing memecoin
         description: 'A new memecoin',
+        curveConfig: defaultCurveConfig,
       };
 
       await expect(
