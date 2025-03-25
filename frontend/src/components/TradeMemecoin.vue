@@ -103,14 +103,28 @@
         </div>
         <div class="flex space-x-3">
           <Button
-            v-if="userStore.isAuthenticated"
+            v-if="userStore.isAuthenticated && !tradeConfirmation"
             variant="default"
             class="flex-1"
-            @click="handleTrade()"
+            @click="tradeConfirmation = true"
             :disabled="!isTradeFormValid || isLoading || tradeAmount == '0'"
           >
             {{ isLoading ? "Processing..." : "Trade" }}
           </Button>
+          <div class="flex w-full gap-4" v-else-if="userStore.isAuthenticated && tradeConfirmation">
+            <Button variant="outline" class="flex-1" @click="tradeConfirmation = false">
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              class="flex-1"
+              @click="handleTrade()"
+              :disabled="!isTradeFormValid || isLoading || tradeAmount == '0'"
+            >
+              Confirm trade ?
+            </Button>
+          </div>
+
           <Button v-else variant="default" class="flex-1" @click="router.push('/login')">
             Login to trade
           </Button>
@@ -149,6 +163,7 @@ const walletData = computed(() => walletStore.walletData);
 const walletHolding = computed(() =>
   walletStore.holdings.find((holding) => holding.memecoinId === memecoin?.id)
 );
+const tradeConfirmation = ref(false);
 const tradeAmount = ref("0");
 const slippageTolerance = ref("5");
 const isLoading = ref(false);
@@ -176,9 +191,10 @@ const isTradeFormValid = computed(() => {
 watch(
   [tradeAmount, tradeType, walletHolding],
   async ([newTradeAmount, newTradeType, newWalletHolding]) => {
-    if (!newTradeAmount || newTradeAmount === "0") return;
     tradeEstimation.value = null;
     tradeAmountError.value = "";
+
+    if (!newTradeAmount || newTradeAmount === "0") return;
 
     const amount = parseFloat(newTradeAmount);
     if (isNaN(amount)) {
@@ -222,6 +238,8 @@ watch(
 );
 
 async function handleTrade() {
+  tradeConfirmation.value = false;
+
   if (!memecoin || !tradeAmount.value) return;
 
   try {
@@ -239,6 +257,7 @@ async function handleTrade() {
     );
 
     tradeAmount.value = "0";
+    tradeEstimation.value = null;
     toast.success(`Trade ${tradeType.value} executed successfully!`);
   } catch (error) {
     toast.error("Failed to execute trade. Please try again.");
