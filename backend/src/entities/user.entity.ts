@@ -5,8 +5,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToOne,
+  OneToMany,
 } from 'typeorm';
 import { Wallet } from './wallet.entity';
+import { Transaction } from './transaction.entity';
 
 @Entity('users')
 export class User {
@@ -43,12 +45,15 @@ export class User {
   @Column({ default: true })
   isActive: boolean;
 
-  @OneToOne(() => Wallet, (wallet) => wallet.owner)
-  wallet: Wallet;
-
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToOne(() => Wallet, (wallet) => wallet.owner)
+  wallet?: Wallet;
+
+  @OneToMany(() => Transaction, (transaction) => transaction.user)
+  transactions?: Transaction[];
 }

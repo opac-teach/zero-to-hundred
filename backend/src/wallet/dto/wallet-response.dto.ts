@@ -16,10 +16,13 @@ export class WalletResponseDto {
   @Expose()
   ownerId: string;
 
-  @ApiProperty({ description: 'The owner of the wallet' })
+  @ApiProperty({
+    description: 'The owner of the wallet',
+    type: () => PublicUserResponseDto,
+  })
   @Expose()
   @Type(() => PublicUserResponseDto)
-  owner: PublicUserResponseDto;
+  owner?: PublicUserResponseDto;
 
   @ApiProperty({
     description: 'The holdings of the wallet',
@@ -27,7 +30,7 @@ export class WalletResponseDto {
   })
   @Expose()
   @Type(() => WalletHoldingResponseDto)
-  holdings: WalletHoldingResponseDto[];
+  holdings?: WalletHoldingResponseDto[];
 
   @ApiProperty({ description: 'The date when the wallet was created' })
   @Expose()

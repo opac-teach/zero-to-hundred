@@ -93,9 +93,9 @@
           id="slope"
           v-model="form.curveConfig.slope"
           type="range"
-          :min="form.curveConfig.curveType == 'exponential' ? 0 : 0"
-          :max="form.curveConfig.curveType == 'exponential' ? 2 : 10"
-          :step="form.curveConfig.curveType == 'exponential' ? 0.1 : 0.1"
+          :min="form.curveConfig.curveType == 'exponential' ? 1 : 0"
+          :max="form.curveConfig.curveType == 'exponential' ? 3 : 1.5"
+          :step="form.curveConfig.curveType == 'exponential' ? 0.01 : 0.05"
           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
         />
 
@@ -111,9 +111,9 @@
           id="startingPrice"
           v-model="form.curveConfig.startingPrice"
           type="range"
-          min="0.0"
-          max="100"
-          step="0.5"
+          :min="form.curveConfig.curveType == 'exponential' ? 0 : 0"
+          :max="form.curveConfig.curveType == 'exponential' ? 0.01 : 100"
+          :step="form.curveConfig.curveType == 'exponential' ? 0.0001 : 0.05"
           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
         />
 
@@ -168,6 +168,7 @@ import { Button } from "@/components/ui/button";
 import BondingCurvePreview from "@/components/charts/BondingCurvePreview.vue";
 import { useWalletStore } from "@/stores/wallet";
 import Avatar from "@/components/Logo.vue";
+import { defaultCurveConfig } from "@/lib/bonding-curve";
 
 const router = useRouter();
 const marketStore = useMarketStore();
@@ -182,11 +183,7 @@ const form = ref<CreateMemecoinDto>({
   symbol: "",
   description: "",
   logoUrl: "",
-  curveConfig: {
-    slope: "2",
-    startingPrice: "1",
-    curveType: "linear",
-  },
+  curveConfig: defaultCurveConfig,
 });
 
 const errors = ref({
@@ -259,13 +256,6 @@ async function handleSubmit() {
 
   try {
     isLoading.value = true;
-    const data = form?.value;
-    // Filter out empty string values from data
-    Object.keys(data).forEach((key) => {
-      if (data[key] === "") {
-        delete data[key];
-      }
-    });
     await marketStore.createMemecoin(form.value);
     toast.success("Memecoin created successfully! 🎉");
     router.push("/memecoins");

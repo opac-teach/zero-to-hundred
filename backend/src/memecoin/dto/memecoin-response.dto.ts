@@ -25,7 +25,10 @@ export class MemecoinResponseDto {
   @Expose()
   logoUrl: string;
 
-  @ApiProperty({ description: 'The creator of the memecoin' })
+  @ApiProperty({
+    description: 'The creator of the memecoin',
+    type: () => PublicUserResponseDto,
+  })
   @Expose()
   @Type(() => PublicUserResponseDto)
   creator: PublicUserResponseDto;

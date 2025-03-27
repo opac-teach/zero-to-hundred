@@ -4,6 +4,7 @@ import { UserService } from './user.service';
 import {
   PrivateUserResponseDto,
   PublicUserResponseDto,
+  UserProfileResponseDto,
 } from './dto/user-response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { plainToInstance } from 'class-transformer';
@@ -33,10 +34,29 @@ describe('UserController', () => {
     total: 1,
   };
 
+  const mockUserProfileResponse = {
+    ...mockPublicUserResponse,
+    wallet: {
+      zthBalance: '1000',
+      holdings: [
+        {
+          amount: '100',
+          memecoin: { id: 'memecoin-id-1', name: 'Test Memecoin' },
+        },
+      ],
+    },
+    transactions: [
+      {
+        type: 'buy',
+        memecoin: { id: 'memecoin-id-1', name: 'Test Memecoin' },
+      },
+    ],
+  };
   const mockUserService = {
     findAll: jest.fn().mockResolvedValue([mockFullUserResponse]),
     findOne: jest.fn().mockResolvedValue(mockFullUserResponse),
     findByUsername: jest.fn().mockResolvedValue(mockFullUserResponse),
+    getUserProfile: jest.fn().mockResolvedValue(mockUserProfileResponse),
     update: jest.fn().mockResolvedValue(mockFullUserResponse),
     getLeaderboard: jest.fn().mockResolvedValue(mockLeaderboardResponse),
   };
@@ -74,22 +94,22 @@ describe('UserController', () => {
     });
   });
 
-  describe('findByUsername', () => {
+  describe('getUserProfile', () => {
     it('should return a user by username', async () => {
-      let result = await controller.findByUsername('testuser');
-      result = plainToInstance(PublicUserResponseDto, result, {
+      let result = await controller.getUserProfile('testuser');
+      result = plainToInstance(UserProfileResponseDto, result, {
         excludeExtraneousValues: true,
       });
-      expect(result).toEqual(mockPublicUserResponse);
-      expect(userService.findByUsername).toHaveBeenCalledWith('testuser');
+      expect(result).toEqual(mockUserProfileResponse);
+      expect(userService.getUserProfile).toHaveBeenCalledWith('testuser');
     });
   });
 
-  describe('getProfile', () => {
+  describe('get my Profile', () => {
     it('should return the current user profile', async () => {
       const req = { user: { id: 'user-id-1' } };
 
-      let result = await controller.getProfile(req);
+      let result = await controller.getMyProfile(req);
       result = plainToInstance(PrivateUserResponseDto, result, {
         excludeExtraneousValues: true,
       });

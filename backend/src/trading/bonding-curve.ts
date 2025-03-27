@@ -34,8 +34,8 @@ export function calculateBuyPrice(
   supply: string,
   curveConfig: BondingCurveConfig = defaultCurveConfig,
 ): string {
-  const slope = new Decimal(curveConfig.slope);
-  const startingPrice = new Decimal(curveConfig.startingPrice);
+  const slopeBN = new Decimal(curveConfig.slope);
+  const startingPriceBN = new Decimal(curveConfig.startingPrice);
 
   const amountBN = new Decimal(amount);
   const supplyBN = new Decimal(supply);
@@ -49,15 +49,17 @@ export function calculateBuyPrice(
   }
 
   if (curveConfig.curveType === 'linear') {
-    return slope
+    return slopeBN
       .times(newSupplyBN.pow(2).minus(supplyBN.pow(2)))
       .div(2)
-      .plus(startingPrice.times(amountBN))
+      .plus(startingPriceBN.times(amountBN))
       .toString();
   } else if (curveConfig.curveType === 'exponential') {
-    return startingPrice
-      .times(newSupplyBN.pow(slope.plus(1)).minus(supplyBN.pow(slope.plus(1))))
-      .div(slope.plus(1))
+    return startingPriceBN
+      .times(
+        newSupplyBN.pow(slopeBN.plus(1)).minus(supplyBN.pow(slopeBN.plus(1))),
+      )
+      .div(slopeBN.plus(1))
       .toString();
   } else {
     throw new Error('Invalid curve type');

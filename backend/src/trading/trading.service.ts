@@ -52,9 +52,17 @@ export class TradingService {
     try {
       let cost = '0';
       if (tradeType === 'buy') {
-        cost = calculateBuyPrice(amount, memecoin.totalSupply);
+        cost = calculateBuyPrice(
+          amount,
+          memecoin.totalSupply,
+          memecoin.curveConfig,
+        );
       } else {
-        cost = calculateSellPrice(amount, memecoin.totalSupply);
+        cost = calculateSellPrice(
+          amount,
+          memecoin.totalSupply,
+          memecoin.curveConfig,
+        );
       }
       return new TradeEstimationResponseDto({
         cost,
@@ -108,9 +116,17 @@ export class TradingService {
       }
       let cost = '0';
       if (tradeType === 'buy') {
-        cost = calculateBuyPrice(amount, memecoin.totalSupply);
+        cost = calculateBuyPrice(
+          amount,
+          memecoin.totalSupply,
+          memecoin.curveConfig,
+        );
       } else {
-        cost = calculateSellPrice(amount, memecoin.totalSupply);
+        cost = calculateSellPrice(
+          amount,
+          memecoin.totalSupply,
+          memecoin.curveConfig,
+        );
       }
 
       let holding = await queryRunner.manager.findOne(WalletHolding, {

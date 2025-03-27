@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude, Expose, Transform, Type } from 'class-transformer';
-
+import { Exclude, Expose, Type } from 'class-transformer';
+import { TransactionResponseDto } from '../../wallet/dto';
+import { WalletResponseDto } from '../../wallet/dto';
+import { MemecoinResponseDto } from '../../memecoin/dto';
 @Exclude()
 export class PublicUserResponseDto {
   @ApiProperty({ description: 'The unique identifier of the user' })
@@ -54,6 +56,7 @@ export class PublicUserResponseDto {
 
 @Exclude()
 export class PrivateUserResponseDto extends PublicUserResponseDto {
+  @ApiProperty({ description: 'The email of the user' })
   @Expose()
   email: string;
 
@@ -61,4 +64,35 @@ export class PrivateUserResponseDto extends PublicUserResponseDto {
     super(partial);
     Object.assign(this, partial);
   }
+}
+
+@Exclude()
+export class UserProfileResponseDto extends PublicUserResponseDto {
+  @ApiProperty({
+    description: 'The transactions of the user',
+    type: [TransactionResponseDto],
+  })
+  @Expose()
+  @Type(() => TransactionResponseDto)
+  transactions: TransactionResponseDto[];
+
+  @ApiProperty({
+    description: 'The wallet of the user',
+    type: WalletResponseDto,
+  })
+  @Expose()
+  @Type(() => WalletResponseDto)
+  wallet: WalletResponseDto;
+
+  @ApiProperty({
+    description: 'The memecoins created by the user',
+    type: [MemecoinResponseDto],
+  })
+  @Expose()
+  @Type(() => MemecoinResponseDto)
+  createdMemecoins: MemecoinResponseDto[];
+
+  @ApiProperty({ description: 'The rank of the user' })
+  @Expose()
+  rank: number;
 }

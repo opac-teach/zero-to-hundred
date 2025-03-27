@@ -29,7 +29,7 @@ export interface AuthResponseDto {
   email: string;
 }
 
-export interface UserResponseDto {
+export interface PublicUserResponseDto {
   id: string;
   username: string;
   userTitle: string;
@@ -43,12 +43,19 @@ export interface UserResponseDto {
   updatedAt: string;
 }
 
-export interface MyUserResponseDto extends UserResponseDto {
+export interface MyUserResponseDto extends PublicUserResponseDto {
   email: string;
 }
 
-export interface UserWithWalletResponseDto extends UserResponseDto {
+export interface UserResponseWithWalletDto extends PublicUserResponseDto {
   wallet: WalletResponseDto;
+}
+
+export interface UserProfileResponseDto extends PublicUserResponseDto {
+  transactions: TransactionResponseDto[];
+  wallet: WalletResponseDto;
+  createdMemecoins: MemecoinResponseDto[];
+  rank: number;
 }
 
 export interface UpdateUserDto {
@@ -61,21 +68,26 @@ export interface UpdateUserDto {
   textColor?: string;
 }
 
+export interface BondingCurveConfigDto {
+  slope: string;
+  startingPrice: string;
+  curveType: "linear" | "exponential";
+}
+
 export interface MemecoinResponseDto {
   id: string;
   name: string;
   symbol: string;
   description: string;
   logoUrl: string;
-  creator: UserResponseDto;
+  creator: PublicUserResponseDto;
   creatorId: string;
   totalSupply: string;
   currentPrice: string;
-  marketCap: string;
   volume24h: string;
   createdAt: string;
   updatedAt: string;
-  curveConfig?: BondingCurveConfig;
+  curveConfig: BondingCurveConfigDto;
 }
 
 export interface CreateMemecoinDto {
@@ -83,7 +95,7 @@ export interface CreateMemecoinDto {
   symbol: string;
   description?: string;
   logoUrl?: string;
-  curveConfig: BondingCurveConfig;
+  curveConfig: BondingCurveConfigDto;
 }
 
 export interface MemecoinPriceDto {
@@ -106,7 +118,7 @@ export interface WalletResponseDto {
   id: string;
   zthBalance: string;
   ownerId: string;
-  owner: UserResponseDto;
+  owner: PublicUserResponseDto;
   holdings: WalletHoldingResponseDto[];
   createdAt: string;
   updatedAt: string;
@@ -118,7 +130,7 @@ export interface TransactionResponseDto {
   memeCoinAmount: string;
   zthAmount: string;
   price: string;
-  user: UserResponseDto;
+  user: PublicUserResponseDto;
   userId: string;
   memecoin: MemecoinResponseDto;
   memecoinId: string;
@@ -137,6 +149,7 @@ export interface TradeResponseDto {
   transaction: TransactionResponseDto;
   memecoin: MemecoinResponseDto;
   walletHolding: WalletHoldingResponseDto;
+  wallet: WalletResponseDto;
 }
 
 export interface TradeEstimationResponseDto {
@@ -160,7 +173,7 @@ export interface TradingVolumeDto {
 }
 
 export interface LeaderboardItemDto {
-  user: UserWithWalletResponseDto;
+  user: UserResponseWithWalletDto;
   rank: number;
 }
 

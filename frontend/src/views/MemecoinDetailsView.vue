@@ -34,6 +34,23 @@
         :value="Number(memecoin?.totalSupply || '0').toFixed(2)"
         unit="ZTH"
       />
+      <Card>
+        <CardHeader> <CardTitle> Curve Config </CardTitle> </CardHeader>
+        <CardContent>
+          <div class="flex justify-between items-center">
+            <span class="text-gray-500 dark:text-gray-400">Type</span>
+            <span class="font-medium">{{ memecoin?.curveConfig.curveType }}</span>
+          </div>
+          <div class="flex justify-between items-center mt-2">
+            <span class="text-gray-500 dark:text-gray-400">Starting Price</span>
+            <span class="font-medium">{{ memecoin?.curveConfig.startingPrice }}</span>
+          </div>
+          <div class="flex justify-between items-center mt-2">
+            <span class="text-gray-500 dark:text-gray-400">Slope</span>
+            <span class="font-medium">{{ memecoin?.curveConfig.slope }}</span>
+          </div>
+        </CardContent>
+      </Card>
       <!-- <Card>
         <CardContent class="pt-6">
           <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">24h Volume</h3>

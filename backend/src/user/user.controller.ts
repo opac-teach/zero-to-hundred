@@ -26,6 +26,7 @@ import {
 import {
   PublicUserResponseDto,
   PrivateUserResponseDto,
+  UserProfileResponseDto,
 } from './dto/user-response.dto';
 import { LeaderboardDto } from './dto/leaderboard.dto';
 
@@ -82,7 +83,7 @@ export class UserController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  async getProfile(@Request() req): Promise<PrivateUserResponseDto> {
+  async getMyProfile(@Request() req): Promise<PrivateUserResponseDto> {
     const user = await this.userService.findOne(req.user.id);
     return new PrivateUserResponseDto(user);
   }
@@ -106,19 +107,18 @@ export class UserController {
     return new PrivateUserResponseDto(user);
   }
 
-  @ApiOperation({ summary: 'Get user by username' })
+  @ApiOperation({ summary: 'Get user profile by username' })
   @ApiResponse({
     status: 200,
     description: 'Return the user',
-    type: PublicUserResponseDto,
+    type: UserProfileResponseDto,
   })
   @ApiResponse({ status: 404, description: 'User not found' })
   @ApiParam({ name: 'username', description: 'The username of the user' })
   @Get('username/:username')
-  async findByUsername(
+  async getUserProfile(
     @Param('username') username: string,
-  ): Promise<PublicUserResponseDto> {
-    const user = await this.userService.findByUsername(username);
-    return new PublicUserResponseDto(user);
+  ): Promise<UserProfileResponseDto> {
+    return this.userService.getUserProfile(username);
   }
 }

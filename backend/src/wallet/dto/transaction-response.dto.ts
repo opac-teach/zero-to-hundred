@@ -33,7 +33,10 @@ export class TransactionResponseDto {
   @Expose()
   price: string;
 
-  @ApiProperty({ description: 'The user who performed the transaction' })
+  @ApiProperty({
+    description: 'The user who performed the transaction',
+    type: () => PublicUserResponseDto,
+  })
   @Expose()
   @Type(() => PublicUserResponseDto)
   user: PublicUserResponseDto;

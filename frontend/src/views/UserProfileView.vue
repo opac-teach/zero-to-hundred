@@ -155,6 +155,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <KPI title="ZTH Balance" :value="Number(walletStore.zthBalance).toFixed(2)" unit="ZTH" />
           <KPI title="Member Since" :value="formatDate(user?.createdAt)" />
+          <KPI title="Rank" :value="user?.rank" prefix="#" />
           <!-- 
           <Card>
             <CardContent class="pt-6">
@@ -188,6 +189,47 @@
       </CardContent>
     </Card>
 
+    <Card>
+      <CardHeader>
+        <CardTitle>Portfolio</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div class="space-y-4" v-if="user?.wallet.holdings.length">
+          <div
+            v-for="holding in user?.wallet.holdings"
+            :key="holding.id"
+            class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+            @click="router.push(`/memecoin/${holding.memecoin.symbol}`)"
+          >
+            <div class="flex items-center space-x-4">
+              <Avatar
+                :src="holding.memecoin.logoUrl"
+                :alt="holding.memecoin.symbol"
+                class="w-12 h-12"
+              />
+              <div>
+                <div class="font-medium text-gray-900 dark:text-white">
+                  {{ holding.memecoin.name }}
+                </div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                  {{ holding.memecoin.symbol }}
+                </div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="font-medium text-gray-900 dark:text-white">
+                {{ holding.amount }} {{ holding.memecoin.symbol }}
+              </div>
+              <div class="text-sm text-gray-500 dark:text-gray-400">
+                {{ parseFloat(holding.amount) * parseFloat(holding.memecoin.currentPrice) }}
+                ZTH
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-else class="text-gray-500 dark:text-gray-400">Empty...</div>
+      </CardContent>
+    </Card>
     <!-- Created Memecoins -->
     <Card>
       <CardHeader>
@@ -197,8 +239,8 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card>
             <CardHeader>Created Memecoins</CardHeader>
-            <CardContent class="space-y-4">
-              <Card v-for="memecoin in createdMemecoins" :key="memecoin.id">
+            <CardContent class="space-y-4 max-h-[600px] overflow-y-auto">
+              <Card v-for="memecoin in user?.createdMemecoins" :key="memecoin.id">
                 <CardContent
                   class="pt-6 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
                   @click="router.push(`/memecoin/${memecoin.symbol}`)"
@@ -238,10 +280,10 @@
 
           <Card>
             <CardHeader>Transactions</CardHeader>
-            <CardContent>
-              <div v-if="transactions.length" class="space-y-4">
+            <CardContent class="max-h-[600px] overflow-y-auto">
+              <div v-if="user?.transactions?.length" class="space-y-4">
                 <div
-                  v-for="transaction in transactions"
+                  v-for="transaction in user?.transactions"
                   :key="transaction.id"
                   class="flex justify-between items-center border-b last:border-b-0 pb-4"
                 >
@@ -253,32 +295,36 @@
                       {{ formatDate(transaction.createdAt) }}
                     </p>
                   </div>
-                  <div>
-                    <p
-                      class="text-sm font-medium"
-                      :class="
-                        transaction.type === 'BUY'
-                          ? 'text-green-600 dark:text-green-400'
-                          : 'text-red-600 dark:text-red-400'
-                      "
-                    >
-                      {{ transaction.type === "BUY" ? "+" : "-" }}
-                      {{ Number(transaction.memeCoinAmount).toFixed(2) }}
-                      {{ transaction.memecoin.symbol }}
-                    </p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">
-                      {{ transaction.type === "BUY" ? "-" : "+" }}
-                      {{ Number(transaction.zthAmount).toFixed(2) }} ZTH
-                    </p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">
-                      @
-                      {{
-                        new Decimal(transaction.memeCoinAmount)
-                          .div(transaction.zthAmount)
-                          .toFixed(2)
-                      }}
-                      {{ transaction.memecoin.symbol }}/ZTH
-                    </p>
+                  <div class="text-right">
+                    <div v-if="transaction.type === 'CREATE'">
+                      <p class="text-sm font-medium">{{ transaction.memecoin.symbol }}</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">
+                        {{ transaction.memecoin.name }}
+                      </p>
+                    </div>
+                    <div v-else class="text-right">
+                      <p
+                        class="text-sm font-medium"
+                        :class="
+                          transaction.type === 'BUY'
+                            ? 'text-green-600 dark:text-green-400'
+                            : 'text-red-600 dark:text-red-400'
+                        "
+                      >
+                        {{ transaction.type === "BUY" ? "+" : "-" }}
+                        {{ Number(transaction.memeCoinAmount).toFixed(2) }}
+                        {{ transaction.memecoin.symbol }}
+                      </p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">
+                        {{ transaction.type === "BUY" ? "-" : "+" }}
+                        {{ Number(transaction.zthAmount).toFixed(2) }} ZTH
+                      </p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">
+                        @
+                        {{ Number(transaction.price).toFixed(2) }}
+                        {{ transaction.memecoin.symbol }}/ZTH
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -297,15 +343,13 @@ import { useRoute, useRouter } from "vue-router";
 import { users, wallet } from "@/api/client";
 import { useToast } from "vue-toastification";
 import { usePageTitle } from "@/composables/usePageTitle";
-import type { UserResponseDto, TransactionResponseDto, WalletResponseDto } from "@/api";
+import type { UserProfileResponseDto, TransactionResponseDto, WalletResponseDto } from "@/api";
 import { useUserStore } from "@/stores/user";
 import { Button } from "@/components/ui/button";
 import { marked } from "marked";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMarketStore } from "@/stores/market";
-import { useTradingStore } from "@/stores/trading";
 import { useWalletStore } from "@/stores/wallet";
-import { useAssetsStore } from "@/stores/assets";
 import Avatar from "@/components/Logo.vue";
 import KPI from "@/components/KPI.vue";
 import Decimal from "decimal.js";
@@ -313,15 +357,12 @@ import Decimal from "decimal.js";
 const userStore = useUserStore();
 const marketStore = useMarketStore();
 const walletStore = useWalletStore();
-const tradingStore = useTradingStore();
 const route = useRoute();
 const toast = useToast();
 const isLoading = ref(false);
 const error = ref<string | null>(null);
-const transactions = ref<TransactionResponseDto[]>([]);
-const walletData = ref<WalletResponseDto | null>(null);
 const router = useRouter();
-const user = ref<UserResponseDto | null>(null);
+const user = ref<UserProfileResponseDto | null>(null);
 
 usePageTitle(user, (userValue) =>
   userValue?.username ? `${userValue.username}'s Profile` : "User Profile"
@@ -345,7 +386,7 @@ async function fetchUserProfile() {
       username = userStore.currentUser?.username || "";
     }
     const response = await users.getByUsername(username);
-    user.value = response.data;
+    user.value = response.data as UserProfileResponseDto;
   } catch (error: any) {
     error.value = error.message || "Failed to fetch user profile";
     toast.error(error.value);
@@ -354,29 +395,11 @@ async function fetchUserProfile() {
   }
 }
 
-async function fetchWallet() {
-  try {
-    const response = await wallet.getWallet();
-    walletData.value = response.data;
-  } catch (error: any) {
-    console.error("Failed to fetch wallet:", error);
-  }
-}
-
-async function fetchTransactions() {
-  try {
-    const response = await wallet.getTransactions(1, 5); // Get last 5 transactions
-    transactions.value = response.data;
-  } catch (error: any) {
-    console.error("Failed to fetch transactions:", error);
-  }
-}
-
 const createdMemecoins = computed(() =>
   marketStore.memecoinsList.filter((m) => m.creatorId === user.value?.id)
 );
 
 onMounted(async () => {
-  await Promise.all([fetchUserProfile(), fetchTransactions(), fetchWallet()]);
+  await Promise.all([fetchUserProfile()]);
 });
 </script>

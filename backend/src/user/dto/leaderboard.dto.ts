@@ -11,7 +11,10 @@ class UserResponseWithWalletDto extends PublicUserResponseDto {
 }
 
 export class LeaderboardItemDto {
-  @ApiProperty({ description: 'The user' })
+  @ApiProperty({
+    description: 'The user',
+    type: () => UserResponseWithWalletDto,
+  })
   @Expose()
   @Type(() => UserResponseWithWalletDto)
   user: UserResponseWithWalletDto;

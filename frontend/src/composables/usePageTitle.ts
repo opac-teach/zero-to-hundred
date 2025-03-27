@@ -1,6 +1,6 @@
 import { onMounted, onUnmounted, watch, type Ref } from "vue";
 import { useRoute } from "vue-router";
-import { setPageTitle } from "@/utils/title";
+import { setPageTitle } from "@/composables/title";
 
 /**
  * Composable for managing dynamic page titles within components

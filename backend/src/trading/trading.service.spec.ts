@@ -9,7 +9,12 @@ import { WalletHolding } from '../entities/wallet-holding.entity';
 import { Transaction, TransactionType } from '../entities/transaction.entity';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { TradeMemecoinDto } from './dto';
-import { calculateSellPrice, defaultCurveConfig } from './bonding-curve';
+import {
+  calculateBuyPrice,
+  calculateSellPrice,
+  defaultCurveConfig,
+  BondingCurveConfig,
+} from './bonding-curve';
 
 // Mock data
 const mockUser = {
@@ -314,6 +319,66 @@ describe('TradingService', () => {
       expect(result.wallet).toHaveProperty('zthBalance', '986');
     });
 
+    it('should successfully buy a with a custom curve', async () => {
+      // Mock all necessary repository methods
+      const customCurveConfig: BondingCurveConfig = {
+        curveType: 'linear',
+        startingPrice: '1.5',
+        slope: '1.5',
+      };
+      userRepository.findOne.mockResolvedValue(mockUser);
+      queryRunner.manager.findOne.mockResolvedValueOnce({ ...mockWallet });
+      queryRunner.manager.findOne.mockResolvedValueOnce({
+        ...mockMemecoin,
+        curveConfig: customCurveConfig,
+      });
+      queryRunner.manager.findOne.mockResolvedValueOnce({
+        ...mockWalletHolding,
+      });
+
+      walletHoldingRepository.create.mockImplementation((w) => w);
+      transactionRepository.create.mockImplementation((t) => t);
+
+      const requestCost = calculateBuyPrice('2', '2', customCurveConfig);
+      const tradeDto = new TradeMemecoinDto();
+      tradeDto.memecoinId = 'memecoin-id-1';
+      tradeDto.amount = '2';
+      tradeDto.requestCost = requestCost;
+      tradeDto.tradeType = 'buy';
+      tradeDto.slippageTolerance = 5;
+
+      const result = await service.tradeMemecoin('user-id-1', tradeDto);
+
+      // Check that repositories were called correctly
+      expect(userRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 'user-id-1' },
+      });
+      expect(queryRunner.manager.findOne).toHaveBeenCalled();
+      expect(transactionRepository.create).toHaveBeenCalled();
+
+      // Check that the query runner was used correctly
+      expect(queryRunner.connect).toHaveBeenCalled();
+      expect(queryRunner.startTransaction).toHaveBeenCalled();
+      expect(queryRunner.commitTransaction).toHaveBeenCalled();
+      expect(queryRunner.release).toHaveBeenCalled();
+      expect(queryRunner.manager.save).toHaveBeenCalled();
+
+      // Check the response properties
+      expect(result).toHaveProperty('transaction');
+      expect(result.transaction).toHaveProperty('type', TransactionType.BUY);
+      expect(result.transaction).toHaveProperty('memeCoinAmount', '2');
+      expect(result.transaction).toHaveProperty('zthAmount', requestCost);
+      expect(result.transaction).toHaveProperty('price', '6');
+      expect(result).toHaveProperty('memecoin');
+      expect(result.memecoin).toHaveProperty('id', 'memecoin-id-1');
+      expect(result.memecoin).toHaveProperty('totalSupply', '4');
+      expect(result.memecoin).toHaveProperty('currentPrice', '9');
+      expect(result).toHaveProperty('walletHolding');
+      expect(result.walletHolding).toHaveProperty('amount', '102');
+      expect(result).toHaveProperty('wallet');
+      expect(result.wallet).toHaveProperty('zthBalance', '988');
+    });
+
     it('should create a new wallet holding if one does not exist', async () => {
       // Mock all necessary repository methods
       userRepository.findOne.mockResolvedValue(mockUser);
@@ -594,6 +659,113 @@ describe('TradingService', () => {
         service.tradeMemecoin('user-id-1', tradeDto),
       ).rejects.toThrow(BadRequestException);
       expect(queryRunner.rollbackTransaction).toHaveBeenCalled();
+    });
+  });
+
+  describe('estimateTradeMemecoin', () => {
+    it('should throw NotFoundException if memecoin is not found', async () => {
+      memecoinRepository.findOne.mockResolvedValue(null);
+
+      const tradeDto = new TradeMemecoinDto();
+      tradeDto.memecoinId = 'non-existent-memecoin';
+      tradeDto.amount = '10';
+      tradeDto.tradeType = 'buy';
+
+      await expect(service.estimateTradeMemecoin(tradeDto)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should successfully estimate a buy trade', async () => {
+      memecoinRepository.findOne.mockResolvedValue(mockMemecoin);
+
+      const tradeDto = new TradeMemecoinDto();
+      tradeDto.memecoinId = 'memecoin-id-1';
+      tradeDto.amount = '2';
+      tradeDto.tradeType = 'buy';
+
+      const result = await service.estimateTradeMemecoin(tradeDto);
+
+      expect(result).toHaveProperty('cost');
+      expect(result).toHaveProperty('amount', '2');
+      expect(result).toHaveProperty('memecoin');
+      expect(result.memecoin).toHaveProperty('id', 'memecoin-id-1');
+      expect(result.cost).toBe(
+        calculateBuyPrice(
+          '2',
+          mockMemecoin.totalSupply,
+          mockMemecoin.curveConfig,
+        ),
+      );
+    });
+
+    it('should successfully estimate a sell trade', async () => {
+      memecoinRepository.findOne.mockResolvedValue(mockMemecoin);
+
+      const tradeDto = new TradeMemecoinDto();
+      tradeDto.memecoinId = 'memecoin-id-1';
+      tradeDto.amount = '2';
+      tradeDto.tradeType = 'sell';
+
+      const result = await service.estimateTradeMemecoin(tradeDto);
+
+      expect(result).toHaveProperty('cost');
+      expect(result).toHaveProperty('amount', '2');
+      expect(result).toHaveProperty('memecoin');
+      expect(result.memecoin).toHaveProperty('id', 'memecoin-id-1');
+      expect(result.cost).toBe(
+        calculateSellPrice(
+          '2',
+          mockMemecoin.totalSupply,
+          mockMemecoin.curveConfig,
+        ),
+      );
+    });
+
+    it('should successfully estimate a trade with custom curve config', async () => {
+      const customCurveConfig: BondingCurveConfig = {
+        curveType: 'linear',
+        startingPrice: '1.5',
+        slope: '1.5',
+      };
+      const memecoinWithCustomCurve = {
+        ...mockMemecoin,
+        curveConfig: customCurveConfig,
+      };
+      memecoinRepository.findOne.mockResolvedValue(memecoinWithCustomCurve);
+
+      const tradeDto = new TradeMemecoinDto();
+      tradeDto.memecoinId = 'memecoin-id-1';
+      tradeDto.amount = '2';
+      tradeDto.tradeType = 'buy';
+
+      const result = await service.estimateTradeMemecoin(tradeDto);
+
+      expect(result).toHaveProperty('cost');
+      expect(result).toHaveProperty('amount', '2');
+      expect(result).toHaveProperty('memecoin');
+      expect(result.memecoin).toHaveProperty('id', 'memecoin-id-1');
+      expect(result.memecoin.curveConfig).toEqual(customCurveConfig);
+      expect(result.cost).toBe(
+        calculateBuyPrice(
+          '2',
+          memecoinWithCustomCurve.totalSupply,
+          customCurveConfig,
+        ),
+      );
+    });
+
+    it('should throw BadRequestException if calculation fails', async () => {
+      memecoinRepository.findOne.mockResolvedValue(mockMemecoin);
+
+      const tradeDto = new TradeMemecoinDto();
+      tradeDto.memecoinId = 'memecoin-id-1';
+      tradeDto.amount = '-1'; // Invalid amount to trigger calculation error
+      tradeDto.tradeType = 'buy';
+
+      await expect(service.estimateTradeMemecoin(tradeDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 });

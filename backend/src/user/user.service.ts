@@ -4,11 +4,13 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository, In, MoreThan } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { LeaderboardDto, LeaderboardItemDto } from './dto/leaderboard.dto';
-
+import { UserProfileResponseDto } from './dto/user-response.dto';
+import { TransactionType } from '../entities/transaction.entity';
+import { userInfo } from 'os';
 @Injectable()
 export class UserService {
   constructor(
@@ -44,6 +46,40 @@ export class UserService {
     }
 
     return user;
+  }
+
+  async getUserProfile(username: string): Promise<UserProfileResponseDto> {
+    const user = await this.userRepository.findOne({
+      where: { username },
+      relations: [
+        'wallet',
+        'transactions',
+        'transactions.memecoin',
+        'wallet.holdings',
+        'wallet.holdings.memecoin',
+      ],
+    });
+
+    if (!userInfo) {
+      throw new NotFoundException(`User with username ${username} not found`);
+    }
+
+    const userProfile = new UserProfileResponseDto(user);
+
+    userProfile.createdMemecoins = userProfile.transactions
+      .filter((transaction) => transaction.type === TransactionType.CREATE)
+      .map((transaction) => transaction.memecoin);
+
+    userProfile.rank =
+      (await this.userRepository.count({
+        where: {
+          wallet: {
+            zthBalance: MoreThan(user.wallet.zthBalance),
+          },
+        },
+      })) + 1;
+
+    return new UserProfileResponseDto(userProfile);
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
