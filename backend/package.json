@@ -19,7 +19,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "export-openapi": "curl -o ./specs/openapi.json http://localhost:3000/swagger-json",
+    "export-openapi": "curl -o ./specs/openapi.json http://localhost:3202/swagger-json",
     "typecheck": "tsc --noEmit",
     "typeorm": "typeorm-ts-node-commonjs",
     "migration:generate": "npm run typeorm -- migration:generate -d typeorm.config.ts",

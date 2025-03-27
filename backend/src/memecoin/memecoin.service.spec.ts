@@ -277,7 +277,6 @@ describe('MemecoinService', () => {
         symbol: 'TEST',
         description: 'A test memecoin',
         logoUrl: 'https://example.com/logo.png',
-        curveConfig: defaultCurveConfig,
       };
 
       await expect(
@@ -294,7 +293,6 @@ describe('MemecoinService', () => {
         name: 'New Coin',
         symbol: 'TEST', // Same symbol as existing memecoin
         description: 'A new memecoin',
-        curveConfig: defaultCurveConfig,
       };
 
       await expect(

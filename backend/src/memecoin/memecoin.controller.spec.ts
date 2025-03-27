@@ -132,6 +132,23 @@ describe('MemecoinController', () => {
         createMemecoinDto,
       );
     });
+    it('should create a new memecoin without curve config', async () => {
+      const req = { user: { id: 'user-id-1' } };
+      const createMemecoinDto: CreateMemecoinDto = {
+        name: 'New Coin',
+        symbol: 'NEW',
+        description: 'A new memecoin',
+        logoUrl: 'https://example.com/logo.png',
+      };
+
+      const result = await controller.create(req, createMemecoinDto);
+
+      expect(result).toEqual(mockMemecoinResponse);
+      expect(memecoinService.create).toHaveBeenCalledWith(
+        'user-id-1',
+        createMemecoinDto,
+      );
+    });
   });
 
   describe('getTransactions', () => {

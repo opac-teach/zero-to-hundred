@@ -1,15 +1,51 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsNotEmpty,
   IsString,
   IsOptional,
   MaxLength,
   Matches,
+  IsUrl,
+  IsDecimal,
+  IsEnum,
+  ValidateNested,
 } from 'class-validator';
-import {
-  BondingCurveConfig,
-  defaultCurveConfig,
-} from 'src/trading/bonding-curve';
+import { BondingCurveConfig } from 'src/trading/bonding-curve';
+
+export class BondingCurveConfigDto implements BondingCurveConfig {
+  @ApiProperty({
+    description: 'Slope of the bonding curve',
+    example: '1.5',
+  })
+  @IsString()
+  @IsDecimal()
+  @IsNotEmpty()
+  slope: string;
+
+  @ApiProperty({
+    description: 'Starting price of the bonding curve',
+    example: '10',
+  })
+  @IsString()
+  @IsDecimal()
+  @IsNotEmpty()
+  startingPrice: string;
+
+  @ApiProperty({
+    description: 'Type of the bonding curve',
+    example: 'linear',
+    enum: ['linear', 'exponential'],
+  })
+  @IsString()
+  @IsEnum(['linear', 'exponential'])
+  @IsNotEmpty()
+  curveType: 'linear' | 'exponential';
+
+  constructor(partial: Partial<BondingCurveConfigDto>) {
+    Object.assign(this, partial);
+  }
+}
 
 export class CreateMemecoinDto {
   @ApiProperty({
@@ -49,14 +85,16 @@ export class CreateMemecoinDto {
     example: 'https://example.com/doge-logo.png',
     required: false,
   })
-  @IsString()
+  @IsUrl()
   @IsOptional()
   logoUrl?: string;
 
   @ApiProperty({
     description: 'The bonding curve configuration',
-    example: defaultCurveConfig,
+    required: false,
   })
+  @Type(() => BondingCurveConfigDto)
+  @ValidateNested()
   @IsOptional()
-  curveConfig: BondingCurveConfig;
+  curveConfig?: BondingCurveConfigDto;
 }
