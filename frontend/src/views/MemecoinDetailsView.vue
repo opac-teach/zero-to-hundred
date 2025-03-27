@@ -26,10 +26,14 @@
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
       <KPI
         title="Current Price"
-        :value="Number(memecoin?.currentPrice || '0').toFixed(6)"
+        :value="Number(memecoin?.currentPrice || '0').toFixed(2)"
         unit="ZTH"
       />
-      <KPI title="Current Supply" :value="memecoin?.totalSupply" unit="ZTH" />
+      <KPI
+        title="Current Supply"
+        :value="Number(memecoin?.totalSupply || '0').toFixed(2)"
+        unit="ZTH"
+      />
       <!-- <Card>
         <CardContent class="pt-6">
           <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">24h Volume</h3>

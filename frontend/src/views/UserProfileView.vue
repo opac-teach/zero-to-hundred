@@ -53,7 +53,6 @@
       </div>
     </div>
 
-    <!-- Statistics -->
     <!-- <Card>
       <CardHeader>
         <CardTitle>Trading Statistics</CardTitle>
@@ -147,14 +146,14 @@
       </CardContent>
     </Card> -->
 
-    <!-- Portfolio Value -->
+    <!-- Stats -->
     <Card>
       <CardHeader>
         <CardTitle>Stats</CardTitle>
       </CardHeader>
       <CardContent>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <KPI title="ZTH Balance" :value="walletStore.zthBalance" unit="ZTH" />
+          <KPI title="ZTH Balance" :value="Number(walletStore.zthBalance).toFixed(2)" unit="ZTH" />
           <KPI title="Member Since" :value="formatDate(user?.createdAt)" />
           <!-- 
           <Card>
@@ -218,7 +217,14 @@
                     </div>
                     <div class="text-right">
                       <div class="font-medium text-gray-900 dark:text-white">
-                        {{ parseFloat(memecoin.currentPrice).toFixed(6) }} ZTH
+                        <p>
+                          <span class="text-gray-500 dark:text-gray-400 italic">Price:</span>
+                          {{ parseFloat(memecoin.currentPrice).toFixed(2) }} ZTH
+                        </p>
+                        <p>
+                          <span class="text-gray-500 dark:text-gray-400 italic">Supply:</span>
+                          {{ parseFloat(memecoin.totalSupply).toFixed(2) }}
+                        </p>
                       </div>
                       <!-- <div class="text-sm text-gray-500 dark:text-gray-400">
                     {{ memecoin.volume24h }} ZTH 24h
@@ -237,7 +243,7 @@
                 <div
                   v-for="transaction in transactions"
                   :key="transaction.id"
-                  class="flex justify-between items-center"
+                  class="flex justify-between items-center border-b last:border-b-0 pb-4"
                 >
                   <div>
                     <p class="text-sm font-medium text-gray-900 dark:text-white">
@@ -247,17 +253,33 @@
                       {{ formatDate(transaction.createdAt) }}
                     </p>
                   </div>
-                  <p
-                    class="text-sm font-medium"
-                    :class="
-                      transaction.type === 'BUY'
-                        ? 'text-green-600 dark:text-green-400'
-                        : 'text-red-600 dark:text-red-400'
-                    "
-                  >
-                    {{ transaction.type === "BUY" ? "+" : "-" }}{{ transaction.memeCoinAmount }}
-                    {{ transaction.memecoin.symbol }}
-                  </p>
+                  <div>
+                    <p
+                      class="text-sm font-medium"
+                      :class="
+                        transaction.type === 'BUY'
+                          ? 'text-green-600 dark:text-green-400'
+                          : 'text-red-600 dark:text-red-400'
+                      "
+                    >
+                      {{ transaction.type === "BUY" ? "+" : "-" }}
+                      {{ Number(transaction.memeCoinAmount).toFixed(2) }}
+                      {{ transaction.memecoin.symbol }}
+                    </p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                      {{ transaction.type === "BUY" ? "-" : "+" }}
+                      {{ Number(transaction.zthAmount).toFixed(2) }} ZTH
+                    </p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                      @
+                      {{
+                        new Decimal(transaction.memeCoinAmount)
+                          .div(transaction.zthAmount)
+                          .toFixed(2)
+                      }}
+                      {{ transaction.memecoin.symbol }}/ZTH
+                    </p>
+                  </div>
                 </div>
               </div>
               <p v-else class="text-gray-500 dark:text-gray-400">No recent activity</p>
@@ -286,6 +308,7 @@ import { useWalletStore } from "@/stores/wallet";
 import { useAssetsStore } from "@/stores/assets";
 import Avatar from "@/components/Logo.vue";
 import KPI from "@/components/KPI.vue";
+import Decimal from "decimal.js";
 
 const userStore = useUserStore();
 const marketStore = useMarketStore();

@@ -28,10 +28,10 @@
         <!-- Right side -->
         <div class="flex flex-1 items-center justify-end space-x-4">
           <!-- Theme toggle -->
-          <Button variant="ghost" size="icon" @click="uiStore.toggleDarkMode">
+          <!-- <Button variant="ghost" size="icon" @click="uiStore.toggleDarkMode">
             <sun-icon v-if="uiStore.isDarkMode" class="h-4 w-4" />
             <moon-icon v-else class="h-4 w-4" />
-          </Button>
+          </Button> -->
 
           <Select v-model="uiStore.useCustomAPI">
             <SelectTrigger class="w-[120px]">

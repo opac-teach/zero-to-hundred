@@ -18,6 +18,7 @@
       <div class="flex justify-between items-center mb-6">
         <h2 class="text-xl font-semibold text-gray-900 dark:text-white">My Holdings</h2>
         <div class="flex items-center space-x-2">
+          <span class="text-gray-500 dark:text-gray-400">Sort by:</span>
           <button
             @click="sortHoldingsBy = 'value'"
             class="px-3 py-1 rounded-md text-sm font-medium"
@@ -183,12 +184,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useWalletStore } from "@/stores/wallet";
-import { useAssetsStore } from "@/stores/assets";
 import { useToast } from "vue-toastification";
 import Avatar from "@/components/Logo.vue";
 
 const walletStore = useWalletStore();
-const assetsStore = useAssetsStore();
 const toast = useToast();
 const sortHoldingsBy = ref<"value" | "amount">("value");
 const selectedFilter = ref("all");
