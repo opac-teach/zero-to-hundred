@@ -7,7 +7,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { MyUserResponseDto, UserResponseDto } from './dto/user-response.dto';
 import { LeaderboardDto, LeaderboardItemDto } from './dto/leaderboard.dto';
 
 @Injectable()
@@ -17,40 +16,37 @@ export class UserService {
     private userRepository: Repository<User>,
   ) {}
 
-  async findAll(): Promise<UserResponseDto[]> {
+  async findAll(): Promise<User[]> {
     const users = await this.userRepository.find({
       order: {
         createdAt: 'DESC',
       },
     });
 
-    return users.map((user) => new UserResponseDto(user));
+    return users;
   }
 
-  async findOne(id: string): Promise<MyUserResponseDto> {
+  async findOne(id: string): Promise<User> {
     const user = await this.userRepository.findOne({ where: { id } });
 
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    return new MyUserResponseDto(user);
+    return user;
   }
 
-  async findByUsername(username: string): Promise<UserResponseDto> {
+  async findByUsername(username: string): Promise<User> {
     const user = await this.userRepository.findOne({ where: { username } });
 
     if (!user) {
       throw new NotFoundException(`User with username ${username} not found`);
     }
 
-    return new UserResponseDto(user);
+    return user;
   }
 
-  async update(
-    id: string,
-    updateUserDto: UpdateUserDto,
-  ): Promise<MyUserResponseDto> {
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.userRepository.findOne({ where: { id } });
 
     if (!user) {
@@ -74,7 +70,7 @@ export class UserService {
     Object.assign(user, updateUserDto);
 
     const updatedUser = await this.userRepository.save(user);
-    return new MyUserResponseDto(updatedUser);
+    return updatedUser;
   }
 
   async getLeaderboard(

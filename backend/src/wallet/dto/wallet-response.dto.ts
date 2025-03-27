@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
 import { WalletHoldingResponseDto } from './wallet-holding-response.dto';
-import { UserResponseDto } from '../../user/dto/user-response.dto';
+import { PublicUserResponseDto } from '../../user/dto/user-response.dto';
 
 export class WalletResponseDto {
   @ApiProperty({ description: 'The unique identifier of the wallet' })
@@ -18,8 +18,8 @@ export class WalletResponseDto {
 
   @ApiProperty({ description: 'The owner of the wallet' })
   @Expose()
-  @Type(() => UserResponseDto)
-  owner: UserResponseDto;
+  @Type(() => PublicUserResponseDto)
+  owner: PublicUserResponseDto;
 
   @ApiProperty({
     description: 'The holdings of the wallet',

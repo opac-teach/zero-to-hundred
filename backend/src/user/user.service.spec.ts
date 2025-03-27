@@ -6,12 +6,13 @@ import { Repository } from 'typeorm';
 import { NotFoundException, ConflictException } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Wallet } from '../entities/wallet.entity';
+import { plainToInstance } from 'class-transformer';
 
 describe('UserService', () => {
   let service: UserService;
   let userRepository: Repository<User>;
 
-  const mockWallet = {
+  const mockWallet = plainToInstance(Wallet, {
     id: 'wallet-id-1',
     ownerId: 'user-id-1',
     zthBalance: '1000',
@@ -20,9 +21,9 @@ describe('UserService', () => {
     updatedAt: new Date(),
     owner: null,
     holdings: [],
-  } as Wallet;
+  });
 
-  const mockUser = {
+  const mockUser = plainToInstance(User, {
     id: 'user-id-1',
     username: 'testuser',
     email: 'test@example.com',
@@ -38,30 +39,28 @@ describe('UserService', () => {
     createdAt: new Date(),
     updatedAt: new Date(),
     wallet: mockWallet,
-  } as User;
+  });
+  const mockUser2 = plainToInstance(User, {
+    id: 'user-id-2',
+    username: 'testuser2',
+    email: 'test2@example.com',
+    password: 'hashedpassword',
+    userTitle: 'Test User 2',
+    role: 'user',
+    profilePictureUrl: null,
+    bannerUrl: null,
+    description: null,
+    backgroundColor: '#f5f5f5',
+    textColor: '#333333',
+    isActive: true,
+    zthBalance: 100,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
 
   mockWallet.owner = mockUser;
 
-  const mockUsers = [
-    mockUser,
-    {
-      id: 'user-id-2',
-      username: 'testuser2',
-      email: 'test2@example.com',
-      password: 'hashedpassword',
-      userTitle: 'Test User 2',
-      role: 'user',
-      profilePictureUrl: null,
-      bannerUrl: null,
-      description: null,
-      backgroundColor: '#f5f5f5',
-      textColor: '#333333',
-      isActive: true,
-      zthBalance: 100,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-  ];
+  const mockUsers: User[] = [mockUser, mockUser2];
 
   const mockUserRepository = {
     find: jest.fn().mockResolvedValue(mockUsers),
@@ -119,6 +118,7 @@ describe('UserService', () => {
 
       expect(result).toBeDefined();
       expect(result.length).toBe(2);
+      expect(result[0]).toBeInstanceOf(User);
       expect(userRepository.find).toHaveBeenCalledWith({
         order: {
           createdAt: 'DESC',
@@ -133,6 +133,7 @@ describe('UserService', () => {
 
       expect(result).toBeDefined();
       expect(result.id).toBe('user-id-1');
+      expect(result).toBeInstanceOf(User);
       expect(userRepository.findOne).toHaveBeenCalledWith({
         where: { id: 'user-id-1' },
       });
@@ -152,6 +153,7 @@ describe('UserService', () => {
       const result = await service.findByUsername('testuser');
 
       expect(result).toBeDefined();
+      expect(result).toBeInstanceOf(User);
       expect(result.username).toBe('testuser');
       expect(userRepository.findOne).toHaveBeenCalledWith({
         where: { username: 'testuser' },
@@ -176,6 +178,7 @@ describe('UserService', () => {
       const result = await service.update('user-id-1', updateUserDto);
 
       expect(result).toBeDefined();
+      expect(result).toBeInstanceOf(User);
       expect(userRepository.findOne).toHaveBeenCalledWith({
         where: { id: 'user-id-1' },
       });

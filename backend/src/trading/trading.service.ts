@@ -122,10 +122,11 @@ export class TradingService {
         new Decimal(wallet.zthBalance).lessThan(cost)
       ) {
         throw new BadRequestException('Insufficient ZTH balance');
-      } else if (tradeType === 'sell') {
-        if (!holding || new Decimal(holding.amount).lessThan(amount)) {
-          throw new BadRequestException('Insufficient memecoin balance');
-        }
+      } else if (
+        tradeType === 'sell' &&
+        (!holding || new Decimal(holding.amount).lessThan(amount))
+      ) {
+        throw new BadRequestException('Insufficient memecoin balance');
       }
 
       const costChange = new Decimal(cost)
@@ -134,9 +135,14 @@ export class TradingService {
         .abs()
         .times(100);
       if (costChange.greaterThan(slippageTolerance)) {
-        throw new BadRequestException(
-          `Cost slippage exceeds tolerance: ${costChange.toFixed(2)}%`,
-        );
+        throw new BadRequestException({
+          message: `Cost slippage exceeds tolerance`,
+          details: {
+            slippage: costChange,
+            requestCost,
+            cost,
+          },
+        });
       }
 
       let walletZTHBalance = new Decimal(wallet.zthBalance);
@@ -186,8 +192,8 @@ export class TradingService {
         memecoinId,
         type: tradeType === 'buy' ? TransactionType.BUY : TransactionType.SELL,
         memeCoinAmount: amount.toString(),
-        zthAmount: amount.toString(),
-        price: memecoin.currentPrice,
+        zthAmount: cost.toString(),
+        price: new Decimal(cost).div(amount).toString(),
       });
       const savedTransaction = await queryRunner.manager.save(transaction);
 
@@ -199,6 +205,7 @@ export class TradingService {
         transaction: savedTransaction,
         memecoin: memecoin,
         walletHolding: holding,
+        wallet: wallet,
       });
     } catch (error) {
       await queryRunner.rollbackTransaction();

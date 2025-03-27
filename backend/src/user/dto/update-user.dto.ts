@@ -12,21 +12,13 @@ export class UpdateUserDto {
   username?: string;
 
   @ApiProperty({
-    description: 'The full name of the user',
+    description: 'The title of the user',
     example: 'John Doe',
     required: false,
   })
   @IsString()
   @IsOptional()
   userTitle?: string;
-
-  @ApiProperty({
-    description: 'The full name of the user',
-    example: 'John Doe',
-    required: false,
-  })
-  @IsString()
-  cacabouind: string;
 
   @ApiProperty({
     description: 'The profile picture URL of the user',

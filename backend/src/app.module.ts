@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ValidationPipe, ClassSerializerInterceptor } from '@nestjs/common';
 import { databaseConfig } from './config/database.config';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
@@ -24,3 +25,27 @@ import { TradingModule } from './trading/trading.module';
   ],
 })
 export class AppModule {}
+
+export function registerGlobals(app) {
+  // Enable CORS
+  app.enableCors();
+
+  // Set global prefix for all routes
+  app.setGlobalPrefix('api');
+
+  // Enable validation pipes
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
+
+  // Enable class serializer interceptor
+  // app.useGlobalInterceptors(
+  //   new ClassSerializerInterceptor(app.get('Reflector'), {
+  //     excludeExtraneousValues: true,
+  //   }),
+  // );
+}

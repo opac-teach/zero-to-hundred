@@ -1,33 +1,12 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { AppModule, registerGlobals } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ValidationPipe, ClassSerializerInterceptor } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Enable CORS
-  app.enableCors();
-
-  // Set global prefix for all routes
-  app.setGlobalPrefix('api');
-
-  // Enable validation pipes
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      transform: true,
-      forbidNonWhitelisted: true,
-    }),
-  );
-
-  // Enable class serializer interceptor
-  app.useGlobalInterceptors(
-    new ClassSerializerInterceptor(app.get('Reflector'), {
-      excludeExtraneousValues: true,
-    }),
-  );
+  registerGlobals(app);
 
   // Set up Swagger documentation
   const config = new DocumentBuilder()

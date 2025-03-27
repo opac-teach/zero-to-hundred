@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
-import { UserResponseDto } from './user-response.dto';
+import { PublicUserResponseDto } from './user-response.dto';
 import { WalletResponseDto } from '../../wallet/dto';
 
-class UserResponseWithWalletDto extends UserResponseDto {
+class UserResponseWithWalletDto extends PublicUserResponseDto {
   @ApiProperty({ description: 'The wallet of the user' })
   @Expose()
   @Type(() => WalletResponseDto)
@@ -20,7 +20,7 @@ export class LeaderboardItemDto {
   @Expose()
   rank: number;
 
-  constructor(user: Partial<UserResponseDto>, rank: number) {
+  constructor(user: Partial<PublicUserResponseDto>, rank: number) {
     Object.assign(this, { user, rank });
   }
 }

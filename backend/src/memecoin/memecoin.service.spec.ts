@@ -14,7 +14,7 @@ import {
 import { StatisticsService } from '../statistics/statistics.service';
 import { CreateMemecoinDto } from './dto';
 import { MemecoinResponseDto } from './dto/memecoin-response.dto';
-import { defaultCurveConfig } from 'src/trading/bonding-curve';
+import { defaultCurveConfig } from '../trading/bonding-curve';
 
 describe('MemecoinService', () => {
   let service: MemecoinService;

@@ -6,7 +6,7 @@ import {
   MemecoinPriceDto,
   CreateMemecoinDto,
 } from './dto';
-import { defaultCurveConfig } from 'src/trading/bonding-curve';
+import { defaultCurveConfig } from '../trading/bonding-curve';
 
 describe('MemecoinController', () => {
   let controller: MemecoinController;

@@ -9,6 +9,8 @@ import {
   Query,
   ParseIntPipe,
   DefaultValuePipe,
+  UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -21,7 +23,10 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { UserResponseDto, MyUserResponseDto } from './dto/user-response.dto';
+import {
+  PublicUserResponseDto,
+  PrivateUserResponseDto,
+} from './dto/user-response.dto';
 import { LeaderboardDto } from './dto/leaderboard.dto';
 
 @ApiTags('users')
@@ -33,11 +38,12 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: 'Return all users',
-    type: [UserResponseDto],
+    type: [PublicUserResponseDto],
   })
   @Get()
-  async findAll(): Promise<UserResponseDto[]> {
-    return this.userService.findAll();
+  async findAll(): Promise<PublicUserResponseDto[]> {
+    const users = await this.userService.findAll();
+    return users.map((user) => new PublicUserResponseDto(user));
   }
 
   @ApiOperation({ summary: 'Get user leaderboard' })
@@ -70,36 +76,22 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: 'Return the current user',
-    type: UserResponseDto,
+    type: PublicUserResponseDto,
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  async getProfile(@Request() req): Promise<MyUserResponseDto> {
-    return this.userService.findOne(req.user.id);
-  }
-
-  @ApiOperation({ summary: 'Get user by username' })
-  @ApiResponse({
-    status: 200,
-    description: 'Return the user',
-    type: UserResponseDto,
-  })
-  @ApiResponse({ status: 404, description: 'User not found' })
-  @ApiParam({ name: 'username', description: 'The username of the user' })
-  @Get('username/:username')
-  async findByUsername(
-    @Param('username') username: string,
-  ): Promise<UserResponseDto> {
-    return this.userService.findByUsername(username);
+  async getProfile(@Request() req): Promise<PrivateUserResponseDto> {
+    const user = await this.userService.findOne(req.user.id);
+    return new PrivateUserResponseDto(user);
   }
 
   @ApiOperation({ summary: 'Update current user profile' })
   @ApiResponse({
     status: 200,
     description: 'Return the updated user',
-    type: UserResponseDto,
+    type: PublicUserResponseDto,
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'User not found' })
@@ -109,7 +101,24 @@ export class UserController {
   async updateProfile(
     @Request() req,
     @Body() updateUserDto: UpdateUserDto,
-  ): Promise<MyUserResponseDto> {
-    return this.userService.update(req.user.id, updateUserDto);
+  ): Promise<PrivateUserResponseDto> {
+    const user = await this.userService.update(req.user.id, updateUserDto);
+    return new PrivateUserResponseDto(user);
+  }
+
+  @ApiOperation({ summary: 'Get user by username' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return the user',
+    type: PublicUserResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiParam({ name: 'username', description: 'The username of the user' })
+  @Get('username/:username')
+  async findByUsername(
+    @Param('username') username: string,
+  ): Promise<PublicUserResponseDto> {
+    const user = await this.userService.findByUsername(username);
+    return new PublicUserResponseDto(user);
   }
 }

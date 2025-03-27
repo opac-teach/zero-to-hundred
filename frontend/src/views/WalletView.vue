@@ -47,7 +47,8 @@
         <div
           v-for="holding in sortedHoldings"
           :key="holding.id"
-          class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+          class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+          @click="router.push(`/memecoin/${holding.memecoin.symbol}`)"
         >
           <div class="flex items-center space-x-4">
             <Avatar
@@ -186,6 +187,7 @@ import { ref, computed, onMounted } from "vue";
 import { useWalletStore } from "@/stores/wallet";
 import { useToast } from "vue-toastification";
 import Avatar from "@/components/Logo.vue";
+import router from "@/router";
 
 const walletStore = useWalletStore();
 const toast = useToast();

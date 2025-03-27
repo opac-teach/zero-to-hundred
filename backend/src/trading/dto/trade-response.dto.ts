@@ -1,10 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude, Expose, Transform, Type } from 'class-transformer';
-import { TransactionType } from '../../entities/transaction.entity';
+import { Exclude, Expose, Type } from 'class-transformer';
 import { MemecoinResponseDto } from '../../memecoin/dto';
 import {
   TransactionResponseDto,
   WalletHoldingResponseDto,
+  WalletResponseDto,
 } from '../../wallet/dto';
 
 @Exclude()
@@ -23,6 +23,11 @@ export class TradeResponseDto {
   @Expose()
   @Type(() => WalletHoldingResponseDto)
   walletHolding: WalletHoldingResponseDto;
+
+  @ApiProperty({ description: 'The wallet details' })
+  @Expose()
+  @Type(() => WalletResponseDto)
+  wallet: WalletResponseDto;
 
   constructor(partial: Partial<TradeResponseDto>) {
     Object.assign(this, partial);

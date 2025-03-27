@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose, Type } from 'class-transformer';
-import { UserResponseDto } from '../../user/dto/user-response.dto';
+import { PublicUserResponseDto } from '../../user/dto/user-response.dto';
 import { BondingCurveConfigDto } from './create-memecoin.dto';
 
 @Exclude()
@@ -27,8 +27,8 @@ export class MemecoinResponseDto {
 
   @ApiProperty({ description: 'The creator of the memecoin' })
   @Expose()
-  @Type(() => UserResponseDto)
-  creator: UserResponseDto;
+  @Type(() => PublicUserResponseDto)
+  creator: PublicUserResponseDto;
 
   @ApiProperty({ description: 'The ID of the creator' })
   @Expose()

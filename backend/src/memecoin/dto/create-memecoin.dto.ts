@@ -10,8 +10,9 @@ import {
   IsDecimal,
   IsEnum,
   ValidateNested,
+  ValidateIf,
 } from 'class-validator';
-import { BondingCurveConfig } from 'src/trading/bonding-curve';
+import { BondingCurveConfig } from '../../trading/bonding-curve';
 
 export class BondingCurveConfigDto implements BondingCurveConfig {
   @ApiProperty({
@@ -85,6 +86,7 @@ export class CreateMemecoinDto {
     example: 'https://example.com/doge-logo.png',
     required: false,
   })
+  @ValidateIf((o) => o.logoUrl && o.logoUrl !== '')
   @IsUrl()
   @IsOptional()
   logoUrl?: string;

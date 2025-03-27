@@ -1,35 +1,43 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
-import { MyUserResponseDto, UserResponseDto } from './dto/user-response.dto';
+import {
+  PrivateUserResponseDto,
+  PublicUserResponseDto,
+} from './dto/user-response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { plainToInstance } from 'class-transformer';
 
 describe('UserController', () => {
   let controller: UserController;
   let userService: UserService;
 
-  const mockUserResponse = new UserResponseDto({
+  const mockPublicUserResponse = {
     id: 'user-id-1',
     username: 'testuser',
     userTitle: 'Test User',
     createdAt: new Date(),
     updatedAt: new Date(),
-  });
-  const mockMyUserResponse = new MyUserResponseDto({
-    ...mockUserResponse,
+  };
+  const mockPrivateUserResponse = {
+    ...mockPublicUserResponse,
     email: 'test@example.com',
-  });
+  };
+  const mockFullUserResponse = {
+    ...mockPrivateUserResponse,
+    password: 'password',
+  };
 
   const mockLeaderboardResponse = {
-    users: [mockUserResponse],
+    users: [mockPublicUserResponse],
     total: 1,
   };
 
   const mockUserService = {
-    findAll: jest.fn().mockResolvedValue([mockUserResponse]),
-    findOne: jest.fn().mockResolvedValue(mockUserResponse),
-    findByUsername: jest.fn().mockResolvedValue(mockUserResponse),
-    update: jest.fn().mockResolvedValue(mockUserResponse),
+    findAll: jest.fn().mockResolvedValue([mockFullUserResponse]),
+    findOne: jest.fn().mockResolvedValue(mockFullUserResponse),
+    findByUsername: jest.fn().mockResolvedValue(mockFullUserResponse),
+    update: jest.fn().mockResolvedValue(mockFullUserResponse),
     getLeaderboard: jest.fn().mockResolvedValue(mockLeaderboardResponse),
   };
 
@@ -57,18 +65,22 @@ describe('UserController', () => {
 
   describe('findAll', () => {
     it('should return an array of users', async () => {
-      const result = await controller.findAll();
-
-      expect(result).toEqual([mockUserResponse]);
+      let result = await controller.findAll();
+      result[0] = plainToInstance(PublicUserResponseDto, result[0], {
+        excludeExtraneousValues: true,
+      });
+      expect(result[0]).toEqual(mockPublicUserResponse);
       expect(userService.findAll).toHaveBeenCalled();
     });
   });
 
   describe('findByUsername', () => {
     it('should return a user by username', async () => {
-      const result = await controller.findByUsername('testuser');
-
-      expect(result).toEqual(mockUserResponse);
+      let result = await controller.findByUsername('testuser');
+      result = plainToInstance(PublicUserResponseDto, result, {
+        excludeExtraneousValues: true,
+      });
+      expect(result).toEqual(mockPublicUserResponse);
       expect(userService.findByUsername).toHaveBeenCalledWith('testuser');
     });
   });
@@ -77,9 +89,11 @@ describe('UserController', () => {
     it('should return the current user profile', async () => {
       const req = { user: { id: 'user-id-1' } };
 
-      const result = await controller.getProfile(req);
-
-      expect(result).toEqual(mockMyUserResponse);
+      let result = await controller.getProfile(req);
+      result = plainToInstance(PrivateUserResponseDto, result, {
+        excludeExtraneousValues: true,
+      });
+      expect(result).toEqual(mockPrivateUserResponse);
       expect(userService.findOne).toHaveBeenCalledWith('user-id-1');
     });
   });
@@ -89,9 +103,11 @@ describe('UserController', () => {
       const req = { user: { id: 'user-id-1' } };
       const updateUserDto: UpdateUserDto = { userTitle: 'Updated Name' };
 
-      const result = await controller.updateProfile(req, updateUserDto);
-
-      expect(result).toEqual(mockMyUserResponse);
+      let result = await controller.updateProfile(req, updateUserDto);
+      result = plainToInstance(PrivateUserResponseDto, result, {
+        excludeExtraneousValues: true,
+      });
+      expect(result).toEqual(mockPrivateUserResponse);
       expect(userService.update).toHaveBeenCalledWith(
         'user-id-1',
         updateUserDto,

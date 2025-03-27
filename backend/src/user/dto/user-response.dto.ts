@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose, Transform, Type } from 'class-transformer';
 
 @Exclude()
-export class UserResponseDto {
+export class PublicUserResponseDto {
   @ApiProperty({ description: 'The unique identifier of the user' })
   @Expose()
   id: string;
@@ -47,18 +47,17 @@ export class UserResponseDto {
   @Expose()
   updatedAt: Date;
 
-  constructor(partial: Partial<UserResponseDto>) {
+  constructor(partial: Partial<PublicUserResponseDto>) {
     Object.assign(this, partial);
   }
 }
 
 @Exclude()
-export class MyUserResponseDto extends UserResponseDto {
-  @ApiProperty({ description: 'The email of the user' })
+export class PrivateUserResponseDto extends PublicUserResponseDto {
   @Expose()
   email: string;
 
-  constructor(partial: Partial<MyUserResponseDto>) {
+  constructor(partial: Partial<PrivateUserResponseDto>) {
     super(partial);
     Object.assign(this, partial);
   }

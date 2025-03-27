@@ -2,7 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose, Type } from 'class-transformer';
 import { MemecoinResponseDto } from '../../memecoin/dto';
 import { TransactionType } from '../../entities/transaction.entity';
-import { UserResponseDto } from '../../user/dto/user-response.dto';
+import { PublicUserResponseDto } from '../../user/dto/user-response.dto';
+
 @Exclude()
 export class TransactionResponseDto {
   @ApiProperty({ description: 'The unique identifier of the transaction' })
@@ -34,8 +35,8 @@ export class TransactionResponseDto {
 
   @ApiProperty({ description: 'The user who performed the transaction' })
   @Expose()
-  @Type(() => UserResponseDto)
-  user: UserResponseDto;
+  @Type(() => PublicUserResponseDto)
+  user: PublicUserResponseDto;
 
   @ApiProperty({ description: 'The ID of the user' })
   @Expose()

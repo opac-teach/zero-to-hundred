@@ -3,7 +3,7 @@ import { WalletController } from './wallet.controller';
 import { WalletService } from './wallet.service';
 import { WalletResponseDto } from './dto/wallet-response.dto';
 import { TransactionResponseDto } from './dto/transaction-response.dto';
-import { UserResponseDto } from '../user/dto/user-response.dto';
+import { PublicUserResponseDto } from '../user/dto/user-response.dto';
 import { MemecoinResponseDto } from '../memecoin/dto/memecoin-response.dto';
 import { User } from '../entities/user.entity';
 import { Wallet } from '../entities/wallet.entity';
@@ -46,7 +46,9 @@ describe('WalletController', () => {
 
   mockWallet.owner = mockUser;
 
-  const mockUserResponse: UserResponseDto = new UserResponseDto(mockUser);
+  const mockUserResponse: PublicUserResponseDto = new PublicUserResponseDto(
+    mockUser,
+  );
 
   const mockMemecoin: Memecoin = {
     id: 'memecoin-id-1',

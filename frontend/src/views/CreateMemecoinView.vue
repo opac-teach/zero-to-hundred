@@ -259,6 +259,13 @@ async function handleSubmit() {
 
   try {
     isLoading.value = true;
+    const data = form?.value;
+    // Filter out empty string values from data
+    Object.keys(data).forEach((key) => {
+      if (data[key] === "") {
+        delete data[key];
+      }
+    });
     await marketStore.createMemecoin(form.value);
     toast.success("Memecoin created successfully! 🎉");
     router.push("/memecoins");

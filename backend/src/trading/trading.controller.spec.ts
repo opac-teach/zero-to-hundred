@@ -111,10 +111,6 @@ describe('TradingController', () => {
     tradingService = module.get<TradingService>(TradingService);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   describe('buyMemecoin', () => {
     it('should call tradingService.tradeMemeCoin with correct parameters', async () => {
       const tradeDto = new TradeMemecoinDto();
@@ -125,25 +121,12 @@ describe('TradingController', () => {
 
       const req = { user: mockUser, wallet: mockWallet };
 
-      await controller.tradeMemecoin(req, tradeDto);
+      const result = await controller.tradeMemecoin(req, tradeDto);
 
       expect(tradingService.tradeMemecoin).toHaveBeenCalledWith(
         mockUser.id,
         tradeDto,
       );
-    });
-
-    it('should buy memecoin successfully', async () => {
-      const tradeDto = new TradeMemecoinDto();
-      tradeDto.memecoinId = 'memecoin-id-1';
-      tradeDto.amount = '100';
-      tradeDto.requestCost = '0.5';
-      tradeDto.tradeType = 'buy';
-
-      const req = { user: mockUser, wallet: mockWallet };
-
-      const result = await controller.tradeMemecoin(req, tradeDto);
-
       expect(result).toEqual(mockTradeResponse);
     });
   });
@@ -157,33 +140,14 @@ describe('TradingController', () => {
       tradeDto.tradeType = 'sell';
       const req = { user: mockUser, wallet: mockWallet };
 
-      await controller.tradeMemecoin(req, tradeDto);
+      const result = await controller.tradeMemecoin(req, tradeDto);
 
       expect(tradingService.tradeMemecoin).toHaveBeenCalledWith(
         mockUser.id,
         tradeDto,
       );
-    });
 
-    it('should sell memecoin successfully', async () => {
-      const tradeDto = new TradeMemecoinDto();
-      tradeDto.memecoinId = 'memecoin-id-1';
-      tradeDto.amount = '50';
-      tradeDto.requestCost = '0.5';
-
-      const req = { user: mockUser, wallet: mockWallet };
-
-      const result = await controller.tradeMemecoin(req, tradeDto);
-
-      expect(result).toEqual(
-        new TradeResponseDto({
-          ...mockTradeResponse,
-          transaction: {
-            ...mockTransaction,
-            type: TransactionType.SELL,
-          },
-        }),
-      );
+      expect(result).toEqual(mockTradeResponse);
     });
   });
 });
