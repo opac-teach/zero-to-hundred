@@ -190,7 +190,7 @@
               v-for="holding in user?.wallet.holdings"
               :key="holding.id"
               class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
-              @click="router.push(`/memecoin/${holding.memecoin.symbol}`)"
+              @click="router.push(`/memecoins/${holding.memecoin.symbol}`)"
             >
               <div class="flex items-center space-x-4">
                 <Avatar
@@ -232,7 +232,7 @@
               v-for="memecoin in user?.createdMemecoins"
               :key="memecoin.id"
               class="p-4 bg-gray-50 dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
-              @click="router.push(`/memecoin/${memecoin.symbol}`)"
+              @click="router.push(`/memecoins/${memecoin.symbol}`)"
             >
               <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">

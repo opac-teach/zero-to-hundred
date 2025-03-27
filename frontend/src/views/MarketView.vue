@@ -106,7 +106,7 @@
             <TableRow
               v-for="memecoin in sortedMemecoins"
               :key="memecoin.id"
-              @click="$router.push(`/memecoin/${memecoin.symbol}`)"
+              @click="$router.push(`/memecoins/${memecoin.symbol}`)"
               class="cursor-pointer"
             >
               <TableCell>

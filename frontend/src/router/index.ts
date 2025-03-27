@@ -36,7 +36,7 @@ const router = createRouter({
       meta: { title: "Memecoins Market" },
     },
     {
-      path: "/memecoin/:symbol",
+      path: "/memecoins/:symbol",
       name: "Memecoin Details",
       component: () => import("@/views/MemecoinDetailsView.vue"),
       meta: { title: "Memecoin Details" },
