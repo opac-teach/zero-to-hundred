@@ -2,16 +2,14 @@ import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import type { MyUserResponseDto, UpdateUserDto } from "@/api";
 import { auth, users } from "@/api/client";
-import { useAssetsStore } from "./assets";
 import { useWalletStore } from "./wallet";
 import { api } from "@/api/client";
-
+import { generateRandomUsername } from "@/lib/randomProfile";
 export const useUserStore = defineStore("user", () => {
   const currentUser = ref<MyUserResponseDto | null>(null);
   const token = ref<string | null>(null);
   const isLoading = ref(false);
   const error = ref<string | null>(null);
-  const assetsStore = useAssetsStore();
   const walletStore = useWalletStore();
 
   const isAuthenticated = computed(() => !!token.value);
@@ -73,15 +71,11 @@ export const useUserStore = defineStore("user", () => {
       error.value = null;
 
       // Generate random profile assets
-      const randomUsername = assetsStore.generateRandomUsername();
-      const randomAvatar = assetsStore.getRandomAvatar();
-      const randomBanner = assetsStore.getRandomBanner();
-      const randomTheme = assetsStore.getRandomTheme();
+      const randomUsername = generateRandomUsername();
 
       const response = await auth.register({
         email,
         password,
-        userTitle,
         username: randomUsername,
       });
 

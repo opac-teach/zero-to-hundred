@@ -116,7 +116,6 @@
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useMarketStore } from "@/stores/market";
-import { useAssetsStore } from "@/stores/assets";
 import { useToast } from "vue-toastification";
 import { usePageTitle } from "@/composables/usePageTitle";
 import PriceChart from "@/components/charts/PriceChartBis.vue";
@@ -132,7 +131,6 @@ import KPI from "@/components/KPI.vue";
 const route = useRoute();
 const router = useRouter();
 const marketStore = useMarketStore();
-const assetsStore = useAssetsStore();
 const toast = useToast();
 const targetSupply = ref<string | undefined>(undefined);
 
