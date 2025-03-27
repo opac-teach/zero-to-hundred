@@ -194,7 +194,10 @@ watch(
     tradeEstimation.value = null;
     tradeAmountError.value = "";
 
-    if (!newTradeAmount || newTradeAmount === "0") return;
+    if (!newTradeAmount || newTradeAmount === "0") {
+      emit("update-amount", 0);
+      return;
+    }
 
     const amount = parseFloat(newTradeAmount);
     if (isNaN(amount)) {

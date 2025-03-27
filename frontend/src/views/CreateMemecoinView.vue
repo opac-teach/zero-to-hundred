@@ -52,14 +52,9 @@
           <Textarea
             v-model="form.description"
             rows="3"
-            @input="validateDescription"
             class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-xs focus:border-indigo-500 focus:ring-indigo-500"
-            :class="{ 'border-red-500 dark:border-red-500': errors.description }"
             placeholder="Describe your memecoin..."
           />
-          <p v-if="errors.description" class="mt-1 text-sm text-red-600 dark:text-red-400">
-            {{ errors.description }}
-          </p>
         </div>
 
         <div class="flex items-end space-x-4">
@@ -201,10 +196,8 @@ const isValid = computed(() => {
     form.value.symbol.length >= 2 &&
     form.value.symbol.length <= 5 &&
     /^[A-Z0-9]+$/.test(form.value.symbol) &&
-    (form.value.description?.length ?? 0) >= 10 &&
     !errors.value.name &&
-    !errors.value.symbol &&
-    !errors.value.description
+    !errors.value.symbol
   );
 });
 
@@ -226,14 +219,6 @@ function validateSymbol() {
     errors.value.symbol = "Symbol must contain only uppercase letters and numbers";
   } else {
     errors.value.symbol = "";
-  }
-}
-
-function validateDescription() {
-  if ((form.value.description?.length ?? 0) < 10) {
-    errors.value.description = "Description must be at least 10 characters long";
-  } else {
-    errors.value.description = "";
   }
 }
 
