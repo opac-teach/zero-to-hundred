@@ -7,7 +7,7 @@ import { UserModule } from './user/user.module';
 import { MemecoinModule } from './memecoin/memecoin.module';
 import { WalletModule } from './wallet/wallet.module';
 import { TradingModule } from './trading/trading.module';
-import { StatisticsModule } from './statistics/statistics.module';
+// import { StatisticsModule } from './statistics/statistics.module';
 
 @Module({
   imports: [
@@ -20,7 +20,7 @@ import { StatisticsModule } from './statistics/statistics.module';
     MemecoinModule,
     WalletModule,
     TradingModule,
-    StatisticsModule,
+    // StatisticsModule,
   ],
 })
 export class AppModule {}

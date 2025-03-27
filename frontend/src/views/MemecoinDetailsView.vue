@@ -24,40 +24,20 @@
 
     <!-- Memecoin Stats -->
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-      <Card>
-        <CardContent class="pt-6">
-          <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Current Price</h3>
-          <p class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">
-            {{ Number(memecoin?.currentPrice || "0").toFixed(6) }} ZTH
-          </p>
-          <span
-            :class="[
-              'mt-2 inline-flex text-sm font-semibold',
-              getPriceChange().startsWith('+')
-                ? 'text-green-600 dark:text-green-400'
-                : 'text-red-600 dark:text-red-400',
-            ]"
-          >
-            {{ getPriceChange() }}
-          </span>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent class="pt-6">
-          <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Current Supply</h3>
-          <p class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">
-            {{ memecoin?.totalSupply }} ZTH
-          </p>
-        </CardContent>
-      </Card>
-      <Card>
+      <KPI
+        title="Current Price"
+        :value="Number(memecoin?.currentPrice || '0').toFixed(6)"
+        unit="ZTH"
+      />
+      <KPI title="Current Supply" :value="memecoin?.totalSupply" unit="ZTH" />
+      <!-- <Card>
         <CardContent class="pt-6">
           <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">24h Volume</h3>
           <p class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">
             {{ memecoin?.volume24h }} ZTH
           </p>
         </CardContent>
-      </Card>
+      </Card> -->
     </div>
 
     <!-- Charts and Trading Section -->
@@ -71,7 +51,7 @@
       />
 
       <!-- Price Chart -->
-      <Card>
+      <!-- <Card>
         <CardHeader>
           <CardTitle class="flex justify-between items-center">
             Price Chart
@@ -94,10 +74,10 @@
             <price-chart :data="priceData" :timeframe="selectedTimeframe" />
           </div>
         </CardContent>
-      </Card>
+      </Card> -->
 
       <!-- Volume Chart -->
-      <Card>
+      <!-- <Card>
         <CardHeader>
           <CardTitle>Trading Volume</CardTitle>
         </CardHeader>
@@ -106,7 +86,7 @@
             <volume-chart :data="volumeData" :timeframe="selectedTimeframe" />
           </div>
         </CardContent>
-      </Card>
+      </Card> -->
     </div>
   </div>
 </template>
@@ -126,6 +106,8 @@ import { marked } from "marked";
 import TradeMemecoin from "@/components/TradeMemecoin.vue";
 import BondingCurvePreview from "@/components/charts/BondingCurvePreview.vue";
 import Avatar from "@/components/Logo.vue";
+import KPI from "@/components/KPI.vue";
+
 const route = useRoute();
 const router = useRouter();
 const marketStore = useMarketStore();

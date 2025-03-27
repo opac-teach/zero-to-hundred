@@ -16,7 +16,7 @@
             class="w-[180px] justify-between"
             @click.stop="isSortOpen = !isSortOpen"
           >
-            <span>{{ sortBy }}</span>
+            <span>{{ sortOptions.find((option) => option.value === sortBy)?.label }}</span>
             <chevron-down-icon class="h-4 w-4" />
           </Button>
           <div
@@ -50,7 +50,7 @@
     </div>
 
     <!-- Market Stats -->
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+    <!-- <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
       <Card>
         <CardContent class="pt-6">
           <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Supply</h3>
@@ -83,7 +83,7 @@
           </p>
         </CardContent>
       </Card>
-    </div>
+    </div> -->
 
     <!-- Memecoin List -->
     <Card>
@@ -97,9 +97,9 @@
             <TableRow>
               <TableHead>Memecoin</TableHead>
               <TableHead>Price</TableHead>
-              <TableHead>24h Change</TableHead>
+              <!-- <TableHead>24h Change</TableHead> -->
               <TableHead>Total Supply</TableHead>
-              <TableHead>24h Volume</TableHead>
+              <!-- <TableHead>24h Volume</TableHead> -->
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -127,7 +127,7 @@
                   {{ Number(memecoin.currentPrice).toFixed(6) }} ZTH
                 </div>
               </TableCell>
-              <TableCell>
+              <!-- <TableCell>
                 <span
                   :class="[
                     'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
@@ -138,13 +138,13 @@
                 >
                   {{ getPriceChange(memecoin) }}
                 </span>
-              </TableCell>
+              </TableCell> -->
               <TableCell class="text-sm text-gray-900 dark:text-white">
                 {{ memecoin.totalSupply }} ZTH
               </TableCell>
-              <TableCell class="text-sm text-gray-900 dark:text-white">
+              <!-- <TableCell class="text-sm text-gray-900 dark:text-white">
                 {{ memecoin.volume24h }} ZTH
-              </TableCell>
+              </TableCell> -->
             </TableRow>
           </TableBody>
         </Table>
@@ -156,7 +156,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useMarketStore } from "@/stores/market";
-import { useAssetsStore } from "@/stores/assets";
 import { useToast } from "vue-toastification";
 import {
   ArrowUpIcon,
@@ -175,7 +174,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { MemecoinResponseDto } from "@/api/types";
 import Avatar from "@/components/Logo.vue";
 
 const marketStore = useMarketStore();
@@ -189,43 +187,43 @@ const sortOptions = [
   { value: "createdAt", label: "Created Date" },
   { value: "name", label: "Name" },
   { value: "symbol", label: "Symbol" },
-  { value: "totalSupply", label: "Total Supply" },
+  { value: "totalSupply", label: "Supply" },
 ] as const;
 
-const totalMarketCap = computed(() => {
-  return marketStore.memecoinsList.reduce((sum, coin) => sum + Number(coin.marketCap), 0);
-});
+// const totalMarketCap = computed(() => {
+//   return marketStore.memecoinsList.reduce((sum, coin) => sum + Number(coin.marketCap), 0);
+// });
 
-const totalVolume24h = computed(() => {
-  return marketStore.memecoinsList.reduce((sum, coin) => sum + Number(coin.volume24h), 0);
-});
+// const totalVolume24h = computed(() => {
+//   return marketStore.memecoinsList.reduce((sum, coin) => sum + Number(coin.volume24h), 0);
+// });
 
-const activeMemecoins = computed(() => {
-  return marketStore.memecoinsList.length;
-});
+// const activeMemecoins = computed(() => {
+//   return marketStore.memecoinsList.length;
+// });
 
-const marketSentiment = computed(() => {
-  // Since we no longer have marketSentiment data, we'll use price changes to determine sentiment
-  // Count memecoins with positive price change in the last 24h as "positive"
-  // This is a simplified approach - in a real app, you'd use actual market sentiment data
-  const positiveCoins = Math.floor(marketStore.memecoinsList.length * 0.6); // Simulate 60% positive
-  const negativeCoins = Math.floor(marketStore.memecoinsList.length * 0.3); // Simulate 30% negative
+// const marketSentiment = computed(() => {
+//   // Since we no longer have marketSentiment data, we'll use price changes to determine sentiment
+//   // Count memecoins with positive price change in the last 24h as "positive"
+//   // This is a simplified approach - in a real app, you'd use actual market sentiment data
+//   const positiveCoins = Math.floor(marketStore.memecoinsList.length * 0.6); // Simulate 60% positive
+//   const negativeCoins = Math.floor(marketStore.memecoinsList.length * 0.3); // Simulate 30% negative
 
-  if (positiveCoins > negativeCoins) return "Bullish";
-  if (negativeCoins > positiveCoins) return "Bearish";
-  return "Neutral";
-});
+//   if (positiveCoins > negativeCoins) return "Bullish";
+//   if (negativeCoins > positiveCoins) return "Bearish";
+//   return "Neutral";
+// });
 
-const marketSentimentClass = computed(() => {
-  switch (marketSentiment.value) {
-    case "Bullish":
-      return "text-green-600 dark:text-green-400";
-    case "Bearish":
-      return "text-red-600 dark:text-red-400";
-    default:
-      return "text-gray-600 dark:text-gray-400";
-  }
-});
+// const marketSentimentClass = computed(() => {
+//   switch (marketSentiment.value) {
+//     case "Bullish":
+//       return "text-green-600 dark:text-green-400";
+//     case "Bearish":
+//       return "text-red-600 dark:text-red-400";
+//     default:
+//       return "text-gray-600 dark:text-gray-400";
+//   }
+// });
 
 const sortedMemecoins = computed(() => {
   return [...marketStore.memecoinsList].sort((a, b) => {
@@ -239,7 +237,7 @@ const sortedMemecoins = computed(() => {
     }
 
     // Handle numeric fields
-    if (["currentPrice", "marketCap", "volume24h", "totalSupply"].includes(sortBy.value)) {
+    if (["price", "supply"].includes(sortBy.value)) {
       aValue = Number(aValue);
       bValue = Number(bValue);
     }
@@ -259,12 +257,12 @@ const sortedMemecoins = computed(() => {
   });
 });
 
-function getPriceChange(memecoin: MemecoinResponseDto) {
-  // Since we're now using the current price directly, we'll simulate a small change
-  // In a real app, you'd track historical prices to calculate this
-  const randomChange = (Math.random() * 2 - 1) * 5; // Random change between -5% and +5%
-  return `${randomChange >= 0 ? "+" : ""}${randomChange.toFixed(2)}%`;
-}
+// function getPriceChange(memecoin: MemecoinResponseDto) {
+//   // Since we're now using the current price directly, we'll simulate a small change
+//   // In a real app, you'd track historical prices to calculate this
+//   const randomChange = (Math.random() * 2 - 1) * 5; // Random change between -5% and +5%
+//   return `${randomChange >= 0 ? "+" : ""}${randomChange.toFixed(2)}%`;
+// }
 
 onMounted(async () => {
   try {
@@ -273,7 +271,7 @@ onMounted(async () => {
         sortBy: sortBy.value,
         order: sortOrder.value,
       }),
-      marketStore.fetchTradingVolume(),
+      // marketStore.fetchTradingVolume(),
     ]);
     marketStore.startPriceUpdates();
 
@@ -307,7 +305,3 @@ watch([sortBy, sortOrder], async () => {
   }
 });
 </script>
-
-<style scoped>
-/* Add any additional styles here */
-</style>

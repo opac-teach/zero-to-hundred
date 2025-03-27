@@ -50,68 +50,11 @@
             <div v-html="marked.parse(user?.description || '')" class="prose"></div>
           </CardContent>
         </Card>
-        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Statistics</h2>
-            <div class="space-y-4">
-              <div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">ZTH Balance</p>
-                <p class="text-xl font-medium text-gray-900 dark:text-white">
-                  {{ parseFloat(walletData?.zthBalance || "0") }} ZTH
-                </p>
-              </div>
-              <div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Member Since</p>
-                <p class="text-xl font-medium text-gray-900 dark:text-white">
-                  {{ formatDate(user?.createdAt) }}
-                </p>
-              </div>
-              <div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Rank</p>
-                <p class="text-xl font-medium text-gray-900 dark:text-white">#N/A</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Recent Activity
-            </h2>
-            <div v-if="transactions.length" class="space-y-4">
-              <div
-                v-for="transaction in transactions"
-                :key="transaction.id"
-                class="flex justify-between items-center"
-              >
-                <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-white">
-                    {{ transaction.type }}
-                  </p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">
-                    {{ formatDate(transaction.createdAt) }}
-                  </p>
-                </div>
-                <p
-                  class="text-sm font-medium"
-                  :class="
-                    transaction.type === 'BUY'
-                      ? 'text-green-600 dark:text-green-400'
-                      : 'text-red-600 dark:text-red-400'
-                  "
-                >
-                  {{ transaction.type === "BUY" ? "+" : "-" }}{{ transaction.memeCoinAmount }}
-                  {{ transaction.memecoin.symbol }}
-                </p>
-              </div>
-            </div>
-            <p v-else class="text-gray-500 dark:text-gray-400">No recent activity</p>
-          </div>
-        </div>
       </div>
     </div>
 
     <!-- Statistics -->
-    <Card>
+    <!-- <Card>
       <CardHeader>
         <CardTitle>Trading Statistics</CardTitle>
       </CardHeader>
@@ -202,25 +145,18 @@
           </Card>
         </div>
       </CardContent>
-    </Card>
+    </Card> -->
 
     <!-- Portfolio Value -->
     <Card>
       <CardHeader>
-        <CardTitle>Portfolio Value</CardTitle>
+        <CardTitle>Stats</CardTitle>
       </CardHeader>
       <CardContent>
-        <div class="space-y-4">
-          <Card>
-            <CardContent class="pt-6">
-              <div class="flex justify-between items-center">
-                <span class="text-gray-600 dark:text-gray-400">ZTH Balance</span>
-                <span class="font-medium text-gray-900 dark:text-white"
-                  >{{ walletStore.zthBalance }} ZTH</span
-                >
-              </div>
-            </CardContent>
-          </Card>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <KPI title="ZTH Balance" :value="walletStore.zthBalance" unit="ZTH" />
+          <KPI title="Member Since" :value="formatDate(user?.createdAt)" />
+          <!-- 
           <Card>
             <CardContent class="pt-6">
               <div class="flex justify-between items-center">
@@ -230,8 +166,8 @@
                 >
               </div>
             </CardContent>
-          </Card>
-          <Card>
+          </Card> -->
+          <!-- <Card>
             <CardContent class="pt-6">
               <div class="flex justify-between items-center">
                 <span class="text-gray-600 dark:text-gray-400">24h Change</span>
@@ -248,7 +184,7 @@
                 </span>
               </div>
             </CardContent>
-          </Card>
+          </Card> -->
         </div>
       </CardContent>
     </Card>
@@ -256,31 +192,75 @@
     <!-- Created Memecoins -->
     <Card>
       <CardHeader>
-        <CardTitle>Created Memecoins</CardTitle>
+        <CardTitle>Activity</CardTitle>
       </CardHeader>
       <CardContent>
-        <div class="space-y-4">
-          <Card v-for="memecoin in createdMemecoins" :key="memecoin.id">
-            <CardContent class="pt-6">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                  <Avatar :src="memecoin.logoUrl" :alt="memecoin.symbol" />
-                  <div>
-                    <div class="font-medium text-gray-900 dark:text-white">{{ memecoin.name }}</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">
-                      {{ memecoin.symbol }}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card>
+            <CardHeader>Created Memecoins</CardHeader>
+            <CardContent class="space-y-4">
+              <Card v-for="memecoin in createdMemecoins" :key="memecoin.id">
+                <CardContent
+                  class="pt-6 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                  @click="router.push(`/memecoin/${memecoin.symbol}`)"
+                >
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                      <Avatar :src="memecoin.logoUrl" :alt="memecoin.symbol" />
+                      <div>
+                        <div class="font-medium text-gray-900 dark:text-white">
+                          {{ memecoin.name }}
+                        </div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">
+                          {{ memecoin.symbol }}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="text-right">
+                      <div class="font-medium text-gray-900 dark:text-white">
+                        {{ parseFloat(memecoin.currentPrice).toFixed(6) }} ZTH
+                      </div>
+                      <!-- <div class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ memecoin.volume24h }} ZTH 24h
+                  </div> -->
                     </div>
                   </div>
-                </div>
-                <div class="text-right">
-                  <div class="font-medium text-gray-900 dark:text-white">
-                    {{ parseFloat(memecoin.currentPrice).toFixed(6) }} ZTH
+                </CardContent>
+              </Card>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>Transactions</CardHeader>
+            <CardContent>
+              <div v-if="transactions.length" class="space-y-4">
+                <div
+                  v-for="transaction in transactions"
+                  :key="transaction.id"
+                  class="flex justify-between items-center"
+                >
+                  <div>
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">
+                      {{ transaction.type }}
+                    </p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                      {{ formatDate(transaction.createdAt) }}
+                    </p>
                   </div>
-                  <div class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ memecoin.volume24h }} ZTH 24h
-                  </div>
+                  <p
+                    class="text-sm font-medium"
+                    :class="
+                      transaction.type === 'BUY'
+                        ? 'text-green-600 dark:text-green-400'
+                        : 'text-red-600 dark:text-red-400'
+                    "
+                  >
+                    {{ transaction.type === "BUY" ? "+" : "-" }}{{ transaction.memeCoinAmount }}
+                    {{ transaction.memecoin.symbol }}
+                  </p>
                 </div>
               </div>
+              <p v-else class="text-gray-500 dark:text-gray-400">No recent activity</p>
             </CardContent>
           </Card>
         </div>
@@ -291,7 +271,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { users, wallet } from "@/api/client";
 import { useToast } from "vue-toastification";
 import { usePageTitle } from "@/composables/usePageTitle";
@@ -305,18 +285,19 @@ import { useTradingStore } from "@/stores/trading";
 import { useWalletStore } from "@/stores/wallet";
 import { useAssetsStore } from "@/stores/assets";
 import Avatar from "@/components/Logo.vue";
+import KPI from "@/components/KPI.vue";
+
 const userStore = useUserStore();
 const marketStore = useMarketStore();
 const walletStore = useWalletStore();
 const tradingStore = useTradingStore();
-const assetsStore = useAssetsStore();
 const route = useRoute();
 const toast = useToast();
 const isLoading = ref(false);
 const error = ref<string | null>(null);
 const transactions = ref<TransactionResponseDto[]>([]);
 const walletData = ref<WalletResponseDto | null>(null);
-
+const router = useRouter();
 const user = ref<UserResponseDto | null>(null);
 
 usePageTitle(user, (userValue) =>
