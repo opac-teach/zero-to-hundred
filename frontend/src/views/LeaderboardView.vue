@@ -46,19 +46,19 @@
               <tr>
                 <th
                   scope="col"
-                  class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-20"
+                  class="px-4 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                 >
                   Rank
                 </th>
                 <th
                   scope="col"
-                  class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                  class="px-4 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                 >
                   User
                 </th>
                 <th
                   scope="col"
-                  class="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                  class="px-4 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                 >
                   Balance
                 </th>
@@ -71,14 +71,14 @@
                 class="hover:bg-gray-50 cursor-pointer dark:hover:bg-gray-700 transition-colors"
                 @click="$router.push(`/user/${leaderboardUser.user.username}`)"
               >
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-4 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <span class="text-sm font-medium text-gray-900 dark:text-white">{{
                       index + 1
                     }}</span>
                   </div>
                 </td>
-                <td class="px-6 py-4">
+                <td class="px-4 py-4">
                   <div class="flex items-center">
                     <Avatar
                       :src="leaderboardUser.user.profilePictureUrl"
@@ -95,9 +95,9 @@
                     </div>
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right">
+                <td class="px-4 py-4 whitespace-nowrap text-right">
                   <div class="text-sm font-medium text-gray-900 dark:text-white">
-                    {{ leaderboardUser.user.wallet.zthBalance }} ZTH
+                    {{ Number(leaderboardUser.user.wallet.zthBalance).toFixed(2) }} ZTH
                   </div>
                 </td>
               </tr>

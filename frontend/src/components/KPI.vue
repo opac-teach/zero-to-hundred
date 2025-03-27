@@ -4,7 +4,7 @@
       <CardTitle>{{ title }}</CardTitle>
     </CardHeader>
     <CardContent>
-      <p class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">
+      <p class="text-2xl font-semibold text-gray-900 dark:text-white">
         {{ prefix }} {{ value }} {{ unit }}
       </p>
     </CardContent>

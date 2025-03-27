@@ -30,11 +30,15 @@
     </div>
 
     <!-- Profile Content -->
-    <div v-else class="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
-      <div class="px-6 py-8">
-        <div class="flex items-center space-x-6">
-          <Avatar :src="user?.profilePictureUrl" :alt="user?.username" class="h-24 w-24" />
-          <div>
+    <div v-else class="space-y-4">
+      <Card class="">
+        <CardContent class="flex items-center space-x-6">
+          <Avatar
+            :src="user?.profilePictureUrl"
+            :alt="user?.username"
+            class="h-16 w-16 md:h-24 md:w-24"
+          />
+          <div class="flex-1">
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ user?.username }}</h1>
             <p class="text-gray-500 dark:text-gray-400">{{ user?.userTitle || "No name set" }}</p>
           </div>
@@ -43,17 +47,10 @@
               Edit profile
             </Button>
           </router-link>
-        </div>
+        </CardContent>
+      </Card>
 
-        <Card v-if="user?.description" class="mt-4">
-          <CardContent class="mt-4">
-            <div v-html="marked.parse(user?.description || '')" class="prose"></div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-
-    <!-- <Card>
+      <!-- <Card>
       <CardHeader>
         <CardTitle>Trading Statistics</CardTitle>
       </CardHeader>
@@ -146,17 +143,12 @@
       </CardContent>
     </Card> -->
 
-    <!-- Stats -->
-    <Card>
-      <CardHeader>
-        <CardTitle>Stats</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <KPI title="ZTH Balance" :value="Number(walletStore.zthBalance).toFixed(2)" unit="ZTH" />
-          <KPI title="Member Since" :value="formatDate(user?.createdAt)" />
-          <KPI title="Rank" :value="user?.rank" prefix="#" />
-          <!-- 
+      <!-- Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <KPI title="ZTH Balance" :value="Number(walletStore.zthBalance).toFixed(2)" unit="ZTH" />
+        <KPI title="Member Since" :value="formatDate(user?.createdAt)" />
+        <KPI title="Rank" :value="user?.rank" prefix="#" />
+        <!-- 
           <Card>
             <CardContent class="pt-6">
               <div class="flex justify-between items-center">
@@ -167,7 +159,7 @@
               </div>
             </CardContent>
           </Card> -->
-          <!-- <Card>
+        <!-- <Card>
             <CardContent class="pt-6">
               <div class="flex justify-between items-center">
                 <span class="text-gray-600 dark:text-gray-400">24h Change</span>
@@ -185,155 +177,151 @@
               </div>
             </CardContent>
           </Card> -->
-        </div>
-      </CardContent>
-    </Card>
+      </div>
 
-    <Card>
-      <CardHeader>
-        <CardTitle>Portfolio</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div class="space-y-4" v-if="user?.wallet.holdings.length">
-          <div
-            v-for="holding in user?.wallet.holdings"
-            :key="holding.id"
-            class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
-            @click="router.push(`/memecoin/${holding.memecoin.symbol}`)"
-          >
-            <div class="flex items-center space-x-4">
-              <Avatar
-                :src="holding.memecoin.logoUrl"
-                :alt="holding.memecoin.symbol"
-                class="w-12 h-12"
-              />
-              <div>
+      <!-- Portfolio -->
+      <Card>
+        <CardHeader>
+          <CardTitle>Portfolio</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div class="space-y-4" v-if="user?.wallet.holdings.length">
+            <div
+              v-for="holding in user?.wallet.holdings"
+              :key="holding.id"
+              class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+              @click="router.push(`/memecoin/${holding.memecoin.symbol}`)"
+            >
+              <div class="flex items-center space-x-4">
+                <Avatar
+                  :src="holding.memecoin.logoUrl"
+                  :alt="holding.memecoin.symbol"
+                  class="w-12 h-12"
+                />
+                <div>
+                  <div class="font-medium text-gray-900 dark:text-white">
+                    {{ holding.memecoin.name }}
+                  </div>
+                  <div class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ holding.memecoin.symbol }}
+                  </div>
+                </div>
+              </div>
+              <div class="text-right">
                 <div class="font-medium text-gray-900 dark:text-white">
-                  {{ holding.memecoin.name }}
+                  {{ Number(holding.amount).toFixed(2) }} {{ holding.memecoin.symbol }}
                 </div>
                 <div class="text-sm text-gray-500 dark:text-gray-400">
-                  {{ holding.memecoin.symbol }}
+                  {{ Number(holding.amount) * Number(holding.memecoin.currentPrice) }}
+                  ZTH
                 </div>
-              </div>
-            </div>
-            <div class="text-right">
-              <div class="font-medium text-gray-900 dark:text-white">
-                {{ holding.amount }} {{ holding.memecoin.symbol }}
-              </div>
-              <div class="text-sm text-gray-500 dark:text-gray-400">
-                {{ parseFloat(holding.amount) * parseFloat(holding.memecoin.currentPrice) }}
-                ZTH
               </div>
             </div>
           </div>
-        </div>
-        <div v-else class="text-gray-500 dark:text-gray-400">Empty...</div>
-      </CardContent>
-    </Card>
-    <!-- Created Memecoins -->
-    <Card>
-      <CardHeader>
-        <CardTitle>Activity</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card>
-            <CardHeader>Created Memecoins</CardHeader>
-            <CardContent class="space-y-4 max-h-[600px] overflow-y-auto">
-              <Card v-for="memecoin in user?.createdMemecoins" :key="memecoin.id">
-                <CardContent
-                  class="pt-6 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
-                  @click="router.push(`/memecoin/${memecoin.symbol}`)"
-                >
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                      <Avatar :src="memecoin.logoUrl" :alt="memecoin.symbol" />
-                      <div>
-                        <div class="font-medium text-gray-900 dark:text-white">
-                          {{ memecoin.name }}
-                        </div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">
-                          {{ memecoin.symbol }}
-                        </div>
-                      </div>
-                    </div>
-                    <div class="text-right">
-                      <div class="font-medium text-gray-900 dark:text-white">
-                        <p>
-                          <span class="text-gray-500 dark:text-gray-400 italic">Price:</span>
-                          {{ parseFloat(memecoin.currentPrice).toFixed(2) }} ZTH
-                        </p>
-                        <p>
-                          <span class="text-gray-500 dark:text-gray-400 italic">Supply:</span>
-                          {{ parseFloat(memecoin.totalSupply).toFixed(2) }}
-                        </p>
-                      </div>
-                      <!-- <div class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ memecoin.volume24h }} ZTH 24h
-                  </div> -->
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </CardContent>
-          </Card>
+          <div v-else class="text-gray-500 dark:text-gray-400">Empty...</div>
+        </CardContent>
+      </Card>
 
-          <Card>
-            <CardHeader>Transactions</CardHeader>
-            <CardContent class="max-h-[600px] overflow-y-auto">
-              <div v-if="user?.transactions?.length" class="space-y-4">
-                <div
-                  v-for="transaction in user?.transactions"
-                  :key="transaction.id"
-                  class="flex justify-between items-center border-b last:border-b-0 pb-4"
-                >
+      <!-- Activity -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Created Memecoins -->
+        <Card>
+          <CardHeader>Created Memecoins</CardHeader>
+          <CardContent class="space-y-4 max-h-[600px] overflow-y-auto">
+            <div
+              v-for="memecoin in user?.createdMemecoins"
+              :key="memecoin.id"
+              class="p-4 bg-gray-50 dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+              @click="router.push(`/memecoin/${memecoin.symbol}`)"
+            >
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <Avatar :src="memecoin.logoUrl" :alt="memecoin.symbol" />
                   <div>
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">
-                      {{ transaction.type }}
-                    </p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">
-                      {{ formatDate(transaction.createdAt) }}
-                    </p>
-                  </div>
-                  <div class="text-right">
-                    <div v-if="transaction.type === 'CREATE'">
-                      <p class="text-sm font-medium">{{ transaction.memecoin.symbol }}</p>
-                      <p class="text-xs text-gray-500 dark:text-gray-400">
-                        {{ transaction.memecoin.name }}
-                      </p>
+                    <div class="font-medium text-gray-900 dark:text-white">
+                      {{ memecoin.name }}
                     </div>
-                    <div v-else class="text-right">
-                      <p
-                        class="text-sm font-medium"
-                        :class="
-                          transaction.type === 'BUY'
-                            ? 'text-green-600 dark:text-green-400'
-                            : 'text-red-600 dark:text-red-400'
-                        "
-                      >
-                        {{ transaction.type === "BUY" ? "+" : "-" }}
-                        {{ Number(transaction.memeCoinAmount).toFixed(2) }}
-                        {{ transaction.memecoin.symbol }}
-                      </p>
-                      <p class="text-xs text-gray-500 dark:text-gray-400">
-                        {{ transaction.type === "BUY" ? "-" : "+" }}
-                        {{ Number(transaction.zthAmount).toFixed(2) }} ZTH
-                      </p>
-                      <p class="text-xs text-gray-500 dark:text-gray-400">
-                        @
-                        {{ Number(transaction.price).toFixed(2) }}
-                        {{ transaction.memecoin.symbol }}/ZTH
-                      </p>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                      {{ memecoin.symbol }}
                     </div>
                   </div>
                 </div>
+                <div class="text-right">
+                  <div class="font-medium text-gray-900 dark:text-white">
+                    <p>
+                      <span class="text-gray-500 dark:text-gray-400 italic">Price:</span>
+                      {{ parseFloat(memecoin.currentPrice).toFixed(2) }} ZTH
+                    </p>
+                    <p>
+                      <span class="text-gray-500 dark:text-gray-400 italic">Supply:</span>
+                      {{ parseFloat(memecoin.totalSupply).toFixed(2) }}
+                    </p>
+                  </div>
+                  <!-- <div class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ memecoin.volume24h }} ZTH 24h
+                  </div> -->
+                </div>
               </div>
-              <p v-else class="text-gray-500 dark:text-gray-400">No recent activity</p>
-            </CardContent>
-          </Card>
-        </div>
-      </CardContent>
-    </Card>
+            </div>
+          </CardContent>
+        </Card>
+
+        <!-- Transactions -->
+        <Card>
+          <CardHeader>Transactions</CardHeader>
+          <CardContent class="max-h-[600px] overflow-y-auto">
+            <div v-if="user?.transactions?.length" class="space-y-4">
+              <div
+                v-for="transaction in user?.transactions"
+                :key="transaction.id"
+                class="flex justify-between items-center border-b last:border-b-0 pb-4"
+              >
+                <div>
+                  <p class="text-sm font-medium text-gray-900 dark:text-white">
+                    {{ transaction.type }}
+                  </p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ formatDate(transaction.createdAt) }}
+                  </p>
+                </div>
+                <div class="text-right">
+                  <div v-if="transaction.type === 'CREATE'">
+                    <p class="text-sm font-medium">{{ transaction.memecoin.symbol }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                      {{ transaction.memecoin.name }}
+                    </p>
+                  </div>
+                  <div v-else class="text-right">
+                    <p
+                      class="text-sm font-medium"
+                      :class="
+                        transaction.type === 'BUY'
+                          ? 'text-green-600 dark:text-green-400'
+                          : 'text-red-600 dark:text-red-400'
+                      "
+                    >
+                      {{ transaction.type === "BUY" ? "+" : "-" }}
+                      {{ Number(transaction.memeCoinAmount).toFixed(2) }}
+                      {{ transaction.memecoin.symbol }}
+                    </p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                      {{ transaction.type === "BUY" ? "-" : "+" }}
+                      {{ Number(transaction.zthAmount).toFixed(2) }} ZTH
+                    </p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                      @
+                      {{ Number(transaction.price).toFixed(2) }}
+                      {{ transaction.memecoin.symbol }}/ZTH
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p v-else class="text-gray-500 dark:text-gray-400">No recent activity</p>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   </div>
 </template>
 

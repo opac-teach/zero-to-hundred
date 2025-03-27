@@ -12,7 +12,7 @@
           </router-link>
 
           <!-- Navigation Links -->
-          <nav class="flex items-center gap-4 text-sm font-medium">
+          <nav class="flex items-center gap-4 text-sm font-medium hidden md:flex">
             <router-link
               v-for="item in navigationItems"
               :key="item.name"
@@ -23,6 +23,28 @@
               {{ item.name }}
             </router-link>
           </nav>
+
+          <NavigationMenu class="md:hidden">
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationMenuTrigger> {{ route.name }} </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul class="flex flex-col gap-2 w-48">
+                    <li
+                      as-child
+                      v-for="item in navigationItems"
+                      :key="item.name"
+                      class="p-2 hover:bg-accent rounded-md"
+                    >
+                      <NavigationMenuLink as-child>
+                        <router-link :to="item.href">{{ item.name }} </router-link>
+                      </NavigationMenuLink>
+                    </li>
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
         </div>
 
         <!-- Right side -->
@@ -57,7 +79,9 @@
           <!-- User menu -->
           <div v-if="userStore.isAuthenticated" class="flex items-center space-x-4">
             <!-- ZTH Balance -->
-            <div class="text-sm font-medium">{{ walletStore.zthBalance }} ZTH</div>
+            <div class="text-sm font-medium">
+              {{ Number(walletStore.zthBalance).toFixed(2) }} ZTH
+            </div>
 
             <!-- Profile dropdown -->
             <div class="relative">
@@ -126,7 +150,7 @@ import { useRouter, useRoute } from "vue-router";
 import { useUserStore } from "@/stores/user";
 import { useWalletStore } from "@/stores/wallet";
 import { useUIStore } from "@/stores/ui";
-import { SunIcon, MoonIcon } from "lucide-vue-next";
+// import { SunIcon, MoonIcon } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 import Avatar from "@/components/Logo.vue";
 import {
@@ -136,8 +160,15 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
 } from "@/components/ui/select";
+import {
+  NavigationMenu,
+  NavigationMenuTrigger,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+} from "@/components/ui/navigation-menu";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 const router = useRouter();
@@ -160,16 +191,3 @@ async function handleLogout() {
   router.push("/login");
 }
 </script>
-
-<style>
-/* Transitions */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-</style>
