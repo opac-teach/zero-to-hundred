@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import type { MemecoinResponseDto, TradingVolumeDto, CreateMemecoinDto } from "@/api/types";
-import { memecoins, statistics } from "@/api/client";
+import { memecoins } from "@/api/client";
 import { useWalletStore } from "@/stores/wallet";
 
 export const useMarketStore = defineStore("market", () => {
@@ -100,24 +100,24 @@ export const useMarketStore = defineStore("market", () => {
     }
   }
 
-  async function fetchTradingVolume(params?: {
-    timeframe?: "24h" | "7d" | "30d";
-    memecoinId?: string;
-  }) {
-    try {
-      const response = await statistics.getTradingVolume(params);
-      tradingVolume.value = response.data;
-    } catch (err: any) {
-      console.error("Failed to fetch trading volume:", err);
-    }
-  }
+  // async function fetchTradingVolume(params?: {
+  //   timeframe?: "24h" | "7d" | "30d";
+  //   memecoinId?: string;
+  // }) {
+  //   try {
+  //     const response = await statistics.getTradingVolume(params);
+  //     tradingVolume.value = response.data;
+  //   } catch (err: any) {
+  //     console.error("Failed to fetch trading volume:", err);
+  //   }
+  // }
 
   function startPriceUpdates() {
-    // Update prices every 30 seconds by refreshing the memecoin list
+    if (priceUpdateInterval) {
+      return;
+    }
     priceUpdateInterval = window.setInterval(() => {
-      for (const memecoin of memecoinsList.value) {
-        fetchMemecoinBySymbol(memecoin.symbol);
-      }
+      fetchMemecoins({ limit: 100 });
     }, 5000);
   }
 
@@ -126,12 +126,6 @@ export const useMarketStore = defineStore("market", () => {
       window.clearInterval(priceUpdateInterval);
       priceUpdateInterval = null;
     }
-  }
-
-  // Helper function to get current price for a memecoin
-  function getMemecoinPrice(memecoinId: string): string | null {
-    const memecoin = memecoinsList.value.find((coin) => coin.id === memecoinId);
-    return memecoin ? memecoin.currentPrice : null;
   }
 
   return {
@@ -144,9 +138,7 @@ export const useMarketStore = defineStore("market", () => {
     fetchMemecoinDetails,
     fetchMemecoinBySymbol,
     createMemecoin,
-    fetchTradingVolume,
     startPriceUpdates,
     stopPriceUpdates,
-    getMemecoinPrice,
   };
 });

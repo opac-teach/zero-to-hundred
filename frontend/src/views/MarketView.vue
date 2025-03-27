@@ -88,7 +88,12 @@
     <!-- Memecoin List -->
     <Card>
       <CardContent class="p-0">
-        <div v-if="marketStore.isLoading" class="p-4 text-center">Loading memecoins...</div>
+        <div
+          v-if="marketStore.memecoinsList.length === 0 && marketStore.isLoading"
+          class="p-4 text-center"
+        >
+          Loading memecoins...
+        </div>
         <div v-else-if="marketStore.error" class="p-4 text-center text-red-500">
           {{ marketStore.error }}
         </div>

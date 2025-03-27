@@ -1,6 +1,5 @@
 import axios from "axios";
 import type {
-  UserResponseDto,
   MemecoinResponseDto,
   WalletResponseDto,
   TransactionResponseDto,
@@ -15,6 +14,7 @@ import type {
   UpdateUserDto,
   TradeEstimationResponseDto,
   MyUserResponseDto,
+  PublicUserResponseDto,
 } from "./types";
 import { useUserStore } from "@/stores/user";
 
@@ -53,8 +53,9 @@ export const auth = {
 
 // User endpoints
 export const users = {
-  getAll: () => api.get<UserResponseDto[]>("/users"),
-  getByUsername: (username: string) => api.get<UserResponseDto>(`/users/username/${username}`),
+  getAll: () => api.get<PublicUserResponseDto[]>("/users"),
+  getByUsername: (username: string) =>
+    api.get<PublicUserResponseDto>(`/users/username/${username}`),
   getMyProfile: () => api.get<MyUserResponseDto>("/users/me"),
   updateProfile: (data: UpdateUserDto) => api.put<MyUserResponseDto>("/users/me", data),
   getLeaderboard: (page?: number, limit?: number) =>
@@ -100,8 +101,8 @@ export const trading = {
   trade: (data: TradeMemecoinDto) => api.post<TradeResponseDto>("/trading/trade", data),
 };
 
-// Statistics endpoints
-export const statistics = {
-  getTradingVolume: (params?: { timeframe?: "24h" | "7d" | "30d"; memecoinId?: string }) =>
-    api.get<TradingVolumeDto>("/statistics/trading-volume", { params }),
-};
+// // Statistics endpoints
+// export const statistics = {
+//   getTradingVolume: (params?: { timeframe?: "24h" | "7d" | "30d"; memecoinId?: string }) =>
+//     api.get<TradingVolumeDto>("/statistics/trading-volume", { params }),
+// };
