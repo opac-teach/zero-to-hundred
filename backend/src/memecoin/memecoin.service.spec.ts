@@ -15,7 +15,7 @@ import { StatisticsService } from '../statistics/statistics.service';
 import { CreateMemecoinDto } from './dto';
 import { MemecoinResponseDto } from './dto/memecoin-response.dto';
 import { defaultCurveConfig } from '../trading/bonding-curve';
-
+import { EventEmitter2 } from '@nestjs/event-emitter';
 describe('MemecoinService', () => {
   let service: MemecoinService;
   let memecoinRepository: Repository<Memecoin>;
@@ -164,6 +164,7 @@ describe('MemecoinService', () => {
           provide: StatisticsService,
           useValue: mockStatisticsService,
         },
+        EventEmitter2,
       ],
     }).compile();
 

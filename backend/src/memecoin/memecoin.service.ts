@@ -13,8 +13,7 @@ import { Transaction, TransactionType } from '../entities/transaction.entity';
 import { CreateMemecoinDto, MemecoinResponseDto } from './dto';
 import Decimal from 'decimal.js';
 import { calculatePrice, defaultCurveConfig } from '../trading/bonding-curve';
-import { TransactionResponseDto } from 'src/wallet/dto';
-
+import { EventEmitter2 } from '@nestjs/event-emitter';
 @Injectable()
 export class MemecoinService {
   constructor(
@@ -27,6 +26,7 @@ export class MemecoinService {
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
     private readonly dataSource: DataSource,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async findAll(
@@ -162,6 +162,8 @@ export class MemecoinService {
       await queryRunner.manager.save(transaction);
 
       await queryRunner.commitTransaction();
+
+      this.eventEmitter.emit('memecoin.created', savedMemecoin);
 
       return new MemecoinResponseDto(savedMemecoin);
     } catch (error) {

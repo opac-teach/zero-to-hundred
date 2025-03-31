@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '../entities/user.entity';
+import { Memecoin } from 'src/entities/memecoin.entity';
 import { Repository } from 'typeorm';
 import Decimal from 'decimal.js';
 import { TradingService } from '../trading/trading.service';
-import { calculateSellPrice } from '../trading/bonding-curve';
+import {
+  calculateBuyPrice,
+  calculateSellPrice,
+} from '../trading/bonding-curve';
 import { TradeMemecoinDto } from '../trading/dto/trade-memecoin.dto';
 import { Wallet } from '../entities/wallet.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -36,12 +40,36 @@ export class BotService {
         where: { bot: true },
       });
       for (const user of users) {
-        await this.checkBot(user);
+        await this.checkUserProfit(user);
       }
     }
   }
 
-  async checkBot(user: User) {
+  @OnEvent('memecoin.created')
+  async handleCreate(memecoin: Memecoin) {
+    // const users = await this.userRepository.find({
+    //   where: { bot: true },
+    // });
+    // const user = users[Math.floor(Math.random() * users.length)];
+    // console.log(
+    //   '[Bot] Making initial purchase:',
+    //   `Symbol: ${memecoin.symbol}`,
+    //   `User: ${user.username}`,
+    // );
+    // await this.tradingService.tradeMemecoin(user.id, {
+    //   memecoinId: memecoin.id,
+    //   amount: '1',
+    //   tradeType: 'buy',
+    //   requestCost: calculateBuyPrice(
+    //     '1',
+    //     memecoin.totalSupply.toString(),
+    //     memecoin.curveConfig,
+    //   ),
+    //   slippageTolerance: 0.01,
+    // });
+  }
+
+  async checkUserProfit(user: User) {
     const wallet = await this.walletRepository.findOne({
       where: {
         ownerId: user.id,
@@ -98,9 +126,11 @@ export class BotService {
 
       const profit = new Decimal(estimatedTrade.cost).minus(totalCost);
       if (profit.gt(0)) {
-        console.log('profit detected !', profit.toString());
-
         await this.tradingService.tradeMemecoin(user.id, tradeParams);
+
+        console.log(
+          `[Bot] selling ${tradeParams.amount} ${holding.memecoin.symbol} tokens for user ${user.username} with profit of ${profit.toString()} ZTH`,
+        );
       }
     }
   }
