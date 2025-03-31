@@ -3,11 +3,9 @@ import {
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
-  UpdateDateColumn,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { ApiProperty } from '@nestjs/swagger';
 import { User } from './user.entity';
 import { Memecoin } from './memecoin.entity';
 
@@ -53,10 +51,4 @@ export class Transaction {
 
   @CreateDateColumn()
   createdAt: Date;
-
-  @ApiProperty({
-    description: 'The date when the transaction was last updated',
-  })
-  @UpdateDateColumn()
-  updatedAt: Date;
 }

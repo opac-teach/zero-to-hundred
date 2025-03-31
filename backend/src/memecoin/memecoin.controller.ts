@@ -6,18 +6,12 @@ import {
   Param,
   UseGuards,
   Request,
-  NotFoundException,
   Query,
-  BadRequestException,
   ParseIntPipe,
   DefaultValuePipe,
 } from '@nestjs/common';
 import { MemecoinService } from './memecoin.service';
-import {
-  CreateMemecoinDto,
-  MemecoinResponseDto,
-  MemecoinPriceDto,
-} from './dto';
+import { CreateMemecoinDto, MemecoinResponseDto } from './dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import {
   ApiTags,
@@ -27,8 +21,7 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { Transaction } from '../entities/transaction.entity';
-import { Transform } from 'class-transformer';
+import { TransactionResponseDto } from './dto/transaction.dto';
 
 @ApiTags('memecoins')
 @Controller('memecoins')
@@ -75,19 +68,6 @@ export class MemecoinController {
     return this.memecoinService.findAll(page, limit, sortBy, order);
   }
 
-  @ApiOperation({ summary: 'Get memecoin by ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'Return the memecoin',
-    type: MemecoinResponseDto,
-  })
-  @ApiResponse({ status: 404, description: 'Memecoin not found' })
-  @ApiParam({ name: 'id', description: 'The ID of the memecoin' })
-  @Get(':id')
-  async findOne(@Param('id') id: string): Promise<MemecoinResponseDto> {
-    return this.memecoinService.findById(id);
-  }
-
   @ApiOperation({ summary: 'Get memecoin by symbol' })
   @ApiResponse({
     status: 200,
@@ -96,7 +76,7 @@ export class MemecoinController {
   })
   @ApiResponse({ status: 404, description: 'Memecoin not found' })
   @ApiParam({ name: 'symbol', description: 'The symbol of the memecoin' })
-  @Get('symbol/:symbol')
+  @Get(':symbol')
   async findBySymbol(
     @Param('symbol') symbol: string,
   ): Promise<MemecoinResponseDto> {
@@ -129,11 +109,20 @@ export class MemecoinController {
   }
 
   @ApiOperation({ summary: 'Get memecoin transactions' })
-  @ApiResponse({ status: 200, description: 'Return the memecoin transactions' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return the memecoin transactions',
+    type: [TransactionResponseDto],
+  })
   @ApiResponse({ status: 404, description: 'Memecoin not found' })
-  @ApiParam({ name: 'id', description: 'The ID of the memecoin' })
-  @Get(':id/transactions')
-  async getTransactions(@Param('id') id: string): Promise<Transaction[]> {
-    return this.memecoinService.getTransactions(id);
+  @ApiParam({ name: 'symbol', description: 'The symbol of the memecoin' })
+  @Get(':symbol/transactions')
+  async getTransactions(
+    @Param('symbol') symbol: string,
+  ): Promise<TransactionResponseDto[]> {
+    const transactions = await this.memecoinService.getTransactions(symbol);
+    return transactions.map(
+      (transaction) => new TransactionResponseDto(transaction),
+    );
   }
 }

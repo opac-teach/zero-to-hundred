@@ -53,21 +53,23 @@
       </Card>
       <Card>
         <CardHeader> <CardTitle> Created By </CardTitle> </CardHeader>
-        <CardContent
-          class="flex items-center space-x-4 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
-          @click="router.push(`/user/${memecoin?.creator?.username}`)"
-        >
-          <Avatar
-            :src="memecoin?.creator?.profilePictureUrl"
-            :alt="memecoin?.creator?.username"
-            class="h-16 w-16"
-          />
-          <div>
-            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">
-              {{ memecoin?.creator?.username }}
-            </h3>
-            <p class="text-gray-500 dark:text-gray-400">{{ memecoin?.creator?.userTitle }}</p>
-          </div>
+        <CardContent>
+          <router-link
+            :to="`/user/${memecoin?.creator?.username}`"
+            class="flex items-center space-x-4"
+          >
+            <Avatar
+              :src="memecoin?.creator?.profilePictureUrl"
+              :alt="memecoin?.creator?.username"
+              class="h-16 w-16"
+            />
+            <div>
+              <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                {{ memecoin?.creator?.username }}
+              </h3>
+              <p class="text-gray-500 dark:text-gray-400">{{ memecoin?.creator?.userTitle }}</p>
+            </div>
+          </router-link>
         </CardContent>
       </Card>
       <!-- <Card>
@@ -128,6 +130,68 @@
         </CardContent>
       </Card> -->
     </div>
+
+    <Card>
+      <CardHeader>
+        <CardTitle>Recent Transactions</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div class="space-y-4">
+          <div
+            v-for="transaction in transactions"
+            :key="transaction.id"
+            class="flex items-center border-b last:border-b-0 pb-4"
+          >
+            <div>
+              <p class="text-sm font-medium text-gray-900 dark:text-white">
+                {{ transaction.type }}
+              </p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">
+                {{ formatDate(transaction.createdAt) }}
+              </p>
+            </div>
+            <div class="flex-1 ml-8 flex items-center">
+              <Avatar
+                :src="transaction.user?.profilePictureUrl"
+                :alt="transaction.user?.username"
+                class="h-8 w-8 mr-2"
+              />
+              <router-link
+                :to="`/user/${transaction.user?.username}`"
+                class="text-sm font-medium text-gray-900 dark:text-white"
+              >
+                {{ transaction.user?.username }}
+              </router-link>
+            </div>
+            <div class="text-right">
+              <div v-if="transaction.type !== 'CREATE'" class="text-right">
+                <p
+                  class="text-sm font-medium"
+                  :class="
+                    transaction.type === 'BUY'
+                      ? 'text-green-600 dark:text-green-400'
+                      : 'text-red-600 dark:text-red-400'
+                  "
+                >
+                  {{ transaction.type === "BUY" ? "+" : "-" }}
+                  {{ Number(transaction.memeCoinAmount).toFixed(2) }}
+                  {{ memecoin?.symbol }}
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  {{ transaction.type === "BUY" ? "-" : "+" }}
+                  {{ Number(transaction.zthAmount).toFixed(2) }} ZTH
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  @
+                  {{ Number(transaction.price).toFixed(2) }}
+                  {{ memecoin?.symbol }}/ZTH
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   </div>
 </template>
 
@@ -137,8 +201,6 @@ import { useRoute, useRouter } from "vue-router";
 import { useMarketStore } from "@/stores/market";
 import { useToast } from "vue-toastification";
 import { usePageTitle } from "@/composables/usePageTitle";
-import PriceChart from "@/components/charts/PriceChartBis.vue";
-import VolumeChart from "@/components/charts/VolumeChart.vue";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { marked } from "marked";
@@ -146,13 +208,16 @@ import TradeMemecoin from "@/components/TradeMemecoin.vue";
 import BondingCurvePreview from "@/components/charts/BondingCurvePreview.vue";
 import Avatar from "@/components/Logo.vue";
 import KPI from "@/components/KPI.vue";
+import type { TransactionResponseDto } from "@/api/types";
+import { memecoins } from "@/api";
+import { formatDate } from "@/utils/formatters";
 
 const route = useRoute();
 const router = useRouter();
 const marketStore = useMarketStore();
 const toast = useToast();
 const targetSupply = ref<string | undefined>(undefined);
-
+const transactions = ref<TransactionResponseDto[]>([]);
 const memecoin = computed(() =>
   marketStore.memecoinsList.find((coin) => coin.symbol === route.params.symbol)
 );
@@ -215,6 +280,8 @@ onMounted(async () => {
       router.push("/memecoins");
     }
     marketStore.startPriceUpdates();
+    const resTx = await memecoins.getTransactions(memecoinSymbol);
+    transactions.value = resTx.data;
   } catch (error: any) {
     toast.error(error.message || "Failed to fetch memecoin details");
     router.push("/memecoins");

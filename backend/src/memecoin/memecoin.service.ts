@@ -13,6 +13,7 @@ import { Transaction, TransactionType } from '../entities/transaction.entity';
 import { CreateMemecoinDto, MemecoinResponseDto } from './dto';
 import Decimal from 'decimal.js';
 import { calculatePrice, defaultCurveConfig } from '../trading/bonding-curve';
+import { TransactionResponseDto } from 'src/wallet/dto';
 
 @Injectable()
 export class MemecoinService {
@@ -171,15 +172,17 @@ export class MemecoinService {
     }
   }
 
-  async getTransactions(id: string): Promise<Transaction[]> {
-    const memecoin = await this.memecoinRepository.findOne({ where: { id } });
+  async getTransactions(symbol: string): Promise<Transaction[]> {
+    const memecoin = await this.memecoinRepository.findOne({
+      where: { symbol },
+    });
 
     if (!memecoin) {
-      throw new NotFoundException(`Memecoin with ID ${id} not found`);
+      throw new NotFoundException(`Memecoin with symbol ${symbol} not found`);
     }
 
     return this.transactionRepository.find({
-      where: { memecoinId: id },
+      where: { memecoinId: memecoin.id },
       relations: ['user'],
       order: {
         createdAt: 'DESC',

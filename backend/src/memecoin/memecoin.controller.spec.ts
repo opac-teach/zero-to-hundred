@@ -1,11 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MemecoinController } from './memecoin.controller';
 import { MemecoinService } from './memecoin.service';
-import {
-  MemecoinResponseDto,
-  MemecoinPriceDto,
-  CreateMemecoinDto,
-} from './dto';
+import { CreateMemecoinDto } from './dto';
 import { defaultCurveConfig } from '../trading/bonding-curve';
 
 describe('MemecoinController', () => {

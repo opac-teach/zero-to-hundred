@@ -8,7 +8,6 @@ async function bootstrap() {
 
   registerGlobals(app);
 
-  // Set up Swagger documentation
   const config = new DocumentBuilder()
     .setTitle('Zero to Hundred API')
     .setDescription('The Zero to Hundred memecoin platform API')
@@ -18,7 +17,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/swagger', app, document);
 
-  // Get port from environment or use default
   const configService = app.get(ConfigService);
   const port = configService.get('PORT');
 

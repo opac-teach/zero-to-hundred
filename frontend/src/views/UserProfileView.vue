@@ -346,7 +346,7 @@ import { useMarketStore } from "@/stores/market";
 import { useWalletStore } from "@/stores/wallet";
 import Avatar from "@/components/Logo.vue";
 import KPI from "@/components/KPI.vue";
-import Decimal from "decimal.js";
+import { formatDate } from "@/utils/formatters";
 
 const userStore = useUserStore();
 const marketStore = useMarketStore();
@@ -363,15 +363,6 @@ usePageTitle(user, (userValue) =>
 );
 
 const description = computed(() => marked.parse(user.value?.description || ""));
-
-function formatDate(dateString?: string) {
-  if (!dateString) return "N/A";
-  return new Date(dateString).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}
 
 async function fetchUserProfile() {
   try {

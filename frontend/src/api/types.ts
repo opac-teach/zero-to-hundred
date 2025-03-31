@@ -1,5 +1,3 @@
-import type { BondingCurveConfig } from "@/lib/bonding-curve";
-
 export interface RegisterDto {
   username: string;
   email: string;

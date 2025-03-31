@@ -80,11 +80,10 @@ export const memecoins = {
 
     return api.get<MemecoinResponseDto[]>("/memecoins", { params: queryParams });
   },
-  getById: (id: string) => api.get<MemecoinResponseDto>(`/memecoins/${id}`),
-  getBySymbol: (symbol: string) => api.get<MemecoinResponseDto>(`/memecoins/symbol/${symbol}`),
+  getBySymbol: (symbol: string) => api.get<MemecoinResponseDto>(`/memecoins/${symbol}`),
   create: (data: CreateMemecoinDto) => api.post<MemecoinResponseDto>("/memecoins", data),
-  getTransactions: (id: string) =>
-    api.get<TransactionResponseDto[]>(`/memecoins/${id}/transactions`),
+  getTransactions: (symbol: string) =>
+    api.get<TransactionResponseDto[]>(`/memecoins/${symbol}/transactions`),
 };
 
 // Wallet endpoints
