@@ -89,7 +89,7 @@
           v-model="form.curveConfig.slope"
           type="range"
           :min="form.curveConfig.curveType == 'exponential' ? 1 : 0"
-          :max="form.curveConfig.curveType == 'exponential' ? 3 : 1.5"
+          :max="form.curveConfig.curveType == 'exponential' ? 3 : 5"
           :step="form.curveConfig.curveType == 'exponential' ? 0.01 : 0.05"
           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
         />
