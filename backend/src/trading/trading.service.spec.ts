@@ -15,15 +15,14 @@ import {
   defaultCurveConfig,
   BondingCurveConfig,
 } from './bonding-curve';
-
+import { EventEmitter2 } from '@nestjs/event-emitter';
 // Mock data
-const mockUser = {
+const mockUser: User = {
   id: 'user-id-1',
   username: 'testuser',
   email: 'test@example.com',
   password: 'password123',
   userTitle: 'Test User',
-  role: 'user',
   profilePictureUrl: 'https://example.com/pic.jpg',
   bannerUrl: 'https://example.com/banner.jpg',
   description: 'Test user description',
@@ -32,6 +31,7 @@ const mockUser = {
   isActive: true,
   createdAt: new Date(),
   updatedAt: new Date(),
+  bot: false,
   wallet: {
     id: 'wallet-id-1',
     ownerId: 'user-id-1',
@@ -44,7 +44,7 @@ const mockUser = {
   } as Wallet,
 };
 
-const mockWallet = {
+const mockWallet: Wallet = {
   id: 'wallet-id-1',
   ownerId: 'user-id-1',
   zthBalance: '1000',
@@ -55,7 +55,7 @@ const mockWallet = {
   holdings: [],
 } as Wallet;
 
-const mockMemecoin = {
+const mockMemecoin: Memecoin = {
   id: 'memecoin-id-1',
   name: 'Test Coin',
   symbol: 'TEST',
@@ -73,7 +73,7 @@ const mockMemecoin = {
   curveConfig: defaultCurveConfig,
 } as Memecoin;
 
-const mockWalletHolding = {
+const mockWalletHolding: WalletHolding = {
   id: 'holding-id-1',
   walletId: 'wallet-id-1',
   memecoinId: 'memecoin-id-1',
@@ -84,7 +84,7 @@ const mockWalletHolding = {
   updatedAt: new Date(),
 } as WalletHolding;
 
-const mockTransaction = {
+const mockTransaction: Transaction = {
   id: 'transaction-id-1',
   type: TransactionType.BUY,
   memeCoinAmount: '100',
@@ -106,7 +106,6 @@ describe('TradingService', () => {
   let walletHoldingRepository;
   let transactionRepository;
   let queryRunner;
-  let dataSource: DataSource;
 
   beforeEach(async () => {
     // Create mock query runner with manager
@@ -185,11 +184,11 @@ describe('TradingService', () => {
             createQueryRunner: jest.fn().mockReturnValue(queryRunner),
           },
         },
+        EventEmitter2,
       ],
     }).compile();
 
     service = module.get<TradingService>(TradingService);
-    dataSource = module.get<DataSource>(DataSource);
   });
 
   it('should be defined', () => {

@@ -7,7 +7,6 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { ApiProperty } from '@nestjs/swagger';
 import { Wallet } from './wallet.entity';
 import { Memecoin } from './memecoin.entity';
 

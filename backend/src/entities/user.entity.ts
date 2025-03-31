@@ -51,6 +51,9 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Date;
 
+  @Column({ default: false })
+  bot: boolean;
+
   @OneToOne(() => Wallet, (wallet) => wallet.owner)
   wallet?: Wallet;
 

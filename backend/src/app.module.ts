@@ -9,18 +9,24 @@ import { MemecoinModule } from './memecoin/memecoin.module';
 import { WalletModule } from './wallet/wallet.module';
 import { TradingModule } from './trading/trading.module';
 // import { StatisticsModule } from './statistics/statistics.module';
+import { BotModule } from './bot/bot.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    EventEmitterModule.forRoot(),
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRoot(databaseConfig),
     AuthModule,
     UserModule,
     MemecoinModule,
     WalletModule,
     TradingModule,
+    BotModule,
     // StatisticsModule,
   ],
 })

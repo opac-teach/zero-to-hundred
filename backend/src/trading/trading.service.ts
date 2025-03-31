@@ -19,7 +19,7 @@ import {
 import Decimal from 'decimal.js';
 import { TradeMemecoinDto } from './dto/trade-memecoin.dto';
 import { TradeEstimationResponseDto } from './dto/estimate-trade-response.dto';
-
+import { EventEmitter2 } from '@nestjs/event-emitter';
 @Injectable()
 export class TradingService {
   constructor(
@@ -34,6 +34,7 @@ export class TradingService {
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
     private readonly dataSource: DataSource,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async estimateTradeMemecoin(
@@ -216,13 +217,16 @@ export class TradingService {
       // Commit transaction
       await queryRunner.commitTransaction();
 
-      // Return response
-      return new TradeResponseDto({
+      const transactionResponse = new TradeResponseDto({
         transaction: savedTransaction,
         memecoin: memecoin,
         walletHolding: holding,
         wallet: wallet,
       });
+
+      this.eventEmitter.emit('trade', transactionResponse);
+
+      return transactionResponse;
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;

@@ -30,7 +30,7 @@ describe('AuthService', () => {
   let userService: UserService;
   let dataSource: DataSource;
 
-  const mockWallet = {
+  const mockWallet: Wallet = {
     id: 'wallet-id-1',
     ownerId: 'user-id-1',
     zthBalance: '1000',
@@ -41,7 +41,7 @@ describe('AuthService', () => {
     holdings: [],
   } as Wallet;
 
-  const mockUser = {
+  const mockUser: User = {
     id: 'user-id-1',
     username: 'testuser',
     email: 'test@example.com',
@@ -57,6 +57,7 @@ describe('AuthService', () => {
     createdAt: new Date(),
     updatedAt: new Date(),
     wallet: mockWallet,
+    bot: false,
   } as User;
 
   mockWallet.owner = mockUser;

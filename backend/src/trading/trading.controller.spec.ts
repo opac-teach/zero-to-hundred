@@ -40,6 +40,7 @@ describe('TradingController', () => {
     createdAt: new Date(),
     updatedAt: new Date(),
     wallet: mockWallet,
+    bot: false,
   } as User;
 
   mockWallet.owner = mockUser;
