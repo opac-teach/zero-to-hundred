@@ -9,8 +9,6 @@ import {
   Query,
   ParseIntPipe,
   DefaultValuePipe,
-  UseInterceptors,
-  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';

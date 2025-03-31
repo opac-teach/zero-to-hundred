@@ -43,9 +43,9 @@ export function registerGlobals(app) {
   );
 
   // Enable class serializer interceptor
-  // app.useGlobalInterceptors(
-  //   new ClassSerializerInterceptor(app.get('Reflector'), {
-  //     excludeExtraneousValues: true,
-  //   }),
-  // );
+  app.useGlobalInterceptors(
+    new ClassSerializerInterceptor(app.get('Reflector'), {
+      excludeExtraneousValues: true,
+    }),
+  );
 }

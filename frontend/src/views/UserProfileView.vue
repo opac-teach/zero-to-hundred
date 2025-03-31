@@ -50,6 +50,12 @@
         </CardContent>
       </Card>
 
+      <Card v-if="user?.description">
+        <CardContent class="pt-6">
+          <div v-html="description" class="prose max-w-none"></div>
+        </CardContent>
+      </Card>
+
       <!-- <Card>
       <CardHeader>
         <CardTitle>Trading Statistics</CardTitle>
@@ -355,6 +361,8 @@ const user = ref<UserProfileResponseDto | null>(null);
 usePageTitle(user, (userValue) =>
   userValue?.username ? `${userValue.username}'s Profile` : "User Profile"
 );
+
+const description = computed(() => marked.parse(user.value?.description || ""));
 
 function formatDate(dateString?: string) {
   if (!dateString) return "N/A";

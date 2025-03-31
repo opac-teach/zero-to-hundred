@@ -4,6 +4,9 @@
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
       <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Memecoin Market</h1>
       <div class="flex items-center space-x-4 w-full sm:w-auto">
+        <Button variant="default" @click="router.push('/create-memecoin')" class="bg-green-500"
+          >Create Memecoin</Button
+        >
         <div class="relative flex-1 sm:flex-none">
           <Input type="text" placeholder="Search memecoins..." class="pl-10" />
           <magnifying-glass-icon
@@ -151,6 +154,9 @@
                 {{ memecoin.volume24h }} ZTH
               </TableCell> -->
             </TableRow>
+            <TableRow v-if="sortedMemecoins.length === 0">
+              <TableCell colspan="4" class="text-center">No memecoins yet, create one!</TableCell>
+            </TableRow>
           </TableBody>
         </Table>
       </CardContent>
@@ -180,9 +186,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Avatar from "@/components/Logo.vue";
+import { useRouter } from "vue-router";
 
 const marketStore = useMarketStore();
 const toast = useToast();
+const router = useRouter();
 
 const sortBy = ref<"createdAt" | "name" | "symbol" | "totalSupply">("createdAt");
 const sortOrder = ref<"ASC" | "DESC">("DESC");

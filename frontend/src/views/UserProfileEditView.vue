@@ -21,21 +21,21 @@
 
             <div class="space-y-2">
               <Label>Description <i>(Markdown supported)</i></Label>
-              <Textarea v-model="editedUser.description" rows="3" />
+              <Textarea v-model="editedUser.description" rows="5" />
             </div>
 
             <div class="space-y-2">
               <Label>Profile picture URL</Label>
               <Input v-model="editedUser.profilePictureUrl" type="text" />
             </div>
-
+            <!-- 
             <div class="space-y-2">
               <Label>Banner picture URL</Label>
               <Input v-model="editedUser.bannerUrl" type="text" />
-            </div>
+            </div> -->
 
             <!-- Theme Customization -->
-            <div class="space-y-2 flex gap-4">
+            <!-- <div class="space-y-2 flex gap-4">
               <div class="">
                 <Label>Background Color</Label>
                 <Input v-model="editedUser.backgroundColor" type="color" class="h-10 w-16" />
@@ -44,7 +44,7 @@
                 <Label>Text Color</Label>
                 <Input v-model="editedUser.textColor" type="color" class="h-10 w-16" />
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
         <div class="flex space-x-4">

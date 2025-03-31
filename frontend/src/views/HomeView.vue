@@ -20,7 +20,7 @@ import { Separator } from "@/components/ui/separator";
       <div class="relative max-w-7xl mx-auto py-24 px-4 sm:py-32 sm:px-6 lg:px-8">
         <div class="text-center">
           <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
-            Welcome to Zero to Hundred
+            gm, ser
           </h1>
           <p class="mt-6 text-xl text-gray-100 max-w-3xl mx-auto">
             The ultimate memecoin platform where you can create, trade, and earn ZTH tokens. Join

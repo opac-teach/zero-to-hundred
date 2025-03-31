@@ -10,8 +10,8 @@
             <label class="flex-1">Amount to {{ tradeType }}</label>
 
             <Button
-              v-if="tradeType == 'sell'"
-              variant="ghost"
+              v-if="tradeType == 'sell' && walletHolding?.amount"
+              variant="outline"
               @click="tradeAmount = walletHolding?.amount || '0'"
               class="mr-2"
             >

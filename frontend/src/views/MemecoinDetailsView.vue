@@ -17,13 +17,13 @@
     <div v-if="memecoin?.description">
       <Card>
         <CardContent class="pt-6">
-          <div v-html="description" class="prose"></div>
+          <div v-html="description" class="prose max-w-none"></div>
         </CardContent>
       </Card>
     </div>
 
     <!-- Memecoin Stats -->
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-8">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-4 mb-8">
       <KPI
         title="Current Price"
         :value="Number(memecoin?.currentPrice || '0').toFixed(2)"
@@ -48,6 +48,25 @@
           <div class="flex justify-between items-center mt-2">
             <span class="text-gray-500 dark:text-gray-400">Slope</span>
             <span class="font-medium">{{ memecoin?.curveConfig.slope }}</span>
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader> <CardTitle> Created By </CardTitle> </CardHeader>
+        <CardContent
+          class="flex items-center space-x-4 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+          @click="router.push(`/user/${memecoin?.creator?.username}`)"
+        >
+          <Avatar
+            :src="memecoin?.creator?.profilePictureUrl"
+            :alt="memecoin?.creator?.username"
+            class="h-16 w-16"
+          />
+          <div>
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">
+              {{ memecoin?.creator?.username }}
+            </h3>
+            <p class="text-gray-500 dark:text-gray-400">{{ memecoin?.creator?.userTitle }}</p>
           </div>
         </CardContent>
       </Card>
