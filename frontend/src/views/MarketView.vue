@@ -90,7 +90,7 @@
 
     <!-- Memecoin List -->
     <Card>
-      <CardContent class="p-0">
+      <CardContent class="p-2">
         <div
           v-if="marketStore.memecoinsList.length === 0 && marketStore.isLoading"
           class="p-4 text-center"
@@ -119,7 +119,7 @@
             >
               <TableCell>
                 <div class="flex items-center">
-                  <Avatar :src="memecoin.logoUrl" :alt="memecoin.symbol" class="h-10 w-10" />
+                  <Avatar :src="memecoin.logoUrl" :alt="memecoin.symbol" class="h-14 w-14" />
                   <div class="ml-4">
                     <div class="text-sm font-medium text-gray-900 dark:text-white">
                       {{ memecoin.name }}

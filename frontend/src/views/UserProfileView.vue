@@ -40,7 +40,7 @@
           />
           <div class="flex-1">
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ user?.username }}</h1>
-            <p class="text-gray-500 dark:text-gray-400">{{ user?.userTitle || "No name set" }}</p>
+            <p class="text-gray-500 dark:text-gray-400">{{ user?.userTitle }}</p>
           </div>
           <router-link to="/user/edit">
             <Button v-if="user?.id === userStore.currentUser?.id" class="flex-end">
@@ -235,6 +235,7 @@
           <CardHeader>Created Memecoins</CardHeader>
           <CardContent class="space-y-4 max-h-[600px] overflow-y-auto">
             <div
+              v-if="createdMemecoins.length > 0"
               v-for="memecoin in user?.createdMemecoins"
               :key="memecoin.id"
               class="p-4 bg-gray-50 dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
@@ -268,6 +269,9 @@
                   </div> -->
                 </div>
               </div>
+            </div>
+            <div v-else class="text-gray-500 dark:text-gray-400">
+              Haven't created any coin yet, leecher !
             </div>
           </CardContent>
         </Card>
