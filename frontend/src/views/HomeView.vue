@@ -27,9 +27,6 @@ import { Separator } from "@/components/ui/separator";
             the revolution and start your journey to the moon! 🚀
           </p>
           <div class="mt-10 flex justify-center gap-4">
-            <router-link to="/create-memecoin">
-              <Button variant="secondary" size="lg"> Get Started </Button>
-            </router-link>
             <router-link to="/memecoins">
               <Button size="lg"> Explore Market </Button>
             </router-link>

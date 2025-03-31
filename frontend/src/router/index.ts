@@ -92,18 +92,18 @@ router.beforeEach((to, from, next) => {
 
   // Handle unauthenticated users trying to access protected routes
   if (to.meta.requiresAuth && !userStore.isAuthenticated) {
-    next({ name: "login", query: { redirect: to.fullPath } });
+    next({ name: "Login", query: { redirect: to.fullPath } });
     return;
   }
 
   // Handle authenticated users trying to access guest-only routes
   if (to.meta.requiresGuest && userStore.isAuthenticated) {
-    next({ name: "home" });
+    next({ name: "Home" });
     return;
   }
 
   if (to.name === "user" && userStore.currentUser) {
-    next({ name: "user-profile", params: { username: userStore.currentUser.username } });
+    next({ name: "User Profile", params: { username: userStore.currentUser.username } });
     return;
   }
 
