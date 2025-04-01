@@ -84,7 +84,11 @@
 
     <!-- Charts and Trading Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <TradeMemecoin :memecoin="memecoin" @update-amount="updateTargetSupply" />
+      <TradeMemecoin
+        :memecoin="memecoin"
+        @update-amount="updateTargetSupply"
+        @trade-executed="fetchTxs"
+      />
 
       <BondingCurvePreview
         :curveConfig="memecoin?.curveConfig"
@@ -174,7 +178,7 @@
                   "
                 >
                   {{ transaction.type === "BUY" ? "+" : "-" }}
-                  {{ Number(transaction.memeCoinAmount).toFixed(2) }}
+                  {{ Number(transaction.memecoinAmount).toFixed(2) }}
                   {{ memecoin?.symbol }}
                 </p>
                 <p class="text-xs text-gray-500 dark:text-gray-400">
@@ -218,8 +222,9 @@ const marketStore = useMarketStore();
 const toast = useToast();
 const targetSupply = ref<string | undefined>(undefined);
 const transactions = ref<TransactionResponseDto[]>([]);
+const memecoinSymbol = route.params.symbol as string;
 const memecoin = computed(() =>
-  marketStore.memecoinsList.find((coin) => coin.symbol === route.params.symbol)
+  marketStore.memecoinsList.find((coin) => coin.symbol === memecoinSymbol)
 );
 const selectedTimeframe = ref<"24h" | "7d" | "30d">("24h");
 const timeframes = ["24h", "7d", "30d"] as const;
@@ -272,16 +277,19 @@ usePageTitle(memecoin, (memecoinValue) =>
   memecoinValue?.name ? `${memecoinValue.name} (${memecoinValue.symbol})` : "Memecoin Details"
 );
 
+async function fetchTxs() {
+  const resTx = await memecoins.getTransactions(memecoinSymbol);
+  transactions.value = resTx.data;
+}
+
 onMounted(async () => {
   try {
-    const memecoinSymbol = route.params.symbol as string;
     await marketStore.fetchMemecoinDetails(memecoinSymbol);
     if (!memecoin.value) {
       router.push("/memecoins");
     }
     marketStore.startPriceUpdates();
-    const resTx = await memecoins.getTransactions(memecoinSymbol);
-    transactions.value = resTx.data;
+    fetchTxs();
   } catch (error: any) {
     toast.error(error.message || "Failed to fetch memecoin details");
     router.push("/memecoins");

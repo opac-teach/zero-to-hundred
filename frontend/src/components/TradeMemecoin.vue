@@ -153,7 +153,7 @@ const router = useRouter();
 const { memecoin } = defineProps<{
   memecoin?: MemecoinResponseDto;
 }>();
-const emit = defineEmits(["update-amount"]);
+const emit = defineEmits(["update-amount", "trade-executed"]);
 
 const userStore = useUserStore();
 const walletStore = useWalletStore();
@@ -262,6 +262,7 @@ async function handleTrade() {
     tradeAmount.value = "0";
     tradeEstimation.value = null;
     toast.success(`Trade ${tradeType.value} executed successfully!`);
+    emit("trade-executed");
   } catch (error) {
     toast.error("Failed to execute trade. Please try again.");
   } finally {
