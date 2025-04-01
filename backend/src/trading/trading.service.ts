@@ -40,7 +40,7 @@ export class TradingService {
   async estimateTradeMemecoin(
     tradeDto: TradeMemecoinDto,
   ): Promise<TradeEstimationResponseDto> {
-    const { memecoinId, amount, tradeType } = tradeDto;
+    const { memecoinId, memecoinAmount, tradeType } = tradeDto;
 
     const memecoin = await this.memecoinRepository.findOne({
       where: { id: memecoinId },
@@ -51,23 +51,23 @@ export class TradingService {
     }
 
     try {
-      let cost = '0';
+      let zthAmount = '0';
       if (tradeType === 'buy') {
-        cost = calculateBuyPrice(
-          amount,
+        zthAmount = calculateBuyPrice(
+          memecoinAmount,
           memecoin.totalSupply,
           memecoin.curveConfig,
         );
       } else {
-        cost = calculateSellPrice(
-          amount,
+        zthAmount = calculateSellPrice(
+          memecoinAmount,
           memecoin.totalSupply,
           memecoin.curveConfig,
         );
       }
       return new TradeEstimationResponseDto({
-        cost,
-        amount,
+        zthAmount,
+        memecoinAmount,
         memecoin,
       });
     } catch (error) {
@@ -81,13 +81,13 @@ export class TradingService {
   ): Promise<TradeResponseDto> {
     const {
       memecoinId,
-      amount,
-      requestCost,
+      memecoinAmount,
+      requestZthAmount,
       slippageTolerance = 1,
       tradeType,
     } = tradeDto;
 
-    if (new Decimal(amount).lessThanOrEqualTo(0)) {
+    if (new Decimal(memecoinAmount).lessThanOrEqualTo(0)) {
       throw new BadRequestException('Amount must be greater than 0');
     }
 
@@ -118,13 +118,13 @@ export class TradingService {
       let cost = '0';
       if (tradeType === 'buy') {
         cost = calculateBuyPrice(
-          amount,
+          memecoinAmount,
           memecoin.totalSupply,
           memecoin.curveConfig,
         );
       } else {
         cost = calculateSellPrice(
-          amount,
+          memecoinAmount,
           memecoin.totalSupply,
           memecoin.curveConfig,
         );
@@ -141,14 +141,14 @@ export class TradingService {
         throw new BadRequestException('Insufficient ZTH balance');
       } else if (
         tradeType === 'sell' &&
-        (!holding || new Decimal(holding.amount).lessThan(amount))
+        (!holding || new Decimal(holding.amount).lessThan(memecoinAmount))
       ) {
         throw new BadRequestException('Insufficient memecoin balance');
       }
 
       const costChange = new Decimal(cost)
-        .minus(requestCost)
-        .div(requestCost)
+        .minus(requestZthAmount)
+        .div(requestZthAmount)
         .abs()
         .times(100);
       if (costChange.greaterThan(slippageTolerance)) {
@@ -156,7 +156,7 @@ export class TradingService {
           message: `Cost slippage exceeds tolerance`,
           details: {
             slippage: costChange,
-            requestCost,
+            requestZthAmount,
             cost,
           },
         });
@@ -173,9 +173,9 @@ export class TradingService {
 
       let newSupply = new Decimal(memecoin.totalSupply);
       if (tradeType === 'buy') {
-        newSupply = newSupply.plus(amount);
+        newSupply = newSupply.plus(memecoinAmount);
       } else {
-        newSupply = newSupply.minus(amount);
+        newSupply = newSupply.minus(memecoinAmount);
       }
       const newPrice = calculatePrice(newSupply.toString());
 
@@ -185,17 +185,21 @@ export class TradingService {
 
       if (tradeType === 'buy') {
         if (holding) {
-          holding.amount = new Decimal(holding.amount).plus(amount).toString();
+          holding.amount = new Decimal(holding.amount)
+            .plus(memecoinAmount)
+            .toString();
         } else {
           holding = this.walletHoldingRepository.create({
             walletId: wallet.id,
             memecoinId,
-            amount: amount.toString(),
+            amount: memecoinAmount.toString(),
           });
         }
         holding = await queryRunner.manager.save(holding);
       } else {
-        holding.amount = new Decimal(holding.amount).minus(amount).toString();
+        holding.amount = new Decimal(holding.amount)
+          .minus(memecoinAmount)
+          .toString();
         if (new Decimal(holding.amount).eq(0)) {
           await queryRunner.manager.remove(holding);
           holding = null;
@@ -208,9 +212,9 @@ export class TradingService {
         userId,
         memecoinId,
         type: tradeType === 'buy' ? TransactionType.BUY : TransactionType.SELL,
-        memeCoinAmount: amount.toString(),
+        memecoinAmount: memecoinAmount.toString(),
         zthAmount: cost.toString(),
-        price: new Decimal(cost).div(amount).toString(),
+        price: new Decimal(cost).div(memecoinAmount).toString(),
       });
       const savedTransaction = await queryRunner.manager.save(transaction);
 

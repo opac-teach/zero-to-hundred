@@ -87,7 +87,7 @@ const mockWalletHolding: WalletHolding = {
 const mockTransaction: Transaction = {
   id: 'transaction-id-1',
   type: TransactionType.BUY,
-  memeCoinAmount: '100',
+  memecoinAmount: '100',
   zthAmount: '10',
   price: '0.1',
   userId: 'user-id-1',
@@ -199,8 +199,8 @@ describe('TradingService', () => {
     it('should throw BadRequestException if amount is not positive', async () => {
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
-      tradeDto.amount = '0';
-      tradeDto.requestCost = '0.1';
+      tradeDto.memecoinAmount = '0';
+      tradeDto.requestZthAmount = '0.1';
       tradeDto.tradeType = 'buy';
       await expect(
         service.tradeMemecoin('user-id-1', tradeDto),
@@ -212,8 +212,8 @@ describe('TradingService', () => {
 
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
-      tradeDto.amount = '10';
-      tradeDto.requestCost = '0.1';
+      tradeDto.memecoinAmount = '10';
+      tradeDto.requestZthAmount = '0.1';
       tradeDto.tradeType = 'buy';
       await expect(
         service.tradeMemecoin('non-existent-user', tradeDto),
@@ -225,8 +225,8 @@ describe('TradingService', () => {
       queryRunner.manager.findOne.mockResolvedValueOnce(null);
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
-      tradeDto.amount = '10';
-      tradeDto.requestCost = '0.1';
+      tradeDto.memecoinAmount = '10';
+      tradeDto.requestZthAmount = '0.1';
       tradeDto.tradeType = 'buy';
 
       await expect(
@@ -241,8 +241,8 @@ describe('TradingService', () => {
 
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'non-existent-memecoin';
-      tradeDto.amount = '10';
-      tradeDto.requestCost = '0.1';
+      tradeDto.memecoinAmount = '10';
+      tradeDto.requestZthAmount = '0.1';
       tradeDto.tradeType = 'buy';
 
       await expect(
@@ -258,8 +258,8 @@ describe('TradingService', () => {
 
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
-      tradeDto.amount = '10';
-      tradeDto.requestCost = '10';
+      tradeDto.memecoinAmount = '10';
+      tradeDto.requestZthAmount = '10';
       tradeDto.tradeType = 'buy';
 
       await expect(
@@ -281,8 +281,8 @@ describe('TradingService', () => {
 
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
-      tradeDto.amount = '2';
-      tradeDto.requestCost = '14';
+      tradeDto.memecoinAmount = '2';
+      tradeDto.requestZthAmount = '14';
       tradeDto.tradeType = 'buy';
       tradeDto.slippageTolerance = 5;
 
@@ -305,7 +305,7 @@ describe('TradingService', () => {
       // Check the response properties
       expect(result).toHaveProperty('transaction');
       expect(result.transaction).toHaveProperty('type', TransactionType.BUY);
-      expect(result.transaction).toHaveProperty('memeCoinAmount', '2');
+      expect(result.transaction).toHaveProperty('memecoinAmount', '2');
       expect(result.transaction).toHaveProperty('zthAmount', '14');
       expect(result.transaction).toHaveProperty('price', '7');
       expect(result).toHaveProperty('memecoin');
@@ -341,8 +341,8 @@ describe('TradingService', () => {
       const requestCost = calculateBuyPrice('2', '2', customCurveConfig);
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
-      tradeDto.amount = '2';
-      tradeDto.requestCost = requestCost;
+      tradeDto.memecoinAmount = '2';
+      tradeDto.requestZthAmount = requestCost;
       tradeDto.tradeType = 'buy';
       tradeDto.slippageTolerance = 5;
 
@@ -365,7 +365,7 @@ describe('TradingService', () => {
       // Check the response properties
       expect(result).toHaveProperty('transaction');
       expect(result.transaction).toHaveProperty('type', TransactionType.BUY);
-      expect(result.transaction).toHaveProperty('memeCoinAmount', '2');
+      expect(result.transaction).toHaveProperty('memecoinAmount', '2');
       expect(result.transaction).toHaveProperty('zthAmount', requestCost);
       expect(result.transaction).toHaveProperty('price', '6');
       expect(result).toHaveProperty('memecoin');
@@ -392,8 +392,8 @@ describe('TradingService', () => {
 
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
-      tradeDto.amount = '2';
-      tradeDto.requestCost = '14';
+      tradeDto.memecoinAmount = '2';
+      tradeDto.requestZthAmount = '14';
       tradeDto.tradeType = 'buy';
       tradeDto.slippageTolerance = 5;
 
@@ -425,8 +425,8 @@ describe('TradingService', () => {
 
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
-      tradeDto.amount = '10';
-      tradeDto.requestCost = '0.1'; // Request price is 0.1
+      tradeDto.memecoinAmount = '10';
+      tradeDto.requestZthAmount = '0.1'; // Request price is 0.1
       tradeDto.tradeType = 'buy';
       tradeDto.slippageTolerance = 1; // 1% tolerance
 
@@ -441,8 +441,8 @@ describe('TradingService', () => {
     it('should throw BadRequestException if amount is not positive', async () => {
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
-      tradeDto.amount = '0';
-      tradeDto.requestCost = '0.1';
+      tradeDto.memecoinAmount = '0';
+      tradeDto.requestZthAmount = '0.1';
       tradeDto.tradeType = 'sell';
 
       await expect(
@@ -455,8 +455,8 @@ describe('TradingService', () => {
 
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
-      tradeDto.amount = '10';
-      tradeDto.requestCost = '0.1';
+      tradeDto.memecoinAmount = '10';
+      tradeDto.requestZthAmount = '0.1';
       tradeDto.tradeType = 'sell';
 
       await expect(
@@ -470,8 +470,8 @@ describe('TradingService', () => {
 
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
-      tradeDto.amount = '10';
-      tradeDto.requestCost = '0.1';
+      tradeDto.memecoinAmount = '10';
+      tradeDto.requestZthAmount = '0.1';
       tradeDto.tradeType = 'sell';
 
       await expect(
@@ -486,8 +486,8 @@ describe('TradingService', () => {
 
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'non-existent-memecoin';
-      tradeDto.amount = '10';
-      tradeDto.requestCost = '0.1';
+      tradeDto.memecoinAmount = '10';
+      tradeDto.requestZthAmount = '0.1';
       tradeDto.tradeType = 'sell';
 
       await expect(
@@ -503,8 +503,8 @@ describe('TradingService', () => {
 
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
-      tradeDto.amount = '1';
-      tradeDto.requestCost = '0.1';
+      tradeDto.memecoinAmount = '1';
+      tradeDto.requestZthAmount = '0.1';
       tradeDto.tradeType = 'sell';
 
       await expect(
@@ -521,8 +521,11 @@ describe('TradingService', () => {
 
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
-      tradeDto.amount = '1';
-      tradeDto.requestCost = calculateSellPrice('1', mockMemecoin.totalSupply);
+      tradeDto.memecoinAmount = '1';
+      tradeDto.requestZthAmount = calculateSellPrice(
+        '1',
+        mockMemecoin.totalSupply,
+      );
       tradeDto.tradeType = 'sell';
 
       await expect(
@@ -567,8 +570,11 @@ describe('TradingService', () => {
 
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
-      tradeDto.amount = '1';
-      tradeDto.requestCost = calculateSellPrice('1', mockMemecoin.totalSupply);
+      tradeDto.memecoinAmount = '1';
+      tradeDto.requestZthAmount = calculateSellPrice(
+        '1',
+        mockMemecoin.totalSupply,
+      );
       tradeDto.tradeType = 'sell';
       tradeDto.slippageTolerance = 10;
 
@@ -616,8 +622,11 @@ describe('TradingService', () => {
 
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
-      tradeDto.amount = '1';
-      tradeDto.requestCost = calculateSellPrice('1', mockMemecoin.totalSupply);
+      tradeDto.memecoinAmount = '1';
+      tradeDto.requestZthAmount = calculateSellPrice(
+        '1',
+        mockMemecoin.totalSupply,
+      );
       tradeDto.tradeType = 'sell';
 
       const result = await service.tradeMemecoin('user-id-1', tradeDto);
@@ -650,8 +659,11 @@ describe('TradingService', () => {
 
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
-      tradeDto.amount = '1';
-      tradeDto.requestCost = calculateSellPrice('1', mockMemecoin.totalSupply);
+      tradeDto.memecoinAmount = '1';
+      tradeDto.requestZthAmount = calculateSellPrice(
+        '1',
+        mockMemecoin.totalSupply,
+      );
       tradeDto.tradeType = 'sell';
 
       await expect(
@@ -667,7 +679,7 @@ describe('TradingService', () => {
 
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'non-existent-memecoin';
-      tradeDto.amount = '10';
+      tradeDto.memecoinAmount = '10';
       tradeDto.tradeType = 'buy';
 
       await expect(service.estimateTradeMemecoin(tradeDto)).rejects.toThrow(
@@ -680,7 +692,7 @@ describe('TradingService', () => {
 
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
-      tradeDto.amount = '2';
+      tradeDto.memecoinAmount = '2';
       tradeDto.tradeType = 'buy';
 
       const result = await service.estimateTradeMemecoin(tradeDto);
@@ -689,7 +701,7 @@ describe('TradingService', () => {
       expect(result).toHaveProperty('amount', '2');
       expect(result).toHaveProperty('memecoin');
       expect(result.memecoin).toHaveProperty('id', 'memecoin-id-1');
-      expect(result.cost).toBe(
+      expect(result.zthAmount).toBe(
         calculateBuyPrice(
           '2',
           mockMemecoin.totalSupply,
@@ -703,7 +715,7 @@ describe('TradingService', () => {
 
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
-      tradeDto.amount = '2';
+      tradeDto.memecoinAmount = '2';
       tradeDto.tradeType = 'sell';
 
       const result = await service.estimateTradeMemecoin(tradeDto);
@@ -712,7 +724,7 @@ describe('TradingService', () => {
       expect(result).toHaveProperty('amount', '2');
       expect(result).toHaveProperty('memecoin');
       expect(result.memecoin).toHaveProperty('id', 'memecoin-id-1');
-      expect(result.cost).toBe(
+      expect(result.zthAmount).toBe(
         calculateSellPrice(
           '2',
           mockMemecoin.totalSupply,
@@ -735,7 +747,7 @@ describe('TradingService', () => {
 
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
-      tradeDto.amount = '2';
+      tradeDto.memecoinAmount = '2';
       tradeDto.tradeType = 'buy';
 
       const result = await service.estimateTradeMemecoin(tradeDto);
@@ -745,7 +757,7 @@ describe('TradingService', () => {
       expect(result).toHaveProperty('memecoin');
       expect(result.memecoin).toHaveProperty('id', 'memecoin-id-1');
       expect(result.memecoin.curveConfig).toEqual(customCurveConfig);
-      expect(result.cost).toBe(
+      expect(result.zthAmount).toBe(
         calculateBuyPrice(
           '2',
           memecoinWithCustomCurve.totalSupply,
@@ -759,7 +771,7 @@ describe('TradingService', () => {
 
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
-      tradeDto.amount = '-1'; // Invalid amount to trigger calculation error
+      tradeDto.memecoinAmount = '-1'; // Invalid amount to trigger calculation error
       tradeDto.tradeType = 'buy';
 
       await expect(service.estimateTradeMemecoin(tradeDto)).rejects.toThrow(

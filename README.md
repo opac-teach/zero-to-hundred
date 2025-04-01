@@ -62,6 +62,16 @@ zero-to-hundred/
    docker-compose -f docker/docker-compose.prod.yml up -d
    ```
 
+### Migrations
+
+```
+npm run migration:generate -- ./src/migrations/[NAME]
+```
+
+```
+npm run migration:run
+```
+
 ## Documentation
 
 For more detailed documentation, please refer to the [doc](./doc) directory.

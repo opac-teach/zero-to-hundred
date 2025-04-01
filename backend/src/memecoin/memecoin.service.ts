@@ -151,7 +151,7 @@ export class MemecoinService {
       // Create a transaction record
       const transaction = new Transaction();
       transaction.type = TransactionType.CREATE;
-      transaction.memeCoinAmount = '0';
+      transaction.memecoinAmount = '0';
       transaction.zthAmount = '1'; // Cost to create a memecoin
       transaction.price = '0';
       transaction.user = user;

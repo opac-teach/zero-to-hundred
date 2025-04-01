@@ -168,7 +168,7 @@
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                {{ transaction.type === "BUY" ? "+" : "-" }}{{ transaction.memeCoinAmount }}
+                {{ transaction.type === "BUY" ? "+" : "-" }}{{ transaction.memecoinAmount }}
                 {{ transaction.memecoin.symbol }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">

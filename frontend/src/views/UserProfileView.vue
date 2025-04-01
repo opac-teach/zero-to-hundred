@@ -311,7 +311,7 @@
                       "
                     >
                       {{ transaction.type === "BUY" ? "+" : "-" }}
-                      {{ Number(transaction.memeCoinAmount).toFixed(2) }}
+                      {{ Number(transaction.memecoinAmount).toFixed(2) }}
                       {{ transaction.memecoin.symbol }}
                     </p>
                     <p class="text-xs text-gray-500 dark:text-gray-400">

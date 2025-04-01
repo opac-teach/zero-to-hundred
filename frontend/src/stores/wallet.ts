@@ -136,8 +136,8 @@ export const useWalletStore = defineStore("wallet", () => {
 
       const response = await trading.trade({
         memecoinId,
-        amount,
-        requestCost,
+        memecoinAmount: amount,
+        requestZthAmount: requestCost,
         slippageTolerance,
         tradeType,
       });

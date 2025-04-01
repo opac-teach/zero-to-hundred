@@ -42,7 +42,7 @@
             </span>
           </div>
           <div class="relative items-center">
-            <Input :value="tradeEstimation?.cost" disabled type="number" />
+            <Input :value="tradeEstimation?.zthAmount" disabled type="number" />
             <span
               class="absolute end-0 inset-y-0 flex items-center justify-center px-2 font-medium"
             >
@@ -211,8 +211,8 @@ watch(
     try {
       const response = await trading.estimate({
         memecoinId: memecoin.id,
-        amount: newTradeAmount,
-        requestCost: memecoin.currentPrice,
+        memecoinAmount: newTradeAmount,
+        requestZthAmount: memecoin.currentPrice,
         tradeType: newTradeType,
       });
       tradeEstimation.value = response.data;
@@ -233,7 +233,7 @@ watch(
     if (
       userStore.isAuthenticated &&
       newTradeType == "buy" &&
-      Number(tradeEstimation.value?.cost) > Number(walletData.value?.zthBalance)
+      Number(tradeEstimation.value?.zthAmount) > Number(walletData.value?.zthBalance)
     ) {
       tradeAmountError.value = "Insufficient balance";
     }
@@ -254,7 +254,7 @@ async function handleTrade() {
     await walletStore.tradeMemecoin(
       memecoin.id,
       tradeAmount.value,
-      tradeEstimation.value.cost,
+      tradeEstimation.value.zthAmount,
       parseFloat(slippageTolerance.value),
       tradeType.value
     );

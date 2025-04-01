@@ -41,7 +41,7 @@ export class Transaction {
   type: TransactionType;
 
   @Column({ type: 'decimal', precision: 24, scale: 8 })
-  memeCoinAmount: string;
+  memecoinAmount: string;
 
   @Column({ type: 'decimal', precision: 24, scale: 8 })
   zthAmount: string;

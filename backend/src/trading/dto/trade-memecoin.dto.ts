@@ -33,7 +33,7 @@ export class TradeMemecoinDto {
   @IsString()
   @IsNotEmpty()
   @Transform(({ value }) => new Decimal(value).toString())
-  amount: string;
+  memecoinAmount: string;
 
   @ApiProperty({
     description: 'The cost of the trade (in ZTH) at the time of the request',
@@ -42,7 +42,7 @@ export class TradeMemecoinDto {
   @IsString()
   @IsNotEmpty()
   @Transform(({ value }) => new Decimal(value).toString())
-  requestCost: string;
+  requestZthAmount: string;
 
   @ApiProperty({
     description: 'The maximum slippage tolerance in percentage',

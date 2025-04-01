@@ -93,28 +93,27 @@ export class BotService {
 
       let bal = new Decimal(0);
       let actualTxs = [];
+      let totalCost = new Decimal(0);
 
       for (const transaction of transactions) {
         if (transaction.type === TransactionType.BUY) {
-          bal = bal.plus(transaction.memeCoinAmount);
+          bal = bal.plus(transaction.memecoinAmount);
+          totalCost = totalCost.plus(transaction.zthAmount);
         } else if (transaction.type === TransactionType.SELL) {
-          bal = bal.minus(transaction.memeCoinAmount);
+          bal = bal.minus(transaction.memecoinAmount);
+          totalCost = totalCost.minus(transaction.zthAmount);
         }
         actualTxs.push(transaction);
         if (bal.eq(holding.amount)) {
           break;
         }
       }
-      let totalCost = new Decimal(0);
-      for (const transaction of actualTxs) {
-        totalCost = totalCost.plus(transaction.zthAmount);
-      }
 
       const tradeParams: TradeMemecoinDto = {
         memecoinId: holding.memecoin.id,
-        amount: holding.amount,
+        memecoinAmount: holding.amount,
         tradeType: 'sell',
-        requestCost: calculateSellPrice(
+        requestZthAmount: calculateSellPrice(
           holding.amount,
           holding.memecoin.totalSupply,
           holding.memecoin.curveConfig,
@@ -124,12 +123,12 @@ export class BotService {
       const estimatedTrade =
         await this.tradingService.estimateTradeMemecoin(tradeParams);
 
-      const profit = new Decimal(estimatedTrade.cost).minus(totalCost);
+      const profit = new Decimal(estimatedTrade.zthAmount).minus(totalCost);
       if (profit.gt(0)) {
         await this.tradingService.tradeMemecoin(user.id, tradeParams);
 
         console.log(
-          `[Bot] selling ${tradeParams.amount} ${holding.memecoin.symbol} tokens for user ${user.username} with profit of ${profit.toString()} ZTH`,
+          `[Bot] selling ${tradeParams.memecoinAmount} ${holding.memecoin.symbol} tokens for user ${user.username} with profit of ${profit.toString()} ZTH`,
         );
       }
     }

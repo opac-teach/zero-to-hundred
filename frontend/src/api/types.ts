@@ -125,7 +125,7 @@ export interface WalletResponseDto {
 export interface TransactionResponseDto {
   id: string;
   type: "BUY" | "SELL" | "CREATE";
-  memeCoinAmount: string;
+  memecoinAmount: string;
   zthAmount: string;
   price: string;
   user: PublicUserResponseDto;
@@ -137,8 +137,8 @@ export interface TransactionResponseDto {
 
 export interface TradeMemecoinDto {
   memecoinId: string;
-  amount: string;
-  requestCost: string;
+  memecoinAmount: string;
+  requestZthAmount: string;
   slippageTolerance?: number;
   tradeType: "buy" | "sell";
 }
@@ -152,8 +152,8 @@ export interface TradeResponseDto {
 
 export interface TradeEstimationResponseDto {
   memecoin: MemecoinResponseDto;
-  cost: string;
-  amount: string;
+  zthAmount: string;
+  memecoinAmount: string;
 }
 
 export interface MemecoinVolumeDto {

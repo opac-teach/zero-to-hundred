@@ -116,8 +116,8 @@ describe('TradingController', () => {
     it('should call tradingService.tradeMemeCoin with correct parameters', async () => {
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
-      tradeDto.amount = '100';
-      tradeDto.requestCost = '0.5';
+      tradeDto.memecoinAmount = '100';
+      tradeDto.requestZthAmount = '0.5';
       tradeDto.tradeType = 'buy';
 
       const req = { user: mockUser, wallet: mockWallet };
@@ -136,8 +136,8 @@ describe('TradingController', () => {
     it('should call tradingService.sellMemecoin with correct parameters', async () => {
       const tradeDto = new TradeMemecoinDto();
       tradeDto.memecoinId = 'memecoin-id-1';
-      tradeDto.amount = '50';
-      tradeDto.requestCost = '0.5';
+      tradeDto.memecoinAmount = '50';
+      tradeDto.requestZthAmount = '0.5';
       tradeDto.tradeType = 'sell';
       const req = { user: mockUser, wallet: mockWallet };
 

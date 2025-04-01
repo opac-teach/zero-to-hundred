@@ -28,7 +28,7 @@ export class TransactionResponseDto {
 
   @ApiProperty({ description: 'The amount of memecoin' })
   @Expose()
-  memeCoinAmount: string;
+  memecoinAmount: string;
 
   @ApiProperty({ description: 'The amount of ZTH' })
   @Expose()

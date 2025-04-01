@@ -110,7 +110,7 @@ describe('WalletController', () => {
   const mockTransactionResponse: TransactionResponseDto =
     new TransactionResponseDto({
       ...mockTransaction,
-      memeCoinAmount: '100',
+      memecoinAmount: '100',
       price: '0.1',
       zthAmount: '10',
       user: mockUserResponse,
