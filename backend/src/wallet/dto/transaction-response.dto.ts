@@ -39,7 +39,7 @@ export class TransactionResponseDto {
   })
   @Expose()
   @Type(() => PublicUserResponseDto)
-  user: PublicUserResponseDto;
+  user?: PublicUserResponseDto;
 
   @ApiProperty({ description: 'The ID of the user' })
   @Expose()
@@ -48,7 +48,7 @@ export class TransactionResponseDto {
   @ApiProperty({ description: 'The memecoin involved in the transaction' })
   @Expose()
   @Type(() => MemecoinResponseDto)
-  memecoin: MemecoinResponseDto;
+  memecoin?: MemecoinResponseDto;
 
   @ApiProperty({ description: 'The ID of the memecoin' })
   @Expose()

@@ -22,14 +22,14 @@ export class Transaction {
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'userId' })
-  user: User;
+  user?: User;
 
   @Column()
   userId: string;
 
   @ManyToOne(() => Memecoin)
   @JoinColumn({ name: 'memecoinId' })
-  memecoin: Memecoin;
+  memecoin?: Memecoin;
 
   @Column()
   memecoinId: string;

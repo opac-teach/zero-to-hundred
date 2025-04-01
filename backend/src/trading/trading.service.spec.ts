@@ -697,8 +697,8 @@ describe('TradingService', () => {
 
       const result = await service.estimateTradeMemecoin(tradeDto);
 
-      expect(result).toHaveProperty('cost');
-      expect(result).toHaveProperty('amount', '2');
+      expect(result).toHaveProperty('zthAmount');
+      expect(result).toHaveProperty('memecoinAmount', '2');
       expect(result).toHaveProperty('memecoin');
       expect(result.memecoin).toHaveProperty('id', 'memecoin-id-1');
       expect(result.zthAmount).toBe(
@@ -720,8 +720,8 @@ describe('TradingService', () => {
 
       const result = await service.estimateTradeMemecoin(tradeDto);
 
-      expect(result).toHaveProperty('cost');
-      expect(result).toHaveProperty('amount', '2');
+      expect(result).toHaveProperty('zthAmount');
+      expect(result).toHaveProperty('memecoinAmount', '2');
       expect(result).toHaveProperty('memecoin');
       expect(result.memecoin).toHaveProperty('id', 'memecoin-id-1');
       expect(result.zthAmount).toBe(
@@ -752,8 +752,8 @@ describe('TradingService', () => {
 
       const result = await service.estimateTradeMemecoin(tradeDto);
 
-      expect(result).toHaveProperty('cost');
-      expect(result).toHaveProperty('amount', '2');
+      expect(result).toHaveProperty('zthAmount');
+      expect(result).toHaveProperty('memecoinAmount', '2');
       expect(result).toHaveProperty('memecoin');
       expect(result.memecoin).toHaveProperty('id', 'memecoin-id-1');
       expect(result.memecoin.curveConfig).toEqual(customCurveConfig);

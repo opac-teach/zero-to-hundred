@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '../entities/user.entity';
-import { Memecoin } from 'src/entities/memecoin.entity';
-import { Repository } from 'typeorm';
+import { Memecoin } from '../entities/memecoin.entity';
+import { Not, Repository } from 'typeorm';
 import Decimal from 'decimal.js';
 import { TradingService } from '../trading/trading.service';
 import {
@@ -84,30 +84,14 @@ export class BotService {
         where: {
           memecoinId: holding.memecoin.id,
           userId: user.id,
+          type: Not(TransactionType.CREATE),
         },
         order: {
           createdAt: 'DESC',
         },
       });
-      transactions.filter((t) => t.type !== 'CREATE');
 
-      let bal = new Decimal(0);
-      let actualTxs = [];
-      let totalCost = new Decimal(0);
-
-      for (const transaction of transactions) {
-        if (transaction.type === TransactionType.BUY) {
-          bal = bal.plus(transaction.memecoinAmount);
-          totalCost = totalCost.plus(transaction.zthAmount);
-        } else if (transaction.type === TransactionType.SELL) {
-          bal = bal.minus(transaction.memecoinAmount);
-          totalCost = totalCost.minus(transaction.zthAmount);
-        }
-        actualTxs.push(transaction);
-        if (bal.eq(holding.amount)) {
-          break;
-        }
-      }
+      const totalCost = this.getHoldingCost(transactions, holding.amount);
 
       const tradeParams: TradeMemecoinDto = {
         memecoinId: holding.memecoin.id,
@@ -132,5 +116,25 @@ export class BotService {
         );
       }
     }
+  }
+
+  getHoldingCost(txs: Transaction[], holdingAmount: string): Decimal {
+    let holdingBalance = new Decimal(0);
+    let totalCost = new Decimal(0);
+
+    for (const transaction of txs) {
+      if (transaction.type === TransactionType.BUY) {
+        holdingBalance = holdingBalance.plus(transaction.memecoinAmount);
+        totalCost = totalCost.plus(transaction.zthAmount);
+      } else if (transaction.type === TransactionType.SELL) {
+        holdingBalance = holdingBalance.minus(transaction.memecoinAmount);
+        totalCost = totalCost.minus(transaction.zthAmount);
+      }
+      if (holdingBalance.eq(holdingAmount)) {
+        break;
+      }
+    }
+
+    return totalCost;
   }
 }
