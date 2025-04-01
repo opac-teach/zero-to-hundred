@@ -33,7 +33,6 @@ export { api, setBaseUrl };
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    console.log(`[API ERROR] ${error?.status} ${error.response?.data?.message}`);
     if (error.response?.status === 401) {
       const userStore = useUserStore();
       userStore.clearToken();

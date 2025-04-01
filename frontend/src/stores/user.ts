@@ -18,10 +18,7 @@ export const useUserStore = defineStore("user", () => {
     const storedToken = localStorage.getItem("token");
     if (storedToken) {
       setToken(storedToken);
-      fetchProfile().catch(() => {
-        // If profile fetch fails, clear the token
-        clearToken();
-      });
+      fetchProfile();
     }
   };
 
@@ -53,13 +50,12 @@ export const useUserStore = defineStore("user", () => {
       setToken(accessToken);
       await fetchProfile();
 
-      // Initialize wallet data after successful login
       await walletStore.initializeWallet();
 
       return true;
     } catch (err: any) {
       error.value = err.response?.data?.message || "Failed to login";
-      return false;
+      throw err;
     } finally {
       isLoading.value = false;
     }
