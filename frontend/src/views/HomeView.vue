@@ -3,6 +3,7 @@ import { RocketLaunchIcon, ChartBarIcon, TrophyIcon } from "@heroicons/vue/24/ou
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { swaggerURL } from "@/api/client";
 </script>
 
 <template>
@@ -27,6 +28,9 @@ import { Separator } from "@/components/ui/separator";
             the revolution and start your journey to the moon! 🚀
           </p>
           <div class="mt-10 flex justify-center gap-4">
+            <a :href="swaggerURL" target="_blank">
+              <Button size="lg" variant="outline"> API Docs </Button>
+            </a>
             <router-link to="/memecoins">
               <Button size="lg"> Explore Market </Button>
             </router-link>

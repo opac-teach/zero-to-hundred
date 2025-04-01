@@ -18,8 +18,9 @@ import type {
 } from "./types";
 import { useUserStore } from "@/stores/user";
 
+const baseURL = import.meta.env.VITE_API_URL || "/api";
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "/api",
+  baseURL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -27,7 +28,8 @@ const api = axios.create({
 const setBaseUrl = (baseUrl: string) => {
   api.defaults.baseURL = baseUrl;
 };
-export { api, setBaseUrl };
+const swaggerURL = baseURL + "/swagger";
+export { api, setBaseUrl, swaggerURL };
 
 // Add response interceptor to handle token expiration
 api.interceptors.response.use(
