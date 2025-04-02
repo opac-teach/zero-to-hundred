@@ -60,7 +60,7 @@ export class BotService {
       memecoinId: memecoin.id,
       memecoinAmount: '1',
       tradeType: 'buy',
-      requestCost: calculateBuyPrice(
+      requestZthAmount: calculateBuyPrice(
         '1',
         memecoin.totalSupply.toString(),
         memecoin.curveConfig,

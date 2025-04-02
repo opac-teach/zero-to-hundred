@@ -218,7 +218,13 @@
                   {{ Number(holding.amount).toFixed(2) }} {{ holding.memecoin.symbol }}
                 </div>
                 <div class="text-sm text-gray-500 dark:text-gray-400">
-                  {{ Number(holding.amount) * Number(holding.memecoin.currentPrice) }}
+                  {{
+                    calculateSellPrice(
+                      holding.amount,
+                      holding.memecoin.totalSupply,
+                      holding.memecoin.curveConfig
+                    )
+                  }}
                   ZTH
                 </div>
               </div>
@@ -351,7 +357,7 @@ import { useWalletStore } from "@/stores/wallet";
 import Avatar from "@/components/Logo.vue";
 import KPI from "@/components/KPI.vue";
 import { formatDate } from "@/utils/formatters";
-
+import { calculateSellPrice } from "@/lib/bonding-curve";
 const userStore = useUserStore();
 const marketStore = useMarketStore();
 const walletStore = useWalletStore();

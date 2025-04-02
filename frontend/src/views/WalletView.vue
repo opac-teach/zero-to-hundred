@@ -70,7 +70,13 @@
               {{ holding.amount }} {{ holding.memecoin.symbol }}
             </div>
             <div class="text-sm text-gray-500 dark:text-gray-400">
-              {{ parseFloat(holding.amount) * parseFloat(holding.memecoin.currentPrice) }}
+              {{
+                calculateSellPrice(
+                  holding.amount,
+                  holding.memecoin.totalSupply,
+                  holding.memecoin.curveConfig
+                )
+              }}
               ZTH
             </div>
           </div>
@@ -188,6 +194,7 @@ import { useWalletStore } from "@/stores/wallet";
 import { useToast } from "vue-toastification";
 import Avatar from "@/components/Logo.vue";
 import router from "@/router";
+import { calculateSellPrice } from "@/lib/bonding-curve";
 
 const walletStore = useWalletStore();
 const toast = useToast();
