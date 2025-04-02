@@ -47,26 +47,26 @@ export class BotService {
 
   @OnEvent('memecoin.created')
   async handleCreate(memecoin: Memecoin) {
-    // const users = await this.userRepository.find({
-    //   where: { bot: true },
-    // });
-    // const user = users[Math.floor(Math.random() * users.length)];
-    // console.log(
-    //   '[Bot] Making initial purchase:',
-    //   `Symbol: ${memecoin.symbol}`,
-    //   `User: ${user.username}`,
-    // );
-    // await this.tradingService.tradeMemecoin(user.id, {
-    //   memecoinId: memecoin.id,
-    //   amount: '1',
-    //   tradeType: 'buy',
-    //   requestCost: calculateBuyPrice(
-    //     '1',
-    //     memecoin.totalSupply.toString(),
-    //     memecoin.curveConfig,
-    //   ),
-    //   slippageTolerance: 0.01,
-    // });
+    const users = await this.userRepository.find({
+      where: { bot: true },
+    });
+    const user = users[Math.floor(Math.random() * users.length)];
+    console.log(
+      '[Bot] Making initial purchase:',
+      `Symbol: ${memecoin.symbol}`,
+      `User: ${user.username}`,
+    );
+    await this.tradingService.tradeMemecoin(user.id, {
+      memecoinId: memecoin.id,
+      memecoinAmount: '1',
+      tradeType: 'buy',
+      requestCost: calculateBuyPrice(
+        '1',
+        memecoin.totalSupply.toString(),
+        memecoin.curveConfig,
+      ),
+      slippageTolerance: 0.01,
+    });
   }
 
   async checkUserProfit(user: User) {
