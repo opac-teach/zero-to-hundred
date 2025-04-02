@@ -151,7 +151,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useMarketStore } from "@/stores/market";
 import { useToast } from "vue-toastification";
@@ -210,7 +210,6 @@ function validateName() {
 }
 
 function validateSymbol() {
-  form.value.symbol = form.value.symbol.toUpperCase();
   if (form.value.symbol.length < 2) {
     errors.value.symbol = "Symbol must be at least 2 characters long";
   } else if (form.value.symbol.length > 5) {
@@ -233,6 +232,11 @@ function validateLogoURL() {
     errors.value.logoUrl = "";
   }
 }
+
+watch(form.value, (newVal) => {
+  form.value.symbol = newVal.symbol.toUpperCase();
+});
+
 async function handleSubmit() {
   if (!isValid.value) {
     toast.error("Please fill in all required fields correctly");
