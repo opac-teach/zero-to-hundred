@@ -6,7 +6,7 @@
     </div>
 
     <!-- Form -->
-    <form @submit.prevent="handleSubmit" class="space-y-6">
+    <form @submit.prevent class="space-y-6">
       <!-- Basic Info -->
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 space-y-6">
         <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Token Informations</h2>
@@ -135,13 +135,14 @@
           <div class="text-sm text-red-500" v-if="!sufficientBalance">Not enough ZTH Balance</div>
           <div class="text-sm text-gray-500">Cost: 1 ZTH</div>
 
-          <button
+          <Button
             type="submit"
             :disabled="isLoading || !isValid || !sufficientBalance"
             class="px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="handleSubmit"
           >
             {{ isLoading ? "Creating..." : "Create Memecoin" }}
-          </button>
+          </Button>
         </div>
       </div>
 
