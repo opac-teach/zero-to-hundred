@@ -14,6 +14,7 @@ import { CreateMemecoinDto, MemecoinResponseDto } from './dto';
 import Decimal from 'decimal.js';
 import { calculatePrice, defaultCurveConfig } from '../trading/bonding-curve';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { WalletHolding } from '../entities/wallet-holding.entity';
 @Injectable()
 export class MemecoinService {
   constructor(
@@ -25,6 +26,8 @@ export class MemecoinService {
     private readonly walletRepository: Repository<Wallet>,
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
+    @InjectRepository(WalletHolding)
+    private readonly walletHoldingRepository: Repository<WalletHolding>,
     private readonly dataSource: DataSource,
     private readonly eventEmitter: EventEmitter2,
   ) {}
@@ -189,6 +192,21 @@ export class MemecoinService {
       order: {
         createdAt: 'DESC',
       },
+    });
+  }
+
+  async getHoldings(symbol: string): Promise<WalletHolding[]> {
+    const memecoin = await this.memecoinRepository.findOne({
+      where: { symbol },
+    });
+
+    if (!memecoin) {
+      throw new NotFoundException(`Memecoin with symbol ${symbol} not found`);
+    }
+
+    return this.walletHoldingRepository.find({
+      where: { memecoinId: memecoin.id },
+      relations: ['wallet.owner'],
     });
   }
 }

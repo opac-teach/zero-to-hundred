@@ -105,6 +105,7 @@ export interface MemecoinPriceDto {
 export interface WalletHoldingResponseDto {
   id: string;
   walletId: string;
+  wallet?: WalletResponseDto;
   memecoin: MemecoinResponseDto;
   memecoinId: string;
   amount: string;
@@ -116,7 +117,7 @@ export interface WalletResponseDto {
   id: string;
   zthBalance: string;
   ownerId: string;
-  owner: PublicUserResponseDto;
+  owner?: PublicUserResponseDto;
   holdings: WalletHoldingResponseDto[];
   createdAt: string;
   updatedAt: string;

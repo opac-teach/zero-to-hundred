@@ -142,7 +142,7 @@
               class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                {{ new Date(transaction.createdAt).toLocaleDateString() }}
+                {{ formatDate(transaction.createdAt) }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span
@@ -195,6 +195,7 @@ import { useToast } from "vue-toastification";
 import Avatar from "@/components/Logo.vue";
 import router from "@/router";
 import { calculateSellPrice } from "@/lib/bonding-curve";
+import { formatDate } from "@/utils/formatters";
 
 const walletStore = useWalletStore();
 const toast = useToast();

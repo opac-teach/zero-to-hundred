@@ -22,6 +22,7 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { TransactionResponseDto } from './dto/transaction.dto';
+import { WalletHoldingResponseDto } from 'src/wallet/dto';
 
 @ApiTags('memecoins')
 @Controller('memecoins')
@@ -124,5 +125,20 @@ export class MemecoinController {
     return transactions.map(
       (transaction) => new TransactionResponseDto(transaction),
     );
+  }
+  @ApiOperation({ summary: 'Get memecoin transactions' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return the memecoin transactions',
+    type: [TransactionResponseDto],
+  })
+  @ApiResponse({ status: 404, description: 'Memecoin not found' })
+  @ApiParam({ name: 'symbol', description: 'The symbol of the memecoin' })
+  @Get(':symbol/holdings')
+  async getHoldings(
+    @Param('symbol') symbol: string,
+  ): Promise<WalletHoldingResponseDto[]> {
+    const holdings = await this.memecoinService.getHoldings(symbol);
+    return holdings.map((holding) => new WalletHoldingResponseDto(holding));
   }
 }

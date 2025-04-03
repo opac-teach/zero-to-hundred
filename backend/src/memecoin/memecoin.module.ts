@@ -7,10 +7,17 @@ import { User } from '../entities/user.entity';
 import { Wallet } from '../entities/wallet.entity';
 import { Transaction } from '../entities/transaction.entity';
 import { StatisticsModule } from '../statistics/statistics.module';
+import { WalletHolding } from 'src/entities/wallet-holding.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Memecoin, User, Wallet, Transaction]),
+    TypeOrmModule.forFeature([
+      Memecoin,
+      User,
+      Wallet,
+      WalletHolding,
+      Transaction,
+    ]),
     StatisticsModule,
   ],
   providers: [MemecoinService],

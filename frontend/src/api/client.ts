@@ -15,6 +15,7 @@ import type {
   TradeEstimationResponseDto,
   MyUserResponseDto,
   PublicUserResponseDto,
+  WalletHoldingResponseDto,
 } from "./types";
 import { useUserStore } from "@/stores/user";
 
@@ -85,6 +86,8 @@ export const memecoins = {
   create: (data: CreateMemecoinDto) => api.post<MemecoinResponseDto>("/memecoins", data),
   getTransactions: (symbol: string) =>
     api.get<TransactionResponseDto[]>(`/memecoins/${symbol}/transactions`),
+  getHoldings: (symbol: string) =>
+    api.get<WalletHoldingResponseDto[]>(`/memecoins/${symbol}/holdings`),
 };
 
 // Wallet endpoints

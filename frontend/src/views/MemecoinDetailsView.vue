@@ -137,6 +137,35 @@
 
     <Card>
       <CardHeader>
+        <CardTitle>Holders</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div class="space-y-4">
+          <div
+            v-for="holding in holdings"
+            :key="holding.id"
+            class="flex items-center justify-between border-b last:border-b-0 pb-4"
+          >
+            <div class="flex items-center space-x-2">
+              <RouterLink
+                :to="`/user/${holding.wallet?.owner?.username}`"
+                class="flex items-center space-x-2"
+              >
+                <Avatar
+                  :src="holding.wallet?.owner?.profilePictureUrl"
+                  :alt="holding.wallet?.owner?.username"
+                  class="h-8 w-8"
+                />
+                <div>{{ holding.wallet?.owner?.username }}</div>
+              </RouterLink>
+            </div>
+            <div>{{ holding.amount }} {{ memecoin?.symbol }}</div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+    <Card>
+      <CardHeader>
         <CardTitle>Recent Transactions</CardTitle>
       </CardHeader>
       <CardContent>
@@ -212,7 +241,7 @@ import TradeMemecoin from "@/components/TradeMemecoin.vue";
 import BondingCurvePreview from "@/components/charts/BondingCurvePreview.vue";
 import Avatar from "@/components/Logo.vue";
 import KPI from "@/components/KPI.vue";
-import type { TransactionResponseDto } from "@/api/types";
+import type { TransactionResponseDto, WalletHoldingResponseDto } from "@/api/types";
 import { memecoins } from "@/api";
 import { formatDate } from "@/utils/formatters";
 
@@ -222,6 +251,7 @@ const marketStore = useMarketStore();
 const toast = useToast();
 const targetSupply = ref<string | undefined>(undefined);
 const transactions = ref<TransactionResponseDto[]>([]);
+const holdings = ref<WalletHoldingResponseDto[]>([]);
 const memecoinSymbol = route.params.symbol as string;
 const memecoin = computed(() =>
   marketStore.memecoinsList.find((coin) => coin.symbol === memecoinSymbol)
@@ -282,6 +312,11 @@ async function fetchTxs() {
   transactions.value = resTx.data;
 }
 
+async function fetchHoldings() {
+  const resHoldings = await memecoins.getHoldings(memecoinSymbol);
+  holdings.value = resHoldings.data;
+}
+
 onMounted(async () => {
   try {
     await marketStore.fetchMemecoinDetails(memecoinSymbol);
@@ -290,6 +325,7 @@ onMounted(async () => {
     }
     marketStore.startPriceUpdates();
     fetchTxs();
+    fetchHoldings();
   } catch (error: any) {
     toast.error(error.message || "Failed to fetch memecoin details");
     router.push("/memecoins");
