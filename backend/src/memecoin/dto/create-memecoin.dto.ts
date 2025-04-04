@@ -11,9 +11,24 @@ import {
   IsEnum,
   ValidateNested,
   ValidateIf,
-  Min,
+  Validate,
 } from 'class-validator';
 import { BondingCurveConfig } from '../../trading/bonding-curve';
+import {
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+} from 'class-validator';
+
+@ValidatorConstraint({ name: 'customText', async: false })
+export class PositiveStringNumber implements ValidatorConstraintInterface {
+  validate(text: string) {
+    return Number(text) > 0;
+  }
+
+  defaultMessage() {
+    return '$property should be a positive number string (got $value)';
+  }
+}
 
 export class BondingCurveConfigDto implements BondingCurveConfig {
   @ApiProperty({
@@ -23,7 +38,7 @@ export class BondingCurveConfigDto implements BondingCurveConfig {
   @IsString()
   @IsDecimal()
   @IsNotEmpty()
-  @Min(0)
+  @Validate(PositiveStringNumber)
   slope: string;
 
   @ApiProperty({
@@ -33,7 +48,7 @@ export class BondingCurveConfigDto implements BondingCurveConfig {
   @IsString()
   @IsDecimal()
   @IsNotEmpty()
-  @Min(0)
+  @Validate(PositiveStringNumber)
   startingPrice: string;
 
   @ApiProperty({
