@@ -11,6 +11,7 @@ import {
   IsEnum,
   ValidateNested,
   ValidateIf,
+  Min,
 } from 'class-validator';
 import { BondingCurveConfig } from '../../trading/bonding-curve';
 
@@ -22,6 +23,7 @@ export class BondingCurveConfigDto implements BondingCurveConfig {
   @IsString()
   @IsDecimal()
   @IsNotEmpty()
+  @Min(0)
   slope: string;
 
   @ApiProperty({
@@ -31,6 +33,7 @@ export class BondingCurveConfigDto implements BondingCurveConfig {
   @IsString()
   @IsDecimal()
   @IsNotEmpty()
+  @Min(0)
   startingPrice: string;
 
   @ApiProperty({
