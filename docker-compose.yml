@@ -29,8 +29,8 @@ services:
       - PORT=3000
     ports:
       - "3202:3000"
-    volumes:
-      - ./backend/src:/app/src
+    #volumes:
+    #- ./backend/src:/app/src
     command: npm run dev
 
   frontend:
@@ -42,11 +42,11 @@ services:
       - backend
     ports:
       - "3201:3000"
-    volumes:
-      - ./frontend/src:/app/src
+    #volumes:
+    #- ./frontend/src:/app/src
     environment:
       - VITE_API_URL=/api
-    command: npm run dev -- --host 0.0.0.0
+    command: npm run dev -- --host 0.0.0.0 --port 3000
 
   nginx:
     image: nginx:latest
@@ -54,7 +54,7 @@ services:
     ports:
       - "3200:80"
     volumes:
-      - ./nginx/conf:/etc/nginx/conf.d
+      - ./nginx/conf:/etc/nginx/conf.d:ro
     depends_on:
       - frontend
       - backend

@@ -3,6 +3,7 @@
     <CardHeader>
       <CardTitle>Trade {{ memecoin?.symbol }}</CardTitle>
     </CardHeader>
+
     <CardContent>
       <div class="space-y-4">
         <div class="space-y-4">
